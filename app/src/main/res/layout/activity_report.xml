@@ -1,11 +1,39 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ReportActivity">
+    android:background="#e6e6e6"
+    tools:context=".ReportActivity">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText android:id="@+id/amount"
+                android:hint="0.00"
+                android:lines="1"
+                android:inputType="numberDecimal"
+                android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <EditText android:id="@+id/comment"
+                android:hint="New transaction"
+                android:lines="1"
+                android:layout_width="match_parent" android:layout_height="wrap_content" />
+            </LinearLayout>
+        <Button
+            android:text="Report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="reportNewTransaction"/>
+    </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

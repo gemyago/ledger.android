@@ -2,8 +2,11 @@ package com.infora.ledger;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 
 public class ReportActivity extends ActionBarActivity {
@@ -35,5 +38,11 @@ public class ReportActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void reportNewTransaction(View view) {
+        EditText etAmount = ((EditText) findViewById(R.id.amount));
+        EditText etComment = ((EditText) findViewById(R.id.comment));
+        Log.d("ReportActivity", "Reporting amount: " + etAmount.getText() + ", " + etComment.getText());
     }
 }
