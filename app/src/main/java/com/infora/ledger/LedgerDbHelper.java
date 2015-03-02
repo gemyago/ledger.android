@@ -3,14 +3,16 @@ package com.infora.ledger;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by jenya on 01.03.15.
  */
 public class LedgerDbHelper extends SQLiteOpenHelper {
+    private static final String TAG = LedgerDbHelper.TAG;
+
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Ledger";
-
 
     public LedgerDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -18,6 +20,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d(TAG, "Initializing database schema. Creating table: " + PendingTransactionContract.TABLE_NAME);
         db.execSQL(
                 "CREATE TABLE " + PendingTransactionContract.TABLE_NAME + " (" +
                         PendingTransactionContract.COLUMN_ID + " NVARCHAR(256) PRIMARY KEY NOT NULL," +

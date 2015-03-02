@@ -37,7 +37,7 @@ public class PendingTransactionsRepositoryTest extends AndroidTestCase {
         }
         assertTrue(thrown);
     }
-    
+
     public void testSaveCreateNew() {
         subject.save(new PendingTransaction("t-100", "22.443", "t-100 comment"));
 

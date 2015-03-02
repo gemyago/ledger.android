@@ -1,6 +1,7 @@
 package com.infora.ledger;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -13,6 +14,10 @@ public class PendingTransactionsRepository {
     private static final String TAG = PendingTransactionsRepository.class.getName();
 
     private SQLiteOpenHelper dbHelper;
+
+    public PendingTransactionsRepository(Context context) {
+        this(new LedgerDbHelper(context));
+    }
 
     public PendingTransactionsRepository(SQLiteOpenHelper dbHelper) {
         this.dbHelper = dbHelper;

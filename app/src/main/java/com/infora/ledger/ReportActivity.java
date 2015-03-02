@@ -1,17 +1,19 @@
 package com.infora.ledger;
 
-import android.support.v7.app.ActionBarActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import java.util.UUID;
+
 
 public class ReportActivity extends ActionBarActivity {
-
-    @Override
+    private static final String TAG = ReportActivity.class.getName();
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
@@ -43,6 +45,39 @@ public class ReportActivity extends ActionBarActivity {
     public void reportNewTransaction(View view) {
         EditText etAmount = ((EditText) findViewById(R.id.amount));
         EditText etComment = ((EditText) findViewById(R.id.comment));
-        Log.d("ReportActivity", "Reporting amount: " + etAmount.getText() + ", " + etComment.getText());
+        String amount = etAmount.getText().toString();
+        String comment = etComment.getText().toString();
+        PendingTransaction pendingTransaction = new PendingTransaction(UUID.randomUUID().toString(), amount, comment);
+        new ReportNewTransactionTask().execute(pendingTransaction);
+    }
+
+    private class ReportNewTransactionTask extends AsyncTask<PendingTransaction, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            View btnReport = findViewById(R.id.report);
+            btnReport.setEnabled(false);
+        }
+
+        @Override
+        protected Void doInBackground(PendingTransaction... params) {
+            PendingTransactionsRepository repo = new PendingTransactionsRepository(ReportActivity.this);
+            for (PendingTransaction pendingTransaction : params) {
+                Log.d(TAG, "Reporting amount: " + pendingTransaction.getAmount() + ", " + pendingTransaction.getComment());
+                repo.save(pendingTransaction);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            View btnReport = findViewById(R.id.report);
+            EditText etAmount = ((EditText) findViewById(R.id.amount));
+            EditText etComment = ((EditText) findViewById(R.id.comment));
+
+            btnReport.setEnabled(true);
+            etAmount.setText("");
+            etAmount.requestFocus();
+            etComment.setText("");
+        }
     }
 }
