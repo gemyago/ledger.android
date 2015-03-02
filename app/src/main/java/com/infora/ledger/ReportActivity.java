@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.UUID;
 
@@ -78,6 +79,8 @@ public class ReportActivity extends ActionBarActivity {
             etAmount.setText("");
             etAmount.requestFocus();
             etComment.setText("");
+
+            Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
         }
     }
 }
