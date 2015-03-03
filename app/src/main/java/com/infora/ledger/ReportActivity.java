@@ -1,5 +1,9 @@
 package com.infora.ledger;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -8,17 +12,35 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 
-public class ReportActivity extends ActionBarActivity {
+public class ReportActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private static final String TAG = ReportActivity.class.getName();
+    private SimpleCursorAdapter reportedTransactionsAdapter;
+    private LedgerDbHelper dbHelper;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
+        reportedTransactionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2,
+                null,
+                new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
+                new int[]{android.R.id.text1, android.R.id.text2});
+        ListView reportedTransactionsList = (ListView)findViewById(R.id.reported_transactions_list);
+        reportedTransactionsList.setAdapter(reportedTransactionsAdapter);
+
+        getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, this);
+
+        dbHelper = new LedgerDbHelper(this);
     }
+
 
 
     @Override
@@ -52,6 +74,26 @@ public class ReportActivity extends ActionBarActivity {
         new ReportNewTransactionTask().execute(pendingTransaction);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(this) {
+            @Override
+            public Cursor loadInBackground() {
+                return dbHelper.getReadableDatabase().query(PendingTransactionContract.TABLE_NAME, null, null, null, null, null, null);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        reportedTransactionsAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        reportedTransactionsAdapter.swapCursor(null);
+    }
+
     private class ReportNewTransactionTask extends AsyncTask<PendingTransaction, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -81,6 +123,8 @@ public class ReportActivity extends ActionBarActivity {
             etComment.setText("");
 
             Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
+
+            getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, ReportActivity.this);
         }
     }
 }
