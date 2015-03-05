@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.infora.ledger.provider"
+            android:name=".PendingTransactionsContentProvider"
+            android:exported="false"></provider>
     </application>
 
 </manifest>

@@ -37,7 +37,7 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         values.put(PendingTransactionContract.COLUMN_ID, "new-transaction-332");
         values.put(PendingTransactionContract.COLUMN_AMOUNT, "10.332");
         values.put(PendingTransactionContract.COLUMN_COMMENT, "Comment 10.332");
-        Uri newUri = resolver.insert(Uri.parse(PendingTransactionContract.CONTENT_URI), values);
+        Uri newUri = resolver.insert(PendingTransactionContract.CONTENT_URI, values);
         assertEquals(PendingTransactionContract.CONTENT_URI + "/new-transaction-332", newUri.toString());
 
         PendingTransaction newTransaction = repo.getById("new-transaction-332");
@@ -50,11 +50,8 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101");
         DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102");
 
-        Cursor results = resolver.query(Uri.parse(PendingTransactionContract.CONTENT_URI), new String[]{
-                PendingTransactionContract.COLUMN_ID,
-                PendingTransactionContract.COLUMN_AMOUNT,
-                PendingTransactionContract.COLUMN_COMMENT
-        }, null, null, PendingTransactionContract.COLUMN_AMOUNT);
+        Cursor results = resolver.query(PendingTransactionContract.CONTENT_URI,
+                PendingTransactionContract.ALL_COLUMNS, null, null, PendingTransactionContract.COLUMN_AMOUNT);
 
         assertEquals(3, results.getCount());
         results.moveToFirst();

@@ -1,16 +1,18 @@
 package com.infora.ledger;
 
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Created by jenya on 04.03.15.
  */
 public class PendingTransactionsContentProvider extends ContentProvider {
+    private static final String TAG = PendingTransactionsContentProvider.class.getName();
+
     public static final String AUTHORITY = PendingTransactionContract.AUTHORITY;
     public static final String PENDING_TRANSACTIONS_LIST_TYPE = "vnd.android.cursor.dir/vnd." + AUTHORITY + ".pending-transactions";
     public static final String PENDING_TRANSACTIONS_ITEM_TYPE = "vnd.android.cursor.item/vnd." + AUTHORITY + ".pending-transactions";
@@ -26,6 +28,10 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     }
 
     private LedgerDbHelper dbHelper;
+
+    private static IllegalArgumentException newInvalidUrlException(Uri uri) {
+        return new IllegalArgumentException("The uri " + uri + " can not be matched.");
+    }
 
     @Override
     public boolean onCreate() {
@@ -63,6 +69,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         switch (match) {
             case TRANSACTIONS:
                 String id = values.getAsString(PendingTransactionContract.COLUMN_ID);
+                Log.d(TAG, "Inserting new transaction id='" + id + "'");
                 dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
                 Uri.Builder builder = uri.buildUpon();
                 builder.appendEncodedPath(id);
@@ -80,9 +87,5 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
-    }
-
-    private static IllegalArgumentException newInvalidUrlException(Uri uri) {
-        return new IllegalArgumentException("The uri " + uri + " can not be matched.");
     }
 }

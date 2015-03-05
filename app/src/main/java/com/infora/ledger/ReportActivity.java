@@ -1,6 +1,7 @@
 package com.infora.ledger;
 
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -16,7 +17,6 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -33,14 +33,13 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
                 null,
                 new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
                 new int[]{android.R.id.text1, android.R.id.text2});
-        ListView reportedTransactionsList = (ListView)findViewById(R.id.reported_transactions_list);
+        ListView reportedTransactionsList = (ListView) findViewById(R.id.reported_transactions_list);
         reportedTransactionsList.setAdapter(reportedTransactionsAdapter);
 
         getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, this);
 
         dbHelper = new LedgerDbHelper(this);
     }
-
 
 
     @Override
@@ -76,12 +75,12 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this) {
-            @Override
-            public Cursor loadInBackground() {
-                return dbHelper.getReadableDatabase().query(PendingTransactionContract.TABLE_NAME, null, null, null, null, null, null);
-            }
-        };
+        return new CursorLoader(this,
+                PendingTransactionContract.CONTENT_URI,
+                PendingTransactionContract.ALL_COLUMNS,
+                null,
+                null,
+                null);
     }
 
     @Override
@@ -103,10 +102,13 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
 
         @Override
         protected Void doInBackground(PendingTransaction... params) {
-            PendingTransactionsRepository repo = new PendingTransactionsRepository(ReportActivity.this);
             for (PendingTransaction pendingTransaction : params) {
                 Log.d(TAG, "Reporting amount: " + pendingTransaction.getAmount() + ", " + pendingTransaction.getComment());
-                repo.save(pendingTransaction);
+                ContentValues values = new ContentValues();
+                values.put(PendingTransactionContract.COLUMN_ID, pendingTransaction.getId());
+                values.put(PendingTransactionContract.COLUMN_AMOUNT, pendingTransaction.getAmount());
+                values.put(PendingTransactionContract.COLUMN_COMMENT, pendingTransaction.getComment());
+                getContentResolver().insert(PendingTransactionContract.CONTENT_URI, values);
             }
             return null;
         }
