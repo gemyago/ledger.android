@@ -24,7 +24,6 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private static final String TAG = ReportActivity.class.getName();
     private SimpleCursorAdapter reportedTransactionsAdapter;
-    private LedgerDbHelper dbHelper;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,8 +36,6 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         reportedTransactionsList.setAdapter(reportedTransactionsAdapter);
 
         getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, this);
-
-        dbHelper = new LedgerDbHelper(this);
     }
 
 
@@ -125,8 +122,6 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
             etComment.setText("");
 
             Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
-
-            getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, ReportActivity.this);
         }
     }
 }

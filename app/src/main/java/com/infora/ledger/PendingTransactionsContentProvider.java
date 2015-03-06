@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
@@ -44,7 +45,10 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case TRANSACTIONS:
-                return dbHelper.getReadableDatabase().query(PendingTransactionContract.TABLE_NAME, projection, null, null, null, null, sortOrder);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor query = db.query(PendingTransactionContract.TABLE_NAME, projection, null, null, null, null, sortOrder);
+                query.setNotificationUri(getContext().getContentResolver(), uri);
+                return query;
             default:
                 throw newInvalidUrlException(uri);
         }
@@ -71,6 +75,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 String id = values.getAsString(PendingTransactionContract.COLUMN_ID);
                 Log.d(TAG, "Inserting new transaction id='" + id + "'");
                 dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
+                getContext().getContentResolver().notifyChange(uri, null);
                 Uri.Builder builder = uri.buildUpon();
                 builder.appendEncodedPath(id);
                 return builder.build();
