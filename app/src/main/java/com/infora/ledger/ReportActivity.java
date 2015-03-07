@@ -31,10 +31,10 @@ public class ReportActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
-        reportedTransactionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2,
+        reportedTransactionsAdapter = new SimpleCursorAdapter(this, R.layout.transactions_list,
                 null,
                 new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
-                new int[]{android.R.id.text1, android.R.id.text2}, 0);
+                new int[]{R.id.amount, R.id.comment}, 0);
         lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
         lvReportedTransactions.setAdapter(reportedTransactionsAdapter);
         getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
