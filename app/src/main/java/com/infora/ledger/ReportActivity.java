@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -17,7 +16,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-public class ReportActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ReportActivity extends ActionBarActivity {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private static final String TAG = ReportActivity.class.getName();
     private SimpleCursorAdapter reportedTransactionsAdapter;
@@ -28,19 +27,10 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         reportedTransactionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2,
                 null,
                 new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
-                new int[]{android.R.id.text1, android.R.id.text2});
-        ListView reportedTransactionsList = (ListView) findViewById(R.id.reported_transactions_list);
-        reportedTransactionsList.setAdapter(reportedTransactionsAdapter);
-
-        getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, this);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_report, menu);
-        return true;
+                new int[]{android.R.id.text1, android.R.id.text2}, 0);
+        ListView lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
+        lvReportedTransactions.setAdapter(reportedTransactionsAdapter);
+        getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
     }
 
     @Override
@@ -66,24 +56,27 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         new ReportNewTransactionTask().execute(PendingTransaction.appendValues(new ContentValues(), amount, comment));
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this,
-                PendingTransactionContract.CONTENT_URI,
-                null,
-                null,
-                null,
-                PendingTransactionContract.COLUMN_TIMESTAMP + " DESC");
-    }
+    private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            return new CursorLoader(ReportActivity.this,
+                    PendingTransactionContract.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    PendingTransactionContract.COLUMN_TIMESTAMP + " DESC");
+        }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        reportedTransactionsAdapter.swapCursor(data);
-    }
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            reportedTransactionsAdapter.swapCursor(data);
+        }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        reportedTransactionsAdapter.swapCursor(null);
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            reportedTransactionsAdapter.swapCursor(null);
+        }
+
     }
 
     private class ReportNewTransactionTask extends AsyncTask<ContentValues, Void, Void> {
