@@ -4,11 +4,15 @@ import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -20,6 +24,7 @@ public class ReportActivity extends ActionBarActivity {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private static final String TAG = ReportActivity.class.getName();
     private SimpleCursorAdapter reportedTransactionsAdapter;
+    private ListView lvReportedTransactions;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +33,12 @@ public class ReportActivity extends ActionBarActivity {
                 null,
                 new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
                 new int[]{android.R.id.text1, android.R.id.text2}, 0);
-        ListView lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
+        lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
         lvReportedTransactions.setAdapter(reportedTransactionsAdapter);
         getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
+
+        lvReportedTransactions.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        lvReportedTransactions.setMultiChoiceModeListener(new ModeCallback());
     }
 
     @Override
@@ -107,6 +115,53 @@ public class ReportActivity extends ActionBarActivity {
             etComment.setText("");
 
             Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private class ModeCallback implements ListView.MultiChoiceModeListener {
+
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.transactions_actions, menu);
+            mode.setTitle(getString(R.string.select_transactions));
+            setSubtitle(mode);
+            return true;
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_delete:
+                    Resources res = getResources();
+                    int checkedItemsCount = lvReportedTransactions.getCheckedItemCount();
+                    String deletedString = res.getQuantityString(R.plurals.number_of_deleted_transactions, checkedItemsCount, checkedItemsCount);
+                    Toast.makeText(ReportActivity.this, deletedString, Toast.LENGTH_SHORT).show();
+                    mode.finish();
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Action item " + item.getTitle() + " is not supported.");
+            }
+            return true;
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+
+        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+            setSubtitle(mode);
+        }
+
+        private void setSubtitle(ActionMode mode) {
+            final int checkedCount = lvReportedTransactions.getCheckedItemCount();
+            if (checkedCount == 0) {
+                mode.setSubtitle(null);
+            } else {
+                String selectedString = getResources().getQuantityString(R.plurals.number_of_selected_transactions, checkedCount, checkedCount);
+                mode.setSubtitle(selectedString);
+            }
         }
     }
 }
