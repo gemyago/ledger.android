@@ -16,12 +16,10 @@ import java.util.UUID;
  * Created by jenya on 04.03.15.
  */
 public class PendingTransactionsContentProvider extends ContentProvider {
-    private static final String TAG = PendingTransactionsContentProvider.class.getName();
-
     public static final String AUTHORITY = PendingTransactionContract.AUTHORITY;
     public static final String PENDING_TRANSACTIONS_LIST_TYPE = "vnd.android.cursor.dir/vnd." + AUTHORITY + ".pending-transactions";
     public static final String PENDING_TRANSACTIONS_ITEM_TYPE = "vnd.android.cursor.item/vnd." + AUTHORITY + ".pending-transactions";
-
+    private static final String TAG = PendingTransactionsContentProvider.class.getName();
     private static final int TRANSACTIONS = 1000;
     private static final int TRANSACTION_ID = 1001;
     private static final UriMatcher sUriMatcher;
@@ -81,7 +79,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 values.put(PendingTransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
                 Log.d(TAG, "Inserting new transaction transaction_id='" + transactionId + "'");
                 long id = dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
-                getContext().getContentResolver().notifyChange(uri, null);
+                notifyListChanged();
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw newInvalidUrlException(uri);
@@ -90,11 +88,29 @@ public class PendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case TRANSACTION_ID:
+                long id = ContentUris.parseId(uri);
+                Log.d(TAG, "Removing transaction id=" + id);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                int deleted = db.delete(PendingTransactionContract.TABLE_NAME,
+                        PendingTransactionContract.COLUMN_ID + " = ?",
+                        new String[]{String.valueOf(id)});
+                notifyListChanged();
+                return deleted;
+            default:
+                throw newInvalidUrlException(uri);
+        }
+
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    private void notifyListChanged() {
+        getContext().getContentResolver().notifyChange(PendingTransactionContract.CONTENT_URI, null);
     }
 }

@@ -15,13 +15,8 @@ public class PendingTransaction {
     private String comment;
     private Date timestamp;
 
-    public PendingTransaction(String amount, String comment) {
-        this.amount = amount;
-        this.comment = comment;
-    }
-
     public PendingTransaction(Cursor cursor) {
-        setId(cursor.getInt(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_ID)));
+        setId(getId(cursor));
         setTransactionId(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_TRANSACTION_ID)));
         setAmount(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_AMOUNT)));
         setComment(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_COMMENT)));
@@ -33,6 +28,10 @@ public class PendingTransaction {
         values.put(PendingTransactionContract.COLUMN_AMOUNT, amount);
         values.put(PendingTransactionContract.COLUMN_COMMENT, comment);
         return values;
+    }
+
+    public static int getId(Cursor cursor) {
+        return cursor.getInt(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_ID));
     }
 
     public int getId() {

@@ -7,9 +7,6 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
-import java.util.Date;
-import java.util.UUID;
-
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
     private MockContentResolver resolver;
@@ -74,5 +71,19 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals("102", results.getString(0));
         assertEquals("102.00", results.getString(1));
         assertEquals("Transaction 102", results.getString(2));
+    }
+
+    public void testDelete() {
+        int id1 = DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
+        int id2 = DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101");
+        int id3 = DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102");
+
+        assertEquals(1, resolver.delete(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id1), null, null));
+        assertEquals(1, resolver.delete(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id3), null, null));
+
+        Cursor results = resolver.query(PendingTransactionContract.CONTENT_URI, null, null, null, null);
+        assertEquals(results.getCount(), 1);
+        results.moveToFirst();
+        assertEquals(id2, PendingTransaction.getId(results));
     }
 }
