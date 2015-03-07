@@ -70,10 +70,10 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this,
                 PendingTransactionContract.CONTENT_URI,
-                PendingTransactionContract.ASSIGNABLE_COLUMNS,
                 null,
                 null,
-                null);
+                null,
+                PendingTransactionContract.COLUMN_TIMESTAMP + " DESC");
     }
 
     @Override
