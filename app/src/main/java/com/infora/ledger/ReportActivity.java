@@ -1,11 +1,13 @@
 package com.infora.ledger;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -118,6 +120,30 @@ public class ReportActivity extends ActionBarActivity {
         }
     }
 
+    private class RemoveTransactionsTask extends AsyncTask<Long, Void, Void> {
+        private long[] checkedIds;
+
+        private RemoveTransactionsTask(long[] checkedIds) {
+            this.checkedIds = checkedIds;
+        }
+
+        @Override
+        protected Void doInBackground(Long... params) {
+            for (Long id : checkedIds) {
+                Uri transactionUri = ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id);
+                getContentResolver().delete(transactionUri, null, null);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Resources res = getResources();
+            String deletedString = res.getQuantityString(R.plurals.number_of_deleted_transactions, checkedIds.length, checkedIds.length);
+            Toast.makeText(ReportActivity.this, deletedString, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private class ModeCallback implements ListView.MultiChoiceModeListener {
 
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -135,10 +161,7 @@ public class ReportActivity extends ActionBarActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_delete:
-                    Resources res = getResources();
-                    int checkedItemsCount = lvReportedTransactions.getCheckedItemCount();
-                    String deletedString = res.getQuantityString(R.plurals.number_of_deleted_transactions, checkedItemsCount, checkedItemsCount);
-                    Toast.makeText(ReportActivity.this, deletedString, Toast.LENGTH_SHORT).show();
+                    new RemoveTransactionsTask(lvReportedTransactions.getCheckedItemIds()).execute();
                     mode.finish();
                     break;
                 default:
