@@ -1,12 +1,16 @@
 package com.infora.ledger;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by jenya on 04.03.15.
@@ -72,13 +76,13 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case TRANSACTIONS:
-                String id = values.getAsString(PendingTransactionContract.COLUMN_ID);
-                Log.d(TAG, "Inserting new transaction id='" + id + "'");
-                dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
+                String transactionId = UUID.randomUUID().toString();
+                values.put(PendingTransactionContract.COLUMN_TRANSACTION_ID, transactionId);
+                values.put(PendingTransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+                Log.d(TAG, "Inserting new transaction transaction_id='" + transactionId + "'");
+                long id = dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
                 getContext().getContentResolver().notifyChange(uri, null);
-                Uri.Builder builder = uri.buildUpon();
-                builder.appendEncodedPath(id);
-                return builder.build();
+                return ContentUris.withAppendedId(uri, id);
             default:
                 throw newInvalidUrlException(uri);
         }

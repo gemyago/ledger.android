@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Date;
+
 /**
  * Created by jenya on 02.03.15.
  */
@@ -15,14 +17,15 @@ public class DbUtils {
         }
     }
 
-    public static void insertPendingTransaction(SQLiteOpenHelper dbHelper, String id, String amount, String comment) {
+    public static int insertPendingTransaction(SQLiteOpenHelper dbHelper, String transactionId, String amount, String comment) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
-            values.put(PendingTransactionContract.COLUMN_ID, id);
+            values.put(PendingTransactionContract.COLUMN_TRANSACTION_ID, transactionId);
             values.put(PendingTransactionContract.COLUMN_AMOUNT, amount);
             values.put(PendingTransactionContract.COLUMN_COMMENT, comment);
-            db.insert(PendingTransactionContract.TABLE_NAME, null, values);
+            values.put(PendingTransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+            return (int) db.insertOrThrow(PendingTransactionContract.TABLE_NAME, null, values);
         } finally {
             db.close();
         }

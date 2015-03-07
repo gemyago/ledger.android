@@ -1,15 +1,19 @@
 package com.infora.ledger;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
+import java.util.Date;
+import java.util.UUID;
+
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
     private MockContentResolver resolver;
-    private PendingTransactionsRepository repo;
+    private PendingTransactionsDbUtils repo;
     private LedgerDbHelper dbHelper;
 
     public PendingTransactionsContentProviderTest() {
@@ -21,7 +25,6 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         super.setUp();
         resolver = getMockContentResolver();
         dbHelper = new LedgerDbHelper(getMockContext());
-        repo = new PendingTransactionsRepository(dbHelper);
     }
 
     public void testGetType() throws Exception {
@@ -34,13 +37,16 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
 
     public void testInsertNewTransaction() {
         ContentValues values = new ContentValues();
-        values.put(PendingTransactionContract.COLUMN_ID, "new-transaction-332");
         values.put(PendingTransactionContract.COLUMN_AMOUNT, "10.332");
         values.put(PendingTransactionContract.COLUMN_COMMENT, "Comment 10.332");
         Uri newUri = resolver.insert(PendingTransactionContract.CONTENT_URI, values);
-        assertEquals(PendingTransactionContract.CONTENT_URI + "/new-transaction-332", newUri.toString());
+        long id = ContentUris.parseId(newUri);
+        assertFalse(id == 0);
+        assertEquals(PendingTransactionContract.CONTENT_URI + "/" + id, newUri.toString());
 
-        PendingTransaction newTransaction = repo.getById("new-transaction-332");
+        PendingTransaction newTransaction = PendingTransactionsDbUtils.getById(dbHelper, id);
+        assertNotNull(newTransaction.getTransactionId());
+        assertNotNull(newTransaction.getTimestamp());
         assertEquals("10.332", newTransaction.getAmount());
         assertEquals("Comment 10.332", newTransaction.getComment());
     }
@@ -51,7 +57,7 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102");
 
         Cursor results = resolver.query(PendingTransactionContract.CONTENT_URI,
-                PendingTransactionContract.ALL_COLUMNS, null, null, PendingTransactionContract.COLUMN_AMOUNT);
+                PendingTransactionContract.ASSIGNABLE_COLUMNS, null, null, PendingTransactionContract.COLUMN_AMOUNT);
 
         assertEquals(3, results.getCount());
         results.moveToFirst();

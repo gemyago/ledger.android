@@ -17,9 +17,6 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import java.util.UUID;
-
-
 public class ReportActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private static final String TAG = ReportActivity.class.getName();
@@ -66,15 +63,14 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         EditText etComment = ((EditText) findViewById(R.id.comment));
         String amount = etAmount.getText().toString();
         String comment = etComment.getText().toString();
-        PendingTransaction pendingTransaction = new PendingTransaction(UUID.randomUUID().toString(), amount, comment);
-        new ReportNewTransactionTask().execute(pendingTransaction);
+        new ReportNewTransactionTask().execute(PendingTransaction.appendValues(new ContentValues(), amount, comment));
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this,
                 PendingTransactionContract.CONTENT_URI,
-                PendingTransactionContract.ALL_COLUMNS,
+                PendingTransactionContract.ASSIGNABLE_COLUMNS,
                 null,
                 null,
                 null);
@@ -90,7 +86,7 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         reportedTransactionsAdapter.swapCursor(null);
     }
 
-    private class ReportNewTransactionTask extends AsyncTask<PendingTransaction, Void, Void> {
+    private class ReportNewTransactionTask extends AsyncTask<ContentValues, Void, Void> {
         @Override
         protected void onPreExecute() {
             View btnReport = findViewById(R.id.report);
@@ -98,14 +94,10 @@ public class ReportActivity extends ActionBarActivity implements LoaderManager.L
         }
 
         @Override
-        protected Void doInBackground(PendingTransaction... params) {
-            for (PendingTransaction pendingTransaction : params) {
-                Log.d(TAG, "Reporting amount: " + pendingTransaction.getAmount() + ", " + pendingTransaction.getComment());
-                ContentValues values = new ContentValues();
-                values.put(PendingTransactionContract.COLUMN_ID, pendingTransaction.getId());
-                values.put(PendingTransactionContract.COLUMN_AMOUNT, pendingTransaction.getAmount());
-                values.put(PendingTransactionContract.COLUMN_COMMENT, pendingTransaction.getComment());
-                getContentResolver().insert(PendingTransactionContract.CONTENT_URI, values);
+        protected Void doInBackground(ContentValues... params) {
+            for (ContentValues pendingTransaction : params) {
+                Log.d(TAG, "Reporting new transaction");
+                getContentResolver().insert(PendingTransactionContract.CONTENT_URI, pendingTransaction);
             }
             return null;
         }

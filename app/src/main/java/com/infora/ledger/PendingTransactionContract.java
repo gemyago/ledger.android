@@ -13,11 +13,14 @@ public class PendingTransactionContract implements BaseColumns {
     public static final String TABLE_NAME = "pending_transactions";
 
     public static final String COLUMN_ID = _ID;
+    public static final String COLUMN_TRANSACTION_ID = "transaction_id";
     public static final String COLUMN_AMOUNT = "amount";
     public static final String COLUMN_COMMENT= "content";
-    public static final String[] ALL_COLUMNS = new String[]{
-            PendingTransactionContract.COLUMN_ID,
+    public static final String COLUMN_TIMESTAMP= "timestamp";
+    public static final String[] ASSIGNABLE_COLUMNS = new String[]{
+            PendingTransactionContract.COLUMN_TRANSACTION_ID,
             PendingTransactionContract.COLUMN_AMOUNT,
-            PendingTransactionContract.COLUMN_COMMENT
+            PendingTransactionContract.COLUMN_COMMENT,
+            PendingTransactionContract.COLUMN_TIMESTAMP
     };
 }
