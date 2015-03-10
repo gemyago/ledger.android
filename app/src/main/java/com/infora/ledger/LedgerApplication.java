@@ -19,7 +19,7 @@ public class LedgerApplication extends Application {
         Log.d(TAG, "Application created");
         bus = new EventBus();
 
-        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver());
+        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);
     }
 
