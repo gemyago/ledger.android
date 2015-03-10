@@ -72,11 +72,15 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     public void reportNewTransaction(View view) {
-        findViewById(R.id.report).setEnabled(false);
         EditText etAmount = ((EditText) findViewById(R.id.amount));
         EditText etComment = ((EditText) findViewById(R.id.comment));
         String amount = etAmount.getText().toString();
+        if(amount.isEmpty()) {
+            Toast.makeText(this, getString(R.string.amount_is_required), Toast.LENGTH_SHORT).show();
+            return;
+        }
         String comment = etComment.getText().toString();
+        findViewById(R.id.report).setEnabled(false);
         BusUtils.post(this, new ReportTransactionCommand(amount, comment));
     }
 

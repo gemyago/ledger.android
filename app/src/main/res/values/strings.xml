@@ -6,6 +6,7 @@
     <string name="transaction_reported">Transaction reported</string>
     <string name="menu_delete">Delete</string>
     <string name="select_transactions">Select Transactions</string>
+    <string name="amount_is_required">Please specify amount.</string>
     <plurals name="number_of_deleted_transactions">
         <item quantity="one">Deleted %d transaction.</item>
         <item quantity="other">Deleted %d transactions.</item>
