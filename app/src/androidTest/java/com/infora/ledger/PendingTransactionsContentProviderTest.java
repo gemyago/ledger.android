@@ -7,6 +7,10 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
+import com.infora.ledger.data.LedgerDbHelper;
+import com.infora.ledger.data.PendingTransactionsContentProvider;
+import com.infora.ledger.data.PendingTransactionsDbUtils;
+
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
     private MockContentResolver resolver;

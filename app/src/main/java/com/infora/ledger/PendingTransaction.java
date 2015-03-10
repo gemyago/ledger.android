@@ -3,6 +3,8 @@ package com.infora.ledger;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.infora.ledger.data.LedgerDbHelper;
+
 import java.util.Date;
 
 /**

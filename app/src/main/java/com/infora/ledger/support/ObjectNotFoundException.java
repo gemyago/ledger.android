@@ -1,4 +1,4 @@
-package com.infora.ledger;
+package com.infora.ledger.support;
 
 /**
  * Created by jenya on 01.03.15.

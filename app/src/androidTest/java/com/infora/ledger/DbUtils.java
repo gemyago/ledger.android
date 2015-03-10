@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.infora.ledger.data.LedgerDbHelper;
+
 import java.util.Date;
 
 /**

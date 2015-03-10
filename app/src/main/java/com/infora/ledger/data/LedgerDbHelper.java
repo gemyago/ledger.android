@@ -1,9 +1,11 @@
-package com.infora.ledger;
+package com.infora.ledger.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.infora.ledger.PendingTransactionContract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -1,8 +1,12 @@
-package com.infora.ledger;
+package com.infora.ledger.data;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.infora.ledger.support.ObjectNotFoundException;
+import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.PendingTransactionContract;
 
 /**
  * Created by jenya on 01.03.15.

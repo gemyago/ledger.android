@@ -1,4 +1,4 @@
-package com.infora.ledger;
+package com.infora.ledger.data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
+import com.infora.ledger.PendingTransactionContract;
 
 import java.util.Date;
 import java.util.UUID;

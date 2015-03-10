@@ -6,7 +6,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -75,7 +74,7 @@ public class ReportActivity extends ActionBarActivity {
         EditText etAmount = ((EditText) findViewById(R.id.amount));
         EditText etComment = ((EditText) findViewById(R.id.comment));
         String amount = etAmount.getText().toString();
-        if(amount.isEmpty()) {
+        if (amount.isEmpty()) {
             Toast.makeText(this, getString(R.string.amount_is_required), Toast.LENGTH_SHORT).show();
             return;
         }

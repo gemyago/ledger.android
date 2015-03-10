@@ -3,6 +3,10 @@ package com.infora.ledger;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
+import com.infora.ledger.data.LedgerDbHelper;
+import com.infora.ledger.data.PendingTransactionsDbUtils;
+import com.infora.ledger.support.ObjectNotFoundException;
+
 /**
  * Created by jenya on 01.03.15.
  */
