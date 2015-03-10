@@ -14,4 +14,8 @@
         <item quantity="one">%d transaction selected.</item>
         <item quantity="other">%d transactions selected.</item>
     </plurals>
+    <plurals name="transactions_removed">
+        <item quantity="one">Transaction deleted.</item>
+        <item quantity="other">%d transactions deleted.</item>
+    </plurals>
 </resources>

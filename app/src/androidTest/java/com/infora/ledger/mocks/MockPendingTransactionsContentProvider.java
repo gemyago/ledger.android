@@ -16,6 +16,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     private Uri insertedUri;
     private InsertArgs insertArgs;
+    private DeleteArgs deleteArgs;
 
     public InsertArgs getInsertArgs() {
         return insertArgs;
@@ -23,6 +24,10 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     public void setInsertedUri(Uri insertedUri) {
         this.insertedUri = insertedUri;
+    }
+
+    public DeleteArgs getDeleteArgs() {
+        return deleteArgs;
     }
 
     @Override
@@ -49,6 +54,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        deleteArgs = new DeleteArgs(uri, selection, selectionArgs);
         return 1;
     }
 
@@ -73,6 +79,30 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
         public ContentValues getValues() {
             return values;
+        }
+    }
+
+    public static class DeleteArgs {
+        private final Uri uri;
+        private final String selection;
+        private final String[] selectionArgs;
+
+        private DeleteArgs(Uri uri, String selection, String[] selectionArgs) {
+            this.uri = uri;
+            this.selection = selection;
+            this.selectionArgs = selectionArgs;
+        }
+
+        public Uri getUri() {
+            return uri;
+        }
+
+        public String getSelection() {
+            return selection;
+        }
+
+        public String[] getSelectionArgs() {
+            return selectionArgs;
         }
     }
 }

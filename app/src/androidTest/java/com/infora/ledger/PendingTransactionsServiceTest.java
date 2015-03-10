@@ -5,7 +5,9 @@ import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.application.PendingTransactionsService;
+import com.infora.ledger.application.RemoveTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
+import com.infora.ledger.application.TransactionsRemovedEvent;
 import com.infora.ledger.application.TransactionReportedEvent;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
@@ -49,5 +51,13 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         provider.setInsertedUri(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, 100));
         subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
         assertEquals(100, subscriber.getEvent().getId());
+    }
+
+    public void testDeleteTransaction() {
+        MockSubscriber<TransactionsRemovedEvent> subscriber = new MockSubscriber<>();
+        bus.register(subscriber);
+        subject.onEventBackgroundThread(new RemoveTransactionsCommand(3321L));
+        assertEquals(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, 3321L), provider.getDeleteArgs().getUri());
+        assertEquals(3321L, subscriber.getEvent().getIds()[0]);
     }
 }
