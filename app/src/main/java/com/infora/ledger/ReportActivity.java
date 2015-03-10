@@ -2,7 +2,6 @@ package com.infora.ledger;
 
 import android.app.LoaderManager;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.res.Resources;
@@ -11,7 +10,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +19,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
+
+import com.infora.ledger.application.ReportTransactionCommand;
+import com.infora.ledger.application.TransactionReportedEvent;
+import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.support.EventHandler;
 
 public class ReportActivity extends ActionBarActivity {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
@@ -44,6 +47,18 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        BusUtils.register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        BusUtils.unregister(this);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -59,11 +74,26 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     public void reportNewTransaction(View view) {
+        findViewById(R.id.report).setEnabled(false);
         EditText etAmount = ((EditText) findViewById(R.id.amount));
         EditText etComment = ((EditText) findViewById(R.id.comment));
         String amount = etAmount.getText().toString();
         String comment = etComment.getText().toString();
-        new ReportNewTransactionTask().execute(PendingTransaction.appendValues(new ContentValues(), amount, comment));
+        BusUtils.post(this, new ReportTransactionCommand(amount, comment));
+    }
+
+    @EventHandler
+    public void onEventMainThread(TransactionReportedEvent event) {
+        View btnReport = findViewById(R.id.report);
+        EditText etAmount = ((EditText) findViewById(R.id.amount));
+        EditText etComment = ((EditText) findViewById(R.id.comment));
+
+        btnReport.setEnabled(true);
+        etAmount.setText("");
+        etAmount.requestFocus();
+        etComment.setText("");
+
+        Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -87,37 +117,6 @@ public class ReportActivity extends ActionBarActivity {
             reportedTransactionsAdapter.swapCursor(null);
         }
 
-    }
-
-    private class ReportNewTransactionTask extends AsyncTask<ContentValues, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            View btnReport = findViewById(R.id.report);
-            btnReport.setEnabled(false);
-        }
-
-        @Override
-        protected Void doInBackground(ContentValues... params) {
-            for (ContentValues pendingTransaction : params) {
-                Log.d(TAG, "Reporting new transaction");
-                getContentResolver().insert(PendingTransactionContract.CONTENT_URI, pendingTransaction);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            View btnReport = findViewById(R.id.report);
-            EditText etAmount = ((EditText) findViewById(R.id.amount));
-            EditText etComment = ((EditText) findViewById(R.id.comment));
-
-            btnReport.setEnabled(true);
-            etAmount.setText("");
-            etAmount.requestFocus();
-            etComment.setText("");
-
-            Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
-        }
     }
 
     private class RemoveTransactionsTask extends AsyncTask<Long, Void, Void> {

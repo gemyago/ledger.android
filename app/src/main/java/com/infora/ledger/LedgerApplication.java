@@ -28,4 +28,8 @@ public class LedgerApplication extends Application {
         super.onTerminate();
         Log.d(TAG, "Application terminated");
     }
+
+    public EventBus getBus() {
+        return bus;
+    }
 }
