@@ -3,9 +3,12 @@ package com.infora.ledger;
 import android.app.Application;
 import android.util.Log;
 
+import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.application.PendingTransactionsService;
 
 import de.greenrobot.event.EventBus;
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
 
 /**
  * Created by jenya on 10.03.15.

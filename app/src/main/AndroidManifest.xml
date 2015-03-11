@@ -21,6 +21,7 @@
             android:authorities="com.infora.ledger.provider"
             android:name=".data.PendingTransactionsContentProvider"
             android:exported="false"></provider>
-    </application>
 
+    </application>
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
