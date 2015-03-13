@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.infora.ledger" >
+    package="com.infora.ledger">
 
     <application
         android:allowBackup="true"
@@ -10,7 +10,7 @@
         android:name=".LedgerApplication">
         <activity
             android:name=".ReportActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,8 +20,15 @@
         <provider
             android:authorities="com.infora.ledger.provider"
             android:name=".data.PendingTransactionsContentProvider"
-            android:exported="false"></provider>
-
+            android:exported="false" />
+        <service android:name=".api.ApiAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/api_authenticator" />
+        </service>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
