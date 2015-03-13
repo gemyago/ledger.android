@@ -20,7 +20,10 @@
         <provider
             android:authorities="com.infora.ledger.provider"
             android:name=".data.PendingTransactionsContentProvider"
-            android:exported="false" />
+            android:exported="false"
+            android:syncable="true"
+            />
+
         <service android:name=".api.ApiAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -29,6 +32,21 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/api_authenticator" />
         </service>
+        <service android:name=".data.PendingTransactionsSyncService"
+            android:exported="true"
+            android:process=":sync"
+            >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/pending_transactions_sync_adapter" />
+        </service>
     </application>
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 </manifest>

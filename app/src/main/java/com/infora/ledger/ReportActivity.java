@@ -1,11 +1,18 @@
 package com.infora.ledger;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +23,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.application.RemoveTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
@@ -24,9 +32,11 @@ import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 
 public class ReportActivity extends ActionBarActivity {
+    private static final String TAG = ReportActivity.class.getName();
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private SimpleCursorAdapter reportedTransactionsAdapter;
     private ListView lvReportedTransactions;
+    private Account syncAccount;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +51,28 @@ public class ReportActivity extends ActionBarActivity {
 
         lvReportedTransactions.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         lvReportedTransactions.setMultiChoiceModeListener(new ModeCallback());
+
+        getContentResolver().registerContentObserver(PendingTransactionContract.CONTENT_URI, true, new ContentObserver(null) {
+            @Override
+            public void onChange(boolean selfChange) {
+                super.onChange(selfChange, null);
+            }
+
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                Log.d(TAG, "Content changed. Requesting sync...");
+                requestSync();
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         BusUtils.register(this);
+
+        Log.d(TAG, "Requesting sync on start...");
+        requestSync();
     }
 
     @Override
@@ -83,6 +109,14 @@ public class ReportActivity extends ActionBarActivity {
         BusUtils.post(this, new ReportTransactionCommand(amount, comment));
     }
 
+    private void requestSync() {
+        if (syncAccount == null) syncAccount = createSyncAccount(this);
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(syncAccount, PendingTransactionContract.AUTHORITY, settingsBundle);
+    }
+
     @EventHandler
     public void onEventMainThread(TransactionReportedEvent event) {
         View btnReport = findViewById(R.id.report);
@@ -102,6 +136,17 @@ public class ReportActivity extends ActionBarActivity {
         int removedLength = event.getIds().length;
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public static Account createSyncAccount(Context context) {
+        Account newAccount = new Account("dummyaccount", ApiAuthenticator.ACCOUNT_TYPE);
+        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+            Log.d(TAG, "Dummy account created");
+        } else {
+            Log.w(TAG, "Dummy account was not created. Probably it already exists");
+        }
+        return newAccount;
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {

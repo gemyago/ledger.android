@@ -11,6 +11,8 @@ import android.os.Bundle;
  * Created by jenya on 13.03.15.
  */
 public class ApiAuthenticator extends AbstractAccountAuthenticator {
+    public static final String ACCOUNT_TYPE = "ledger.infora-soft.com";
+
     public ApiAuthenticator(Context context) {
         super(context);
     }
