@@ -17,12 +17,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login"></activity>
+
         <provider
             android:authorities="com.infora.ledger.provider"
             android:name=".data.PendingTransactionsContentProvider"
             android:exported="false"
-            android:syncable="true"
-            />
+            android:syncable="true" />
 
         <service android:name=".api.ApiAuthenticatorService">
             <intent-filter>
@@ -32,10 +35,10 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/api_authenticator" />
         </service>
-        <service android:name=".data.PendingTransactionsSyncService"
+        <service
+            android:name=".data.PendingTransactionsSyncService"
             android:exported="true"
-            android:process=":sync"
-            >
+            android:process=":sync">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>

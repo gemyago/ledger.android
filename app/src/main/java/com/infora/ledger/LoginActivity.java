@@ -2,6 +2,8 @@ package com.infora.ledger;
 
 import android.accounts.AccountManager;
 import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -55,6 +57,9 @@ public class LoginActivity extends ActionBarActivity {
         if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
             if (resultCode == RESULT_OK) {
                 String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                LedgerApplication app = (LedgerApplication) getApplicationContext();
+                app.rememberUserEamil(email);
+                startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
             }

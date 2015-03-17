@@ -110,11 +110,11 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     private void requestSync() {
-        if (syncAccount == null) syncAccount = createSyncAccount(this);
-        Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(syncAccount, PendingTransactionContract.AUTHORITY, settingsBundle);
+//        if (syncAccount == null) syncAccount = createSyncAccount(this);
+//        Bundle settingsBundle = new Bundle();
+//        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+//        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+//        ContentResolver.requestSync(syncAccount, PendingTransactionContract.AUTHORITY, settingsBundle);
     }
 
     @EventHandler

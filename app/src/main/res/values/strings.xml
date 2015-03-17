@@ -19,8 +19,7 @@
         <item quantity="one">Transaction deleted.</item>
         <item quantity="other">%d transactions deleted.</item>
     </plurals>
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_login">Sign In</string>
 
     <string name="login_title">Welcome to Ledger!</string>
-    <string name="login_with_google">Sign in with Google.</string>
 </resources>
