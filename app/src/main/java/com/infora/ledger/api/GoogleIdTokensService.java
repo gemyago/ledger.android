@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.infora.ledger.LedgerApplication;
 
 import java.io.IOException;
 
@@ -20,7 +21,10 @@ public class GoogleIdTokensService {
         this.context = context;
     }
 
-    public String getToken(String email) {
+    public String getToken() {
+        LedgerApplication app = (LedgerApplication) context.getApplicationContext();
+        String email = app.getUserEmail();
+        if(email == null) throw new RuntimeException("User is not signed in");
         try {
             Log.d(TAG, "Retrieving the token for account: " + email);
             return GoogleAuthUtil.getToken(context, email, ID_TOKEN_SCOPE);

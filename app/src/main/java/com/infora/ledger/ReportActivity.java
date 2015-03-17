@@ -1,10 +1,7 @@
 package com.infora.ledger;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.ContentObserver;
@@ -23,7 +20,6 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.application.RemoveTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
@@ -36,7 +32,6 @@ public class ReportActivity extends ActionBarActivity {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private SimpleCursorAdapter reportedTransactionsAdapter;
     private ListView lvReportedTransactions;
-    private Account syncAccount;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,11 +105,10 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     private void requestSync() {
-//        if (syncAccount == null) syncAccount = createSyncAccount(this);
-//        Bundle settingsBundle = new Bundle();
-//        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-//        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-//        ContentResolver.requestSync(syncAccount, PendingTransactionContract.AUTHORITY, settingsBundle);
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(null, PendingTransactionContract.AUTHORITY, settingsBundle);
     }
 
     @EventHandler
@@ -136,17 +130,6 @@ public class ReportActivity extends ActionBarActivity {
         int removedLength = event.getIds().length;
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    public static Account createSyncAccount(Context context) {
-        Account newAccount = new Account("dummyaccount", ApiAuthenticator.ACCOUNT_TYPE);
-        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            Log.d(TAG, "Dummy account created");
-        } else {
-            Log.w(TAG, "Dummy account was not created. Probably it already exists");
-        }
-        return newAccount;
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {

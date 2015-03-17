@@ -12,7 +12,7 @@ import retrofit.http.POST;
 public interface LedgerApi {
     @FormUrlEncoded
     @POST("/api/sessions.json")
-    AuthenticityToken authenticate(@Field("user[email]") String email, @Field("user[password]") String password);
+    AuthenticityToken authenticateByIdToken(@Field("google_id_token") String googleIdToken);
 
     @FormUrlEncoded
     @POST("/pending-transactions")
