@@ -68,7 +68,7 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
         Intent startedActivity = getStartedActivityIntent();
         assertEquals("com.google", startedActivity.getStringArrayExtra("allowableAccountTypes")[0]);
     }
-    
+
     private interface RememberUserEmailCommandHandler {
         void onEvent(RememberUserEmailCommand cmd);
     }
