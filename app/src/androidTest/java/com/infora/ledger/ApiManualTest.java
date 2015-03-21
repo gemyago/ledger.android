@@ -38,8 +38,8 @@ public class ApiManualTest extends AndroidTestCase {
     }
 
     public void testReportPendingTransaction() throws InterruptedException {
-        AuthenticityToken authenticityToken = ledgerApi.authenticateByIdToken("dev@domain.com", "password");
-        adapter.setAuthenticityToken(authenticityToken.getValue());
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
+//        AuthenticityToken authenticityToken = ledgerApi.authenticateByIdToken("dev@domain.com", "password");
+//        adapter.setAuthenticityToken(authenticityToken.getValue());
+//        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
     }
 }
