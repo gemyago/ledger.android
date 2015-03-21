@@ -1,11 +1,17 @@
 package com.infora.ledger;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
+import android.test.TouchUtils;
 import android.view.View;
+
+import com.infora.ledger.application.RememberUserEmailCommand;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 20.03.15.
@@ -30,14 +36,41 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
         super.setActivity(testActivity);
     }
 
+    public void testOnActivityResultIfAccountWasPicked() {
+        EventBus bus = new EventBus();
+        final boolean[] commandDispatched = {false};
+        bus.register(new RememberUserEmailCommandHandler() {
+            @Override
+            public void onEvent(RememberUserEmailCommand cmd) {
+                assertEquals("test@mail.com", cmd.getEmail());
+                commandDispatched[0] = true;
+            }
+        });
+        startActivity(new Intent(), null, null);
+        getActivity().setBus(bus);
+        Intent data = new Intent();
+        data.putExtra(AccountManager.KEY_ACCOUNT_NAME, "test@mail.com");
+        getActivity().onActivityResult(LoginActivity.REQUEST_CODE_PICK_ACCOUNT, Activity.RESULT_OK, data);
+        assertTrue("The command to remember user email was not dispatched.", commandDispatched[0]);
+
+        Intent startedActivity = getStartedActivityIntent();
+        assertNotNull(startedActivity);
+        assertEquals(ReportActivity.class.getName(), startedActivity.getComponent().getClassName());
+    }
+
     public void testSignIn() throws Exception {
         startActivity(new Intent(), null, null);
         getActivity().setGooglePlayServicesUtilWrapper(gpsUtil);
         gpsUtil.setIsGooglePlayServicesAvailable(0);
-        getActivity().signIn(new View(getActivity()));
+        View buttonView = getActivity().getWindow().findViewById(R.id.sign_in_button);
+        buttonView.callOnClick();
         assertEquals(LoginActivity.REQUEST_CODE_PICK_ACCOUNT, getStartedActivityRequest());
         Intent startedActivity = getStartedActivityIntent();
         assertEquals("com.google", startedActivity.getStringArrayExtra("allowableAccountTypes")[0]);
+    }
+    
+    private interface RememberUserEmailCommandHandler {
+        void onEvent(RememberUserEmailCommand cmd);
     }
 
     private class DummyGooglePlayServicesUtilWrapper extends LoginActivity.GooglePlayServicesUtilWrapper {

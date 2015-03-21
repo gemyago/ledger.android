@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.infora.ledger.application.RememberUserEmailCommand;
+
+import de.greenrobot.event.EventBus;
 
 
 public class LoginActivity extends ActionBarActivity {
@@ -23,6 +26,7 @@ public class LoginActivity extends ActionBarActivity {
     static final int REQUEST_CODE_UPDATE_PLAY_SERVICES = 1001;
 
     private GooglePlayServicesUtilWrapper googlePlayServicesUtilWrapper;
+    private EventBus bus;
 
     public GooglePlayServicesUtilWrapper getGooglePlayServicesUtil() {
         return googlePlayServicesUtilWrapper == null ?
@@ -38,6 +42,15 @@ public class LoginActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+    }
+
+    public EventBus getBus() {
+        if (this.bus == null) this.bus = ((LedgerApplication) getApplicationContext()).getBus();
+        return this.bus;
+    }
+
+    public void setBus(EventBus bus) {
+        this.bus = bus;
     }
 
     public void signIn(View view) {
@@ -59,19 +72,17 @@ public class LoginActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        throw new RuntimeException("Not implemented");
-//        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-//            if (resultCode == RESULT_OK) {
-//                String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-//                LedgerApplication app = (LedgerApplication) getApplicationContext();
-//                app.rememberUserEamil(email);
-//                startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
-//            } else if (resultCode == RESULT_CANCELED) {
-//                Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == REQUEST_CODE_UPDATE_PLAY_SERVICES) {
-//            Log.d(TAG, "Services update result");
-//        }
+        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+            if (resultCode == RESULT_OK) {
+                String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                getBus().post(new RememberUserEmailCommand(email));
+                startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_CODE_UPDATE_PLAY_SERVICES) {
+            Log.d(TAG, "Services update result");
+        }
     }
 
     public static class GooglePlayServicesUtilWrapper {
