@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.infora.ledger.application.PendingTransactionsService;
+import com.infora.ledger.application.RememberUserEmailCommand;
+import com.infora.ledger.data.SharedPreferencesProvider;
 
 import de.greenrobot.event.EventBus;
 
@@ -17,10 +19,14 @@ import de.greenrobot.event.EventBus;
  */
 public class LedgerApplication extends Application {
     private static final String TAG = LedgerApplication.class.getName();
-    private static final String USER_EMAIL_SETTINGS_KEY = "ledger.user-email";
+    public static final String USER_EMAIL_SETTINGS_KEY = "ledger.user-email";
+    public static final String PACKAGE = "com.infora.ledger";
     private EventBus bus;
 
     private String userEmail;
+
+    private SharedPreferencesProvider sharedPreferencesProvider;
+
 
     public void onCreate() {
         super.onCreate();
@@ -52,8 +58,8 @@ public class LedgerApplication extends Application {
 
             @Override
             public void onActivityResumed(Activity activity) {
-                if(activity instanceof LoginActivity) return;
-                if(getUserEmail() != null) return;
+                if (activity instanceof LoginActivity) return;
+                if (getUserEmail() != null) return;
                 startActivity(new Intent(LedgerApplication.this, LoginActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
 
@@ -99,7 +105,29 @@ public class LedgerApplication extends Application {
         return bus;
     }
 
+    public void setBus(EventBus bus) {
+        this.bus = bus;
+    }
+
+    public void onEvent(RememberUserEmailCommand cmd) {
+        String value = cmd.getEmail();
+        SharedPreferences.Editor edit = getSharedPreferences().edit();
+        edit.putString(USER_EMAIL_SETTINGS_KEY, value);
+        edit.apply();
+        userEmail = value;
+    }
+
+    public SharedPreferencesProvider getSharedPreferencesProvider() {
+        return sharedPreferencesProvider == null ?
+                (sharedPreferencesProvider = new SharedPreferencesProvider(this)) :
+                sharedPreferencesProvider;
+    }
+
+    public void setSharedPreferencesProvider(SharedPreferencesProvider sharedPreferencesProvider) {
+        this.sharedPreferencesProvider = sharedPreferencesProvider;
+    }
+
     private SharedPreferences getSharedPreferences() {
-        return getSharedPreferences("com.infora.ledger", Context.MODE_PRIVATE);
+        return getSharedPreferencesProvider().getSharedPreferences(PACKAGE, Context.MODE_PRIVATE);
     }
 }
