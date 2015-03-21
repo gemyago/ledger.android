@@ -5,9 +5,7 @@ import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.application.RememberUserEmailCommand;
-import com.infora.ledger.data.SharedPreferencesProvider;
-
-import java.util.UUID;
+import com.infora.ledger.mocks.MockSharedPreferencesProvider;
 
 import de.greenrobot.event.EventBus;
 
@@ -17,14 +15,14 @@ import de.greenrobot.event.EventBus;
 public class LedgerApplicationTest extends AndroidTestCase {
 
     private LedgerApplication subject;
-    private TestSharedPreferencesProvider prefsProvider;
+    private MockSharedPreferencesProvider prefsProvider;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         subject = new LedgerApplication();
         subject.setBus(new EventBus());
-        prefsProvider = new TestSharedPreferencesProvider(getContext());
+        prefsProvider = new MockSharedPreferencesProvider(getContext());
         subject.setSharedPreferencesProvider(prefsProvider);
     }
 
@@ -44,16 +42,4 @@ public class LedgerApplicationTest extends AndroidTestCase {
         assertEquals("test@mail.com", subject.getUserEmail());
     }
 
-    private static class TestSharedPreferencesProvider extends SharedPreferencesProvider {
-        private final UUID randomPart;
-        public TestSharedPreferencesProvider(Context context) {
-            super(context);
-            randomPart = UUID.randomUUID();
-        }
-
-        @Override
-        public SharedPreferences getSharedPreferences(String name, int mode) {
-            return context.getSharedPreferences(name + randomPart, mode);
-        }
-    }
 }
