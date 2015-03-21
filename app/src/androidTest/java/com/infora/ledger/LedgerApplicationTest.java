@@ -30,16 +30,6 @@ public class LedgerApplicationTest extends AndroidTestCase {
         subject.onEvent(new RememberUserEmailCommand("test@mail.com"));
         SharedPreferences prefs = prefsProvider.getSharedPreferences(LedgerApplication.PACKAGE, Context.MODE_PRIVATE);
         assertEquals("test@mail.com", prefs.getString(LedgerApplication.USER_EMAIL_SETTINGS_KEY, null));
-        assertEquals("test@mail.com", subject.getUserEmail());
-    }
-
-    public void testGetUserEmail() {
-        assertNull(subject.getUserEmail());
-        SharedPreferences prefs = prefsProvider.getSharedPreferences(LedgerApplication.PACKAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(LedgerApplication.USER_EMAIL_SETTINGS_KEY, "test@mail.com");
-        editor.apply();
-        assertEquals("test@mail.com", subject.getUserEmail());
     }
 
 }

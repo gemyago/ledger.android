@@ -59,18 +59,19 @@ public class LoginActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-            if (resultCode == RESULT_OK) {
-                String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                LedgerApplication app = (LedgerApplication) getApplicationContext();
-                app.rememberUserEamil(email);
-                startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
-            } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == REQUEST_CODE_UPDATE_PLAY_SERVICES) {
-            Log.d(TAG, "Services update result");
-        }
+        throw new RuntimeException("Not implemented");
+//        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+//            if (resultCode == RESULT_OK) {
+//                String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+//                LedgerApplication app = (LedgerApplication) getApplicationContext();
+//                app.rememberUserEamil(email);
+//                startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
+//            } else if (resultCode == RESULT_CANCELED) {
+//                Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
+//            }
+//        } else if (requestCode == REQUEST_CODE_UPDATE_PLAY_SERVICES) {
+//            Log.d(TAG, "Services update result");
+//        }
     }
 
     public static class GooglePlayServicesUtilWrapper {

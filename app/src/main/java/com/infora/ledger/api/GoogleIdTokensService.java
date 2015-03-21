@@ -22,17 +22,18 @@ public class GoogleIdTokensService {
     }
 
     public String getToken() {
-        LedgerApplication app = (LedgerApplication) context.getApplicationContext();
-        String email = app.getUserEmail();
-        if(email == null) throw new RuntimeException("User is not signed in");
-        try {
-            Log.d(TAG, "Retrieving the token for account: " + email);
-            return GoogleAuthUtil.getToken(context, email, ID_TOKEN_SCOPE);
-        } catch (GoogleAuthException e) {
-            return handleError(e);
-        } catch (IOException e) {
-            return handleError(e);
-        }
+        throw new RuntimeException("Not implemented");
+//        LedgerApplication app = (LedgerApplication) context.getApplicationContext();
+//        String email = app.getUserEmail();
+//        if(email == null) throw new RuntimeException("User is not signed in");
+//        try {
+//            Log.d(TAG, "Retrieving the token for account: " + email);
+//            return GoogleAuthUtil.getToken(context, email, ID_TOKEN_SCOPE);
+//        } catch (GoogleAuthException e) {
+//            return handleError(e);
+//        } catch (IOException e) {
+//            return handleError(e);
+//        }
     }
 
     public void invalidateToken(String token) {
