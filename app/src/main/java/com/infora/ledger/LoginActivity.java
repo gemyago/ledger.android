@@ -1,26 +1,19 @@
 package com.infora.ledger;
 
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import java.io.IOException;
 
 
 public class LoginActivity extends ActionBarActivity {
@@ -29,6 +22,18 @@ public class LoginActivity extends ActionBarActivity {
     static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
     static final int REQUEST_CODE_UPDATE_PLAY_SERVICES = 1001;
 
+    private GooglePlayServicesUtilWrapper googlePlayServicesUtilWrapper;
+
+    public GooglePlayServicesUtilWrapper getGooglePlayServicesUtil() {
+        return googlePlayServicesUtilWrapper == null ?
+                (googlePlayServicesUtilWrapper = new GooglePlayServicesUtilWrapper()) :
+                googlePlayServicesUtilWrapper;
+    }
+
+    public void setGooglePlayServicesUtilWrapper(GooglePlayServicesUtilWrapper googlePlayServicesUtilWrapper) {
+        this.googlePlayServicesUtilWrapper = googlePlayServicesUtilWrapper;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +41,7 @@ public class LoginActivity extends ActionBarActivity {
     }
 
     public void signIn(View view) {
-        int playServicesCheckResult = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int playServicesCheckResult = getGooglePlayServicesUtil().isGooglePlayServicesAvailable(this);
         switch (playServicesCheckResult) {
             case 0:
                 String[] accountTypes = new String[]{"com.google"};
@@ -46,7 +51,7 @@ public class LoginActivity extends ActionBarActivity {
                 break;
             default:
                 Log.e(TAG, "Play services are not available. Code: " + playServicesCheckResult);
-                Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(playServicesCheckResult, this, REQUEST_CODE_UPDATE_PLAY_SERVICES);
+                Dialog errorDialog = getGooglePlayServicesUtil().getErrorDialog(playServicesCheckResult, this, REQUEST_CODE_UPDATE_PLAY_SERVICES);
                 errorDialog.show();
                 break;
         }
@@ -65,6 +70,16 @@ public class LoginActivity extends ActionBarActivity {
             }
         } else if (requestCode == REQUEST_CODE_UPDATE_PLAY_SERVICES) {
             Log.d(TAG, "Services update result");
+        }
+    }
+
+    public static class GooglePlayServicesUtilWrapper {
+        public int isGooglePlayServicesAvailable(Context context) {
+            return GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+        }
+
+        public Dialog getErrorDialog(int errorCode, Activity activity, int requestCode) {
+            return GooglePlayServicesUtil.getErrorDialog(errorCode, activity, requestCode);
         }
     }
 }
