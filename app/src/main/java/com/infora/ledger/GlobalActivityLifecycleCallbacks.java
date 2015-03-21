@@ -1,4 +1,4 @@
-package com.infora.ledger.application;
+package com.infora.ledger;
 
 import android.app.Activity;
 import android.app.Application;
@@ -8,8 +8,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.infora.ledger.LedgerApplication;
-import com.infora.ledger.LoginActivity;
 import com.infora.ledger.data.SharedPreferencesProvider;
 
 /**

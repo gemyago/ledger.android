@@ -3,7 +3,6 @@ package com.infora.ledger;
 import android.app.Application;
 import android.util.Log;
 
-import com.infora.ledger.application.GlobalActivityLifecycleCallbacks;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.RememberUserEmailCommand;
 import com.infora.ledger.application.UserEmailUtil;

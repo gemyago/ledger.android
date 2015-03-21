@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 
-import com.infora.ledger.application.GlobalActivityLifecycleCallbacks;
 import com.infora.ledger.application.UserEmailUtil;
 import com.infora.ledger.mocks.MockSharedPreferencesProvider;
 
