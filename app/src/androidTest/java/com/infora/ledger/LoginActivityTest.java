@@ -6,10 +6,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
-import android.test.TouchUtils;
 import android.view.View;
 
 import com.infora.ledger.application.RememberUserEmailCommand;
+import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
 
@@ -73,7 +73,7 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
         void onEvent(RememberUserEmailCommand cmd);
     }
 
-    private class DummyGooglePlayServicesUtilWrapper extends LoginActivity.GooglePlayServicesUtilWrapper {
+    private class DummyGooglePlayServicesUtilWrapper extends GooglePlayServicesUtilWrapper {
         private int isGooglePlayServicesAvailable;
 
         public void setIsGooglePlayServicesAvailable(int isGooglePlayServicesAvailable) {

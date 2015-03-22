@@ -1,10 +1,8 @@
 package com.infora.ledger;
 
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -13,8 +11,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.infora.ledger.application.RememberUserEmailCommand;
+import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
 
@@ -85,13 +83,4 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
-    public static class GooglePlayServicesUtilWrapper {
-        public int isGooglePlayServicesAvailable(Context context) {
-            return GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        }
-
-        public Dialog getErrorDialog(int errorCode, Activity activity, int requestCode) {
-            return GooglePlayServicesUtil.getErrorDialog(errorCode, activity, requestCode);
-        }
-    }
 }
