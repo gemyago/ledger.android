@@ -1,13 +1,10 @@
 package com.infora.ledger;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.accounts.Account;
 import android.test.AndroidTestCase;
 
-import com.infora.ledger.application.RememberUserEmailCommand;
-import com.infora.ledger.mocks.MockSharedPreferencesProvider;
-
-import de.greenrobot.event.EventBus;
+import com.infora.ledger.application.CreateSystemAccountCommand;
+import com.infora.ledger.mocks.MockAccountManagerWrapper;
 
 /**
  * Created by jenya on 21.03.15.
@@ -15,21 +12,22 @@ import de.greenrobot.event.EventBus;
 public class LedgerApplicationTest extends AndroidTestCase {
 
     private LedgerApplication subject;
-    private MockSharedPreferencesProvider prefsProvider;
+    private MockAccountManagerWrapper accountManager;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         subject = new LedgerApplication();
-        subject.setBus(new EventBus());
-        prefsProvider = new MockSharedPreferencesProvider(getContext());
-        subject.setSharedPreferencesProvider(prefsProvider);
+        accountManager = new MockAccountManagerWrapper(subject);
+        subject.setAccountManager(accountManager);
     }
 
-    public void testRememberUserEmailCommand() {
-        subject.onEvent(new RememberUserEmailCommand("test@mail.com"));
-        SharedPreferences prefs = prefsProvider.getSharedPreferences(LedgerApplication.PACKAGE, Context.MODE_PRIVATE);
-        assertEquals("test@mail.com", prefs.getString(LedgerApplication.USER_EMAIL_SETTINGS_KEY, null));
+    public void testCreateSystemAccountCommand() {
+        subject.onEvent(new CreateSystemAccountCommand("test@mail.com"));
+        assertNotNull(accountManager.getAddAccountExplicitlyArgs());
+        Account account = accountManager.getAddAccountExplicitlyArgs().getAccount();
+        assertEquals("test@mail.com", account.name);
+        assertEquals(LedgerApplication.ACCOUNT_TYPE, account.type);
+        assertNull(accountManager.getAddAccountExplicitlyArgs().getUserdata());
     }
-
 }

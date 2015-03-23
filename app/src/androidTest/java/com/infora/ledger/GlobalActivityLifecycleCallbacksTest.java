@@ -1,18 +1,18 @@
 package com.infora.ledger;
 
+import android.accounts.Account;
 import android.app.Activity;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 
-import com.infora.ledger.application.UserEmailUtil;
-import com.infora.ledger.mocks.MockSharedPreferencesProvider;
+import com.infora.ledger.mocks.MockAccountManagerWrapper;
 
 /**
  * Created by jenya on 21.03.15.
  */
 public class GlobalActivityLifecycleCallbacksTest extends ActivityUnitTestCase<LoginActivity> {
     private GlobalActivityLifecycleCallbacks subject;
-    private MockSharedPreferencesProvider prefsProvider;
+    private MockAccountManagerWrapper accountManager;
 
     public GlobalActivityLifecycleCallbacksTest() {
         super(LoginActivity.class);
@@ -22,8 +22,9 @@ public class GlobalActivityLifecycleCallbacksTest extends ActivityUnitTestCase<L
     protected void setUp() throws Exception {
         super.setUp();
         startActivity(new Intent(), null, null);
-        prefsProvider = new MockSharedPreferencesProvider(getActivity());
-        subject = new GlobalActivityLifecycleCallbacks(getActivity(), prefsProvider);
+        subject = new GlobalActivityLifecycleCallbacks(getActivity());
+        accountManager = new MockAccountManagerWrapper(getActivity());
+        subject.setAccountManager(accountManager);
     }
 
     @Override
@@ -37,13 +38,13 @@ public class GlobalActivityLifecycleCallbacksTest extends ActivityUnitTestCase<L
         assertNull(getStartedActivityIntent());
     }
 
-    public void testOnActivityResumedDoesNothingIfLoginNamePresent() {
-        UserEmailUtil.saveUserEmail(prefsProvider, "test@mail.com");
+    public void testOnActivityResumedDoesNothingIfApplicationAccountIsPresent() {
+        accountManager.setApplicationAccounts(new Account[]{new Account("test@domain.com", "dummy-type")});
         subject.onActivityResumed(new Activity());
         assertNull(getStartedActivityIntent());
     }
 
-    public void testOnActivityResumedStartsLoginActivityIfNoLoginName() {
+    public void testOnActivityResumedStartsLoginActivityIfNoAccounts() {
         subject.onActivityResumed(new Activity());
         Intent intent = getStartedActivityIntent();
         assertNotNull(intent);

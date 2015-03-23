@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
-import com.infora.ledger.application.RememberUserEmailCommand;
+import com.infora.ledger.application.CreateSystemAccountCommand;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
@@ -73,7 +73,7 @@ public class LoginActivity extends ActionBarActivity {
         if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
             if (resultCode == RESULT_OK) {
                 String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                getBus().post(new RememberUserEmailCommand(email));
+                getBus().post(new CreateSystemAccountCommand(email));
                 startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();

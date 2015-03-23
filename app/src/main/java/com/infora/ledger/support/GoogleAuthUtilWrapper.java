@@ -11,7 +11,8 @@ import java.io.IOException;
  * Created by jenya on 21.03.15.
  */
 public class GoogleAuthUtilWrapper {
-    public String getToken(Context context, String accountName, String scope) throws GoogleAuthException, IOException {
-        return GoogleAuthUtil.getToken(context, accountName, scope);
+    private static final String ID_TOKEN_SCOPE = "audience:server:client_id:127152602937-l6sn5g0albld900plkhh4b7fdjqee620.apps.googleusercontent.com";
+    public String getToken(Context context, String accountName) throws GoogleAuthException, IOException {
+        return GoogleAuthUtil.getToken(context, accountName, ID_TOKEN_SCOPE);
     }
 }

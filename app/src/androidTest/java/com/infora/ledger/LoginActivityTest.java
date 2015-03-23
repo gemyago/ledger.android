@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 import android.view.View;
 
-import com.infora.ledger.application.RememberUserEmailCommand;
+import com.infora.ledger.application.CreateSystemAccountCommand;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
@@ -41,7 +41,7 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
         final boolean[] commandDispatched = {false};
         bus.register(new RememberUserEmailCommandHandler() {
             @Override
-            public void onEvent(RememberUserEmailCommand cmd) {
+            public void onEvent(CreateSystemAccountCommand cmd) {
                 assertEquals("test@mail.com", cmd.getEmail());
                 commandDispatched[0] = true;
             }
@@ -70,7 +70,7 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
     }
 
     private interface RememberUserEmailCommandHandler {
-        void onEvent(RememberUserEmailCommand cmd);
+        void onEvent(CreateSystemAccountCommand cmd);
     }
 
     private class DummyGooglePlayServicesUtilWrapper extends GooglePlayServicesUtilWrapper {

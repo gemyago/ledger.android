@@ -1,6 +1,8 @@
 package com.infora.ledger.data;
 
 import android.accounts.Account;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -14,8 +16,10 @@ import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.PendingTransactionContract;
 import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.AuthenticityToken;
-import com.infora.ledger.api.GoogleIdTokensService;
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.support.AccountManagerWrapper;
+
+import java.io.IOException;
 
 import retrofit.RetrofitError;
 
@@ -26,7 +30,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private static final String TAG = PendingTransactionsSyncAdapter.class.getName();
 
     private ContentResolver resolver;
-    private GoogleIdTokensService tokensService;
+    private AccountManagerWrapper accountManager;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -39,8 +43,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     }
 
     private void onInit(Context context) {
-        tokensService = new GoogleIdTokensService(context);
         resolver = context.getContentResolver();
+        accountManager = new AccountManagerWrapper(context);
     }
 
     @Override
@@ -49,15 +53,29 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
 
         ApiAdapter apiAdapter = new ApiAdapter("http://10.1.0.19:3000");
         LedgerApi api = apiAdapter.getLedgerApi();
-        String googleIdToken = tokensService.getToken();
+        String googleIdToken;
+        try {
+            googleIdToken = accountManager.blockingGetAuthToken(account);
+        } catch (AuthenticatorException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (OperationCanceledException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        }
         Log.d(TAG, "Authenticating using google id_token.");
         try {
             tryAuthenticate(apiAdapter, api, googleIdToken);
         } catch (RetrofitError ex) {
             if (ex.getKind() == RetrofitError.Kind.HTTP && ex.getResponse().getStatus() == 401) {
                 Log.e(TAG, "Authentication failed. The token might have expired. Invalidating the token and retrying.");
-                tokensService.invalidateToken(googleIdToken);
-                tryAuthenticate(apiAdapter, api, tokensService.getToken());
+//TODO: Implement invalidation logic
+//                tokensService.invalidateToken(googleIdToken);
+//                tryAuthenticate(apiAdapter, api, tokensService.getToken());
+                throw ex;
             } else {
                 Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
                 Log.e(TAG, ex.getMessage());

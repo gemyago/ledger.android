@@ -3,10 +3,10 @@ package com.infora.ledger.application;
 /**
  * Created by jenya on 21.03.15.
  */
-public class RememberUserEmailCommand {
+public class CreateSystemAccountCommand {
     private String email;
 
-    public RememberUserEmailCommand(String email) {
+    public CreateSystemAccountCommand(String email) {
         this.email = email;
     }
 

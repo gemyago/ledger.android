@@ -1,12 +1,12 @@
 package com.infora.ledger;
 
+import android.accounts.Account;
 import android.app.Application;
 import android.util.Log;
 
+import com.infora.ledger.application.CreateSystemAccountCommand;
 import com.infora.ledger.application.PendingTransactionsService;
-import com.infora.ledger.application.RememberUserEmailCommand;
-import com.infora.ledger.application.UserEmailUtil;
-import com.infora.ledger.data.SharedPreferencesProvider;
+import com.infora.ledger.support.AccountManagerWrapper;
 
 import de.greenrobot.event.EventBus;
 
@@ -15,27 +15,19 @@ import de.greenrobot.event.EventBus;
  */
 public class LedgerApplication extends Application {
     private static final String TAG = LedgerApplication.class.getName();
-    public static final String USER_EMAIL_SETTINGS_KEY = "ledger.user-email";
     public static final String PACKAGE = "com.infora.ledger";
+    public static final String AUTH_TOKEN_TYPE = PACKAGE;
+    public static final String ACCOUNT_TYPE = "ledger.infora-soft.com";
     private EventBus bus;
 
-    private SharedPreferencesProvider sharedPreferencesProvider;
+    private AccountManagerWrapper accountManager;
 
-
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "Application created");
-        bus = new EventBus();
-
-        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
-        bus.register(pendingTransactionsService);
-        registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this, getSharedPreferencesProvider()));
+    public AccountManagerWrapper getAccountManager() {
+        return accountManager == null ? (accountManager = new AccountManagerWrapper(this)) : accountManager;
     }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-        Log.d(TAG, "Application terminated");
+    public void setAccountManager(AccountManagerWrapper accountManager) {
+        this.accountManager = accountManager;
     }
 
     public EventBus getBus() {
@@ -46,17 +38,27 @@ public class LedgerApplication extends Application {
         this.bus = bus;
     }
 
-    public void onEvent(RememberUserEmailCommand cmd) {
-        UserEmailUtil.saveUserEmail(getSharedPreferencesProvider(), cmd.getEmail());
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "Application created");
+        bus = new EventBus();
+        bus.register(this);
+
+        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
+        bus.register(pendingTransactionsService);
+
+        registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
     }
 
-    public SharedPreferencesProvider getSharedPreferencesProvider() {
-        return sharedPreferencesProvider == null ?
-                (sharedPreferencesProvider = new SharedPreferencesProvider(this)) :
-                sharedPreferencesProvider;
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        Log.d(TAG, "Application terminated");
     }
 
-    public void setSharedPreferencesProvider(SharedPreferencesProvider sharedPreferencesProvider) {
-        this.sharedPreferencesProvider = sharedPreferencesProvider;
+    public void onEvent(CreateSystemAccountCommand cmd) {
+        Log.i(TAG, "Adding new account: " + cmd.getEmail());
+        Account account = new Account(cmd.getEmail(), ACCOUNT_TYPE);
+        getAccountManager().addAccountExplicitly(account, null);
     }
 }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.infora.ledger.data.SharedPreferencesProvider;
+import com.infora.ledger.support.AccountManagerWrapper;
 
 /**
  * Created by jenya on 21.03.15.
@@ -17,11 +18,18 @@ public class GlobalActivityLifecycleCallbacks implements Application.ActivityLif
     private static final String TAG = GlobalActivityLifecycleCallbacks.class.getName();
 
     private Context context;
-    private SharedPreferencesProvider prefsProvider;
+    private AccountManagerWrapper accountManager;
 
-    public GlobalActivityLifecycleCallbacks(Context context, SharedPreferencesProvider prefsProvider) {
+    public GlobalActivityLifecycleCallbacks(Context context) {
         this.context = context;
-        this.prefsProvider = prefsProvider;
+    }
+
+    public AccountManagerWrapper getAccountManager() {
+        return accountManager == null ? (accountManager = new AccountManagerWrapper(context)) : accountManager;
+    }
+
+    public void setAccountManager(AccountManagerWrapper accountManager) {
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -37,12 +45,10 @@ public class GlobalActivityLifecycleCallbacks implements Application.ActivityLif
     @Override
     public void onActivityResumed(Activity activity) {
         if (activity instanceof LoginActivity) return;
-        SharedPreferences prefs = prefsProvider.getSharedPreferences(LedgerApplication.PACKAGE, Context.MODE_PRIVATE);
-        String userEmail = prefs.getString(LedgerApplication.USER_EMAIL_SETTINGS_KEY, null);
-        if (userEmail != null) {
-            Log.d(TAG, "User email assigned. Authentication is not required.");
+        if (getAccountManager().getApplicationAccounts().length > 0) {
+            Log.d(TAG, "Application account present. Account selection is not required.");
         } else {
-            Log.d(TAG, "User email not assigned. Authentication is required. Starting login activity.");
+            Log.d(TAG, "Application account not present. Starting login activity to select the account.");
             context.startActivity(new Intent(context, LoginActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
