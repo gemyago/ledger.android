@@ -18,6 +18,7 @@ public class PendingTransactionContract implements BaseColumns {
     public static final String COLUMN_TRANSACTION_ID = "transaction_id";
     public static final String COLUMN_AMOUNT = "amount";
     public static final String COLUMN_COMMENT= "content";
+    public static final String COLUMN_IS_PUBLISHED= "is_published";
     public static final String COLUMN_TIMESTAMP= "timestamp";
 
     public static final String[] ALL_COLUMNS = new String[]{
@@ -25,6 +26,7 @@ public class PendingTransactionContract implements BaseColumns {
             PendingTransactionContract.COLUMN_TRANSACTION_ID,
             PendingTransactionContract.COLUMN_AMOUNT,
             PendingTransactionContract.COLUMN_COMMENT,
+            PendingTransactionContract.COLUMN_IS_PUBLISHED,
             PendingTransactionContract.COLUMN_TIMESTAMP
     };
 
@@ -32,6 +34,7 @@ public class PendingTransactionContract implements BaseColumns {
             PendingTransactionContract.COLUMN_TRANSACTION_ID,
             PendingTransactionContract.COLUMN_AMOUNT,
             PendingTransactionContract.COLUMN_COMMENT,
+            PendingTransactionContract.COLUMN_IS_PUBLISHED,
             PendingTransactionContract.COLUMN_TIMESTAMP
     };
 }

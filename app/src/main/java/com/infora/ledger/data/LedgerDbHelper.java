@@ -17,7 +17,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -33,6 +33,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         PendingTransactionContract.COLUMN_TRANSACTION_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
                         PendingTransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
                         PendingTransactionContract.COLUMN_COMMENT + " TEXT NULL," +
+                        PendingTransactionContract.COLUMN_IS_PUBLISHED + " INTEGER NOT NULL DEFAULT(0)," +
                         PendingTransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL" +
                         " )"
         );

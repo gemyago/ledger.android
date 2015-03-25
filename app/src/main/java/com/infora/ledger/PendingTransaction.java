@@ -15,6 +15,7 @@ public class PendingTransaction {
     private String transactionId;
     private String amount;
     private String comment;
+    private Boolean isPublished;
     private Date timestamp;
 
     public PendingTransaction(Cursor cursor) {
@@ -22,6 +23,7 @@ public class PendingTransaction {
         setTransactionId(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_TRANSACTION_ID)));
         setAmount(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_AMOUNT)));
         setComment(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_COMMENT)));
+        setIsPublished(cursor.getInt(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_IS_PUBLISHED)) == 1);
         String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_TIMESTAMP));
         setTimestamp(LedgerDbHelper.parseISO8601(timestamp));
     }
@@ -66,6 +68,14 @@ public class PendingTransaction {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Boolean isPublished() {
+        return isPublished;
+    }
+
+    public void setIsPublished(Boolean isPublished) {
+        this.isPublished = isPublished;
     }
 
     public Date getTimestamp() {
