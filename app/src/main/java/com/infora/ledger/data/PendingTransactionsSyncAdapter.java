@@ -1,7 +1,6 @@
 package com.infora.ledger.data;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
@@ -9,12 +8,10 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.infora.ledger.PendingTransaction;
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.LedgerApplication;
 import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
@@ -49,7 +46,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private void onInit(Context context) {
         resolver = context.getContentResolver();
         accountManager = new AccountManagerWrapper(context);
-        syncStrategy = new FullSyncSynchronizationStrategy();
+        LedgerApplication app = (LedgerApplication) context.getApplicationContext();
+        syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
     }
 
     @Override

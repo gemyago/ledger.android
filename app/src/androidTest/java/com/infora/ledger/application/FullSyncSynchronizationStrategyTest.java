@@ -9,9 +9,12 @@ import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
+import com.infora.ledger.mocks.MockSubscriber;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 25.03.15.
@@ -22,6 +25,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
     private MockContentResolver resolver;
     private FullSyncSynchronizationStrategy subject;
     private MockLedgerApi api;
+    private EventBus bus;
 
     public FullSyncSynchronizationStrategyTest() {
         super(MockPendingTransactionsContentProvider.class, PendingTransactionContract.AUTHORITY);
@@ -32,7 +36,8 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         super.setUp();
         resolver = getMockContentResolver();
         provider = getProvider();
-        subject = new FullSyncSynchronizationStrategy();
+        bus = new EventBus();
+        subject = new FullSyncSynchronizationStrategy(bus);
         api = new MockLedgerApi();
     }
 
@@ -63,13 +68,15 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
-        Object[] t1 = {0, "t-1", "100", "t 100", LedgerDbHelper.toISO8601(new Date())};
+        Object[] t1 = {1, "t-1", "100", "t 100", 0, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t1);
-        Object[] t2 = {0, "t-2", "101", "t 101", LedgerDbHelper.toISO8601(new Date())};
+        Object[] t2 = {2, "t-2", "101", "t 101", 0, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t2);
-        Object[] t3 = {0, "t-3", "103", "t 103", LedgerDbHelper.toISO8601(new Date())};
+        Object[] t3 = {3, "t-3", "103", "t 103", 0, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
+        MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>();
+        bus.register(publishedSubscriber);
 
         subject.synchronize(api, resolver, null);
 
@@ -83,18 +90,23 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(t1[1], reported1.getTransactionId());
         assertEquals(t1[2], reported1.getAmount());
         assertEquals(t1[3], reported1.getComment());
-        assertEquals(LedgerDbHelper.parseISO8601((String) t1[4]), reported1.getDate());
+        assertEquals(LedgerDbHelper.parseISO8601((String) t1[5]), reported1.getDate());
 
         MockLedgerApi.ReportPendingTransactionArgs reported2 = api.getReportedTransactions().get(1);
         assertEquals(t2[1], reported2.getTransactionId());
         assertEquals(t2[2], reported2.getAmount());
         assertEquals(t2[3], reported2.getComment());
-        assertEquals(LedgerDbHelper.parseISO8601((String) t2[4]), reported2.getDate());
+        assertEquals(LedgerDbHelper.parseISO8601((String) t2[5]), reported2.getDate());
 
         MockLedgerApi.ReportPendingTransactionArgs reported3 = api.getReportedTransactions().get(2);
         assertEquals(t3[1], reported3.getTransactionId());
         assertEquals(t3[2], reported3.getAmount());
         assertEquals(t3[3], reported3.getComment());
-        assertEquals(LedgerDbHelper.parseISO8601((String) t3[4]), reported3.getDate());
+        assertEquals(LedgerDbHelper.parseISO8601((String) t3[5]), reported3.getDate());
+
+        assertEquals(3, publishedSubscriber.getEvents().size());
+        assertEquals(1, publishedSubscriber.getEvents().get(0).getId());
+        assertEquals(2, publishedSubscriber.getEvents().get(1).getId());
+        assertEquals(3, publishedSubscriber.getEvents().get(2).getId());
     }
 }
