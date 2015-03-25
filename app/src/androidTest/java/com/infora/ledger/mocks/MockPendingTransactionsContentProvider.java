@@ -17,9 +17,20 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     private Uri insertedUri;
     private InsertArgs insertArgs;
     private DeleteArgs deleteArgs;
+    private QueryArgs queryArgs;
+    private UpdateArgs updateArgs;
+    private Cursor queryResult;
+
+    public QueryArgs getQueryArgs() {
+        return queryArgs;
+    }
 
     public InsertArgs getInsertArgs() {
         return insertArgs;
+    }
+
+    public UpdateArgs getUpdateArgs() {
+        return updateArgs;
     }
 
     public void setInsertedUri(Uri insertedUri) {
@@ -30,6 +41,10 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         return deleteArgs;
     }
 
+    public void setQueryResult(Cursor queryResult) {
+        this.queryResult = queryResult;
+    }
+
     @Override
     public boolean onCreate() {
         return false;
@@ -37,7 +52,8 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+        queryArgs = new QueryArgs(uri, projection, selection, selectionArgs, sortOrder);
+        return queryResult;
     }
 
     @Override
@@ -60,6 +76,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        updateArgs = new UpdateArgs(uri, values, selection, selectionArgs);
         return 0;
     }
 
@@ -82,9 +99,24 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         }
     }
 
+    private class UpdateArgs {
+        private final Uri uri;
+        private final ContentValues values;
+        private final String selection;
+        private final String[] selectionArgs;
+
+        public UpdateArgs(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+            this.uri = uri;
+            this.values = values;
+            this.selection = selection;
+            this.selectionArgs = selectionArgs;
+        }
+    }
+
     public static class DeleteArgs {
         private final Uri uri;
         private final String selection;
+
         private final String[] selectionArgs;
 
         private DeleteArgs(Uri uri, String selection, String[] selectionArgs) {
@@ -100,9 +132,25 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         public String getSelection() {
             return selection;
         }
-
         public String[] getSelectionArgs() {
             return selectionArgs;
         }
+
+    }
+    public class QueryArgs {
+        public final Uri uri;
+        public final String[] projection;
+        public final String selection;
+        public final String[] selectionArgs;
+        public final String sortOrder;
+
+        public QueryArgs(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+            this.uri = uri;
+            this.projection = projection;
+            this.selection = selection;
+            this.selectionArgs = selectionArgs;
+            this.sortOrder = sortOrder;
+        }
+
     }
 }

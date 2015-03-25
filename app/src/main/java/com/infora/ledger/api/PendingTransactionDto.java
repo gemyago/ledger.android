@@ -12,4 +12,13 @@ public class PendingTransactionDto {
     public String amount;
     @SerializedName("comment")
     public String comment;
+
+    public PendingTransactionDto() {
+    }
+
+    public PendingTransactionDto(String transactionId, String amount, String comment) {
+        this.transactionId = transactionId;
+        this.amount = amount;
+        this.comment = comment;
+    }
 }

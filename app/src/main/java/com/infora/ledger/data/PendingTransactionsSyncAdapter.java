@@ -19,6 +19,7 @@ import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.application.FullSyncSynchronizationStrategy;
 import com.infora.ledger.support.AccountManagerWrapper;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
 
     private ContentResolver resolver;
     private AccountManagerWrapper accountManager;
+    private FullSyncSynchronizationStrategy syncStrategy;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -47,6 +49,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private void onInit(Context context) {
         resolver = context.getContentResolver();
         accountManager = new AccountManagerWrapper(context);
+        syncStrategy = new FullSyncSynchronizationStrategy();
     }
 
     @Override
@@ -73,12 +76,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
             }
         }
 
-        Cursor cursor = resolver.query(PendingTransactionContract.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            PendingTransaction t = new PendingTransaction(cursor);
-            Log.d(TAG, "Publishing pending transaction: " + t.getTransactionId());
-            api.reportPendingTransaction(t.getTransactionId(), t.getAmount(), t.getComment(), t.getTimestamp());
-        }
+        syncStrategy.synchronize(api, resolver, null);
 
         Log.i(TAG, "Synchronization completed.");
     }
