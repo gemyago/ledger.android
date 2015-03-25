@@ -1,9 +1,11 @@
 package com.infora.ledger.api;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
+import retrofit.http.GET;
 import retrofit.http.POST;
 
 /**
@@ -21,4 +23,7 @@ public interface LedgerApi {
             @Field("amount") String amount,
             @Field("comment") String comment,
             @Field("date") Date date);
+
+    @GET("/pending-transactions.json")
+    ArrayList<PendingTransactionDto> getPendingTransactions();
 }
