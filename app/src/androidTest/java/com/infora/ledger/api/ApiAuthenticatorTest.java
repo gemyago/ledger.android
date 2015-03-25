@@ -38,4 +38,19 @@ public class ApiAuthenticatorTest extends AndroidTestCase {
         assertEquals(account.name, googleAuthUtil.getGetTokenArgs().getAccountName());
         assertEquals(getContext(), googleAuthUtil.getGetTokenArgs().getContext());
     }
+
+    public void testGetAuthTokenWithInvalidateOption() throws Exception {
+        googleAuthUtil.setToken("auth-token");
+        Account account = new Account("test@domain.com", LedgerApplication.ACCOUNT_TYPE);
+        Bundle options = new Bundle();
+        options.putBoolean(ApiAuthenticator.OPTION_INVALIDATE_TOKEN, true);
+        Bundle result = subject.getAuthToken(null, account, null, options);
+        assertEquals(account.name, result.getString(AccountManager.KEY_ACCOUNT_NAME));
+        assertEquals(account.type, result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+        assertEquals("auth-token", result.getString(AccountManager.KEY_AUTHTOKEN));
+
+        assertEquals(account.name, googleAuthUtil.getGetTokenArgs().getAccountName());
+        assertEquals(getContext(), googleAuthUtil.getGetTokenArgs().getContext());
+        assertEquals(true, googleAuthUtil.getGetTokenArgs().isInvalidate());
+    }
 }

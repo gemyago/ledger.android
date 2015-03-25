@@ -23,18 +23,20 @@ public class MockGoogleAuthUtilWrapper extends GoogleAuthUtilWrapper {
     }
 
     @Override
-    public String getToken(Context context, String accountName) throws GoogleAuthException, IOException {
-        getTokenArgs = new GetTokenArgs(context, accountName);
+    public String getToken(Context context, String accountName, boolean invalidate) throws GoogleAuthException, IOException {
+        getTokenArgs = new GetTokenArgs(context, accountName, invalidate);
         return token;
     }
 
     public static class GetTokenArgs {
         private final Context context;
         private final String accountName;
+        private final boolean invalidate;
 
-        private GetTokenArgs(Context context, String accountName) {
+        private GetTokenArgs(Context context, String accountName, boolean invalidate) {
             this.context = context;
             this.accountName = accountName;
+            this.invalidate = invalidate;
         }
 
         public Context getContext() {
@@ -43,6 +45,10 @@ public class MockGoogleAuthUtilWrapper extends GoogleAuthUtilWrapper {
 
         public String getAccountName() {
             return accountName;
+        }
+
+        public boolean isInvalidate() {
+            return invalidate;
         }
     }
 }

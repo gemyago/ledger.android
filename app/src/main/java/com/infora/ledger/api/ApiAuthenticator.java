@@ -53,11 +53,11 @@ public class ApiAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-        //TODO: Implement invalidation via options
         String token;
         try {
-            Log.d(TAG, "Retrieving the token for account: " + account);
-            token = getGoogleAuthUtil().getToken(context, account.name);
+            boolean invalidate = options == null ? false : options.getBoolean(OPTION_INVALIDATE_TOKEN);
+            Log.d(TAG, "Retrieving the token for account: " + account + ". Invalidate option: " + invalidate);
+            token = getGoogleAuthUtil().getToken(context, account.name, invalidate);
         } catch (GoogleAuthException e) {
             Log.e(TAG, "Failed to get the token", e);
             //TODO: Implement proper handling

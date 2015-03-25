@@ -1,6 +1,7 @@
 package com.infora.ledger.data;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
@@ -15,6 +16,7 @@ import android.util.Log;
 import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.PendingTransactionContract;
 import com.infora.ledger.api.ApiAdapter;
+import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.support.AccountManagerWrapper;
@@ -54,27 +56,15 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         ApiAdapter apiAdapter = new ApiAdapter("http://10.1.0.19:3000");
         LedgerApi api = apiAdapter.getLedgerApi();
         String googleIdToken;
-        try {
-            googleIdToken = accountManager.blockingGetAuthToken(account);
-        } catch (AuthenticatorException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        } catch (OperationCanceledException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        }
+        googleIdToken = tryGettingToken(account, false);
         Log.d(TAG, "Authenticating using google id_token.");
         try {
             tryAuthenticate(apiAdapter, api, googleIdToken);
         } catch (RetrofitError ex) {
             if (ex.getKind() == RetrofitError.Kind.HTTP && ex.getResponse().getStatus() == 401) {
                 Log.e(TAG, "Authentication failed. The token might have expired. Invalidating the token and retrying.");
-//TODO: Implement invalidation logic
-//                tokensService.invalidateToken(googleIdToken);
-//                tryAuthenticate(apiAdapter, api, tokensService.getToken());
+                googleIdToken = tryGettingToken(account, true);
+                tryAuthenticate(apiAdapter, api, googleIdToken);
                 throw ex;
             } else {
                 Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
@@ -91,6 +81,26 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         }
 
         Log.i(TAG, "Synchronization completed.");
+    }
+
+    private String tryGettingToken(Account account, boolean invalidate) {
+        String googleIdToken;
+        try {
+            Log.d(TAG, "Trying to get the token.");
+            Bundle options = new Bundle();
+            options.putBoolean(ApiAuthenticator.OPTION_INVALIDATE_TOKEN, invalidate);
+            googleIdToken = accountManager.getAuthToken(account, options);
+        } catch (AuthenticatorException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (OperationCanceledException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        }
+        return googleIdToken;
     }
 
     private void tryAuthenticate(ApiAdapter apiAdapter, LedgerApi api, String googleIdToken) {
