@@ -104,12 +104,25 @@ public class PendingTransactionsContentProvider extends ContentProvider {
             default:
                 throw newInvalidUrlException(uri);
         }
-
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case TRANSACTION_ID:
+                long id = ContentUris.parseId(uri);
+                Log.d(TAG, "Updating transaction id=" + id);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                db.update(PendingTransactionContract.TABLE_NAME,
+                        values,
+                        PendingTransactionContract.COLUMN_ID + " = ?",
+                        new String[]{String.valueOf(id)});
+                notifyListChanged();
+                return 1;
+            default:
+                throw newInvalidUrlException(uri);
+        }
     }
 
     private void notifyListChanged() {

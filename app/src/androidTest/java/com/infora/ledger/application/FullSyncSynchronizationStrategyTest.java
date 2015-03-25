@@ -50,7 +50,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
 
         MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
         for (PendingTransactionDto transaction : remoteTransactions) {
-            matrixCursor.addRow(new Object[]{0, transaction.transactionId, transaction.amount, transaction.comment, LedgerDbHelper.toISO8601(new Date())});
+            matrixCursor.addRow(new Object[]{0, transaction.transactionId, transaction.amount, transaction.comment, 1, LedgerDbHelper.toISO8601(new Date())});
         }
         provider.setQueryResult(matrixCursor);
 
@@ -108,5 +108,35 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(1, publishedSubscriber.getEvents().get(0).getId());
         assertEquals(2, publishedSubscriber.getEvents().get(1).getId());
         assertEquals(3, publishedSubscriber.getEvents().get(2).getId());
+    }
+
+    public void testSynchronizeDeletePublished() {
+        api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
+
+        MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
+        Object[] t1 = {1, "t-1", "100", "t 100", 1, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t1);
+        Object[] t2 = {2, "t-2", "101", "t 101", 1, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t2);
+        Object[] t3 = {3, "t-3", "103", "t 103", 1, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t3);
+        provider.setQueryResult(matrixCursor);
+        MockSubscriber<RemoveTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
+        bus.register(publishedSubscriber);
+
+        subject.synchronize(api, resolver, null);
+
+        assertNull(provider.getInsertArgs());
+        assertNull(provider.getDeleteArgs());
+        assertNull(provider.getUpdateArgs());
+
+        assertEquals(0, api.getReportedTransactions().size());
+
+        assertEquals(1, publishedSubscriber.getEvents().size());
+        long[] removedIds = publishedSubscriber.getEvent().getIds();
+        assertEquals(3, removedIds.length);
+        assertEquals(1, removedIds[0]);
+        assertEquals(2, removedIds[1]);
+        assertEquals(3, removedIds[2]);
     }
 }

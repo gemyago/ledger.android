@@ -99,11 +99,11 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         }
     }
 
-    private class UpdateArgs {
-        private final Uri uri;
-        private final ContentValues values;
-        private final String selection;
-        private final String[] selectionArgs;
+    public class UpdateArgs {
+        public final Uri uri;
+        public final ContentValues values;
+        public final String selection;
+        public final String[] selectionArgs;
 
         public UpdateArgs(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
             this.uri = uri;

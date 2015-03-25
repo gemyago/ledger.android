@@ -38,13 +38,28 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
 
         Log.d(TAG, "Querying locally reported transactions");
         Cursor localTransactions = resolver.query(PendingTransactionContract.CONTENT_URI, null, null, null, null);
+        ArrayList<Integer> toRemoveIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);
             if (!remoteTransactionsMap.containsKey(lt.getTransactionId())) {
-                Log.d(TAG, "Publishing pending transaction: " + lt.getTransactionId());
-                api.reportPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment(), lt.getTimestamp());
-                bus.post(new MarkTransactionAsPublishedCommand(lt.getId()));
+                if (lt.isPublished()) {
+                    Log.d(TAG, "Pending transaction '" + lt.getTransactionId() + "' was approved. Marking for removal.");
+                    toRemoveIds.add(lt.getId());
+                } else {
+                    Log.d(TAG, "Publishing pending transaction: " + lt.getTransactionId());
+                    api.reportPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment(), lt.getTimestamp());
+                    bus.post(new MarkTransactionAsPublishedCommand(lt.getId()));
+                }
             }
+        }
+
+        if (!toRemoveIds.isEmpty()) {
+            long[] ids = new long[toRemoveIds.size()];
+            for (int i = 0; i < toRemoveIds.size(); i++) {
+                ids[i] = toRemoveIds.get(i);
+            }
+            Log.d(TAG, "Posting command to remove published transactions...");
+            bus.post(new RemoveTransactionsCommand(ids));
         }
     }
 }

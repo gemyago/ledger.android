@@ -81,6 +81,22 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals(1, results.getInt(3));
     }
 
+    public void testUpdate() {
+        int id = DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
+
+        ContentValues values = new ContentValues();
+        values.put(PendingTransactionContract.COLUMN_AMOUNT, "110.01");
+        values.put(PendingTransactionContract.COLUMN_COMMENT, "Transaction 110.01");
+        values.put(PendingTransactionContract.COLUMN_IS_PUBLISHED, true);
+        resolver.update(
+                ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id),
+                values, null, null);
+
+        PendingTransaction transaction = PendingTransactionsDbUtils.getById(dbHelper, id);
+        assertEquals("110.01", transaction.getAmount());
+        assertEquals("Transaction 110.01", transaction.getComment());
+    }
+
     public void testDelete() {
         int id1 = DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
         int id2 = DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101");

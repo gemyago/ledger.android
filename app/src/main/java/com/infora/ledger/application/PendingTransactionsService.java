@@ -38,4 +38,13 @@ public class PendingTransactionsService {
         }
         bus.post(new TransactionsRemovedEvent(command.getIds()));
     }
+
+    public void onEvent(MarkTransactionAsPublishedCommand command) {
+        Log.d(TAG, "Processing mark as published command.");
+        ContentValues values = new ContentValues();
+        values.put(PendingTransactionContract.COLUMN_IS_PUBLISHED, true);
+        resolver.update(
+                ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, command.getId()),
+                values, null, null);
+    }
 }
