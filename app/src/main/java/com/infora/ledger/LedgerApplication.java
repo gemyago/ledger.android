@@ -2,6 +2,7 @@ package com.infora.ledger;
 
 import android.accounts.Account;
 import android.app.Application;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.application.CreateSystemAccountCommand;
@@ -48,6 +49,8 @@ public class LedgerApplication extends Application {
         bus.register(pendingTransactionsService);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
+
+        PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
     }
 
     @Override

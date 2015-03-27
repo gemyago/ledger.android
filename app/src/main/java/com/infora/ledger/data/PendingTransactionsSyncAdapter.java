@@ -7,11 +7,14 @@ import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.LedgerApplication;
+import com.infora.ledger.SettingsFragment;
 import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
@@ -32,6 +35,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private ContentResolver resolver;
     private AccountManagerWrapper accountManager;
     private FullSyncSynchronizationStrategy syncStrategy;
+    private String ledgerHost;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -48,13 +52,16 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         accountManager = new AccountManagerWrapper(context);
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
         syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Performing synchronization...");
 
-        ApiAdapter apiAdapter = new ApiAdapter("http://10.1.0.19:3000");
+        Log.d(TAG, "Using ledger host: " + ledgerHost);
+        ApiAdapter apiAdapter = new ApiAdapter(ledgerHost);
         LedgerApi api = apiAdapter.getLedgerApi();
         String googleIdToken;
         googleIdToken = tryGettingToken(account, false);
