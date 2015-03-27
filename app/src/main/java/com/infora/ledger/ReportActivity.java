@@ -3,6 +3,7 @@ package com.infora.ledger;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -62,6 +63,13 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_report, menu);
+        return true;
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         BusUtils.register(this);
@@ -85,6 +93,7 @@ public class ReportActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
 

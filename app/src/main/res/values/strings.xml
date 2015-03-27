@@ -22,4 +22,8 @@
     <string name="title_activity_login">Sign In</string>
 
     <string name="login_title">Welcome to Ledger!</string>
+
+    <string name="prefs_ledger_host">Ledger host</string>
+    <string name="prefs_ledger_host_summary">Host name of the ledger server. Sample: ledger.infora-soft.com.</string>
+    <string name="prefs_ledger_host_default">ledger.infora-soft.com</string>
 </resources>
