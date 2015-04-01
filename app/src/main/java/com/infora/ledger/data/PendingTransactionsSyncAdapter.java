@@ -1,6 +1,7 @@
 package com.infora.ledger.data;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
@@ -48,6 +49,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     }
 
     private void onInit(Context context) {
+        Log.d(TAG, "Initializing sync adapter...");
         resolver = context.getContentResolver();
         accountManager = new AccountManagerWrapper(context);
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
@@ -57,6 +59,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                Log.d(TAG, "Shared pref changed. Key: " + key);
                 if (SettingsFragment.KEY_LEDGER_HOST.equals(key)) {
                     ledgerHost = sharedPreferences.getString(key, null);
                 }
