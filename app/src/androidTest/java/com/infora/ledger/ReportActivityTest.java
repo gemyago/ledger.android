@@ -2,12 +2,14 @@ package com.infora.ledger;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.internal.view.menu.MenuItemImpl;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
+import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
@@ -26,6 +28,28 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     protected void setActivity(Activity testActivity) {
         if (testActivity != null) testActivity.setTheme(R.style.AppTheme);
         super.setActivity(testActivity);
+    }
+
+    public void testRequestSyncOnStart() {
+        startActivity(new Intent(), null, null);
+        EventBus bus = new EventBus();
+        BusUtils.setBus(getActivity(), bus);
+        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
+        bus.register(mockSubscriber);
+        getInstrumentation().callActivityOnStart(getActivity());
+        assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
+        assertFalse("Is manual flag was mistakenly set", mockSubscriber.getEvent().isManual);
+    }
+
+    public void testRequestSyncOnSynchronizeAction() {
+        startActivity(new Intent(), null, null);
+        EventBus bus = new EventBus();
+        BusUtils.setBus(getActivity(), bus);
+        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
+        bus.register(mockSubscriber);
+        getActivity().onOptionsItemSelected(new MockMenuItem(R.id.action_synchronize));
+        assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
+        assertTrue("Is manual flag wasn't set", mockSubscriber.getEvent().isManual);
     }
 
     public void testReportNewTransaction() {

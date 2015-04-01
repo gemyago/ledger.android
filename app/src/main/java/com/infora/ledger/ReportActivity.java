@@ -57,7 +57,7 @@ public class ReportActivity extends ActionBarActivity {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
                 Log.d(TAG, "Content changed. Requesting sync...");
-                requestSync();
+                BusUtils.post(ReportActivity.this, new RequestSyncCommand());
             }
         });
     }
@@ -75,7 +75,7 @@ public class ReportActivity extends ActionBarActivity {
         BusUtils.register(this);
 
         Log.d(TAG, "Requesting sync on start...");
-        requestSync();
+        BusUtils.post(this, new RequestSyncCommand());
     }
 
     @Override
@@ -97,7 +97,9 @@ public class ReportActivity extends ActionBarActivity {
             return true;
         }
         if (id == R.id.action_synchronize) {
-            requestSync();
+            RequestSyncCommand cmd = new RequestSyncCommand();
+            cmd.isManual = true;
+            BusUtils.post(this, cmd);
             return true;
         }
 
@@ -116,13 +118,6 @@ public class ReportActivity extends ActionBarActivity {
         String comment = etComment.getText().toString();
         findViewById(R.id.report).setEnabled(false);
         BusUtils.post(this, new ReportTransactionCommand(amount, comment));
-    }
-
-    private void requestSync() {
-        Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(null, PendingTransactionContract.AUTHORITY, settingsBundle);
     }
 
     @EventHandler
@@ -144,6 +139,14 @@ public class ReportActivity extends ActionBarActivity {
         int removedLength = event.getIds().length;
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @EventHandler
+    public void onEvent(RequestSyncCommand cmd) {
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(null, PendingTransactionContract.AUTHORITY, settingsBundle);
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -212,5 +215,9 @@ public class ReportActivity extends ActionBarActivity {
                 mode.setSubtitle(selectedString);
             }
         }
+    }
+
+    public static class RequestSyncCommand {
+        public boolean isManual = false;
     }
 }
