@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+def getGoauthApiClientId = { file ->
+    Properties props = new Properties()
+    File propsFile = new File(file)
+    if(propsFile.exists()) props.load(propsFile.newDataInputStream())
+    return props.getProperty('goauth-api-client-id')
+}
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
@@ -12,9 +19,13 @@ android {
         versionName "1.0"
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.debug.properties') + "\""
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.release.properties') + "\""
         }
     }
 }
