@@ -6,6 +6,12 @@
         android:summary="@string/prefs_ledger_host_summary"
         android:defaultValue="@string/prefs_ledger_host_default"
         >
-
     </EditTextPreference>
+    <SwitchPreference
+        android:key="use_manual_sync"
+        android:title="@string/prefs_use_manual_sync"
+        android:summary="@string/prefs_use_manual_sync_summary"
+        android:defaultValue="false"
+        >
+    </SwitchPreference>
 </PreferenceScreen>

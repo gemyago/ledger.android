@@ -54,6 +54,14 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
+        prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (SettingsFragment.KEY_LEDGER_HOST.equals(key)) {
+                    ledgerHost = sharedPreferences.getString(key, null);
+                }
+            }
+        });
     }
 
     @Override

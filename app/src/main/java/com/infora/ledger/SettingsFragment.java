@@ -14,6 +14,7 @@ import android.view.ViewGroup;
  */
 public class SettingsFragment extends PreferenceFragment {
     public static final String KEY_LEDGER_HOST = "ledger_host";
+    public static final String KEY_USE_MANUAL_SYNC = "use_manual_sync";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
