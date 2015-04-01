@@ -9,6 +9,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.infora.ledger.LedgerApplication;
+import com.infora.ledger.api.ApiAuthenticator;
 
 import java.io.IOException;
 
@@ -31,7 +32,13 @@ public class AccountManagerWrapper {
     }
 
     public String getAuthToken(Account account, Bundle options) throws AuthenticatorException, OperationCanceledException, IOException {
-        AccountManagerFuture<Bundle> result = AccountManager.get(context)
+        AccountManager accountManager = AccountManager.get(context);
+        //TODO: Needs more testing. Seems like accountManager caches tokens as well.
+        if(options.getBoolean(ApiAuthenticator.OPTION_INVALIDATE_TOKEN)) {
+            String token = accountManager.blockingGetAuthToken(account, LedgerApplication.AUTH_TOKEN_TYPE, true);
+            accountManager.invalidateAuthToken(LedgerApplication.ACCOUNT_TYPE, token);
+        }
+        AccountManagerFuture<Bundle> result = accountManager
                 .getAuthToken(account, LedgerApplication.AUTH_TOKEN_TYPE, options, null, null, null);
         return result.getResult().getString(AccountManager.KEY_AUTHTOKEN);
     }
