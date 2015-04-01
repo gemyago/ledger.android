@@ -30,8 +30,13 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         super.setActivity(testActivity);
     }
 
-    public void testRequestSyncOnStart() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         startActivity(new Intent(), null, null);
+    }
+
+    public void testRequestSyncOnStart() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
@@ -42,7 +47,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testRequestSyncOnSynchronizeAction() {
-        startActivity(new Intent(), null, null);
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
@@ -53,7 +57,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransaction() {
-        startActivity(new Intent(), null, null);
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
@@ -75,7 +78,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransactionEmptyAmount() {
-        startActivity(new Intent(), null, null);
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
@@ -87,7 +89,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testTransactionReportedEvent() {
-        startActivity(new Intent(), null, null);
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();

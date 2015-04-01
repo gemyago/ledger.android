@@ -5,10 +5,12 @@ import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -143,6 +145,12 @@ public class ReportActivity extends ActionBarActivity {
 
     @EventHandler
     public void onEvent(RequestSyncCommand cmd) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean shouldUseManualSync = prefs.getBoolean(SettingsFragment.KEY_USE_MANUAL_SYNC, false);
+        if (shouldUseManualSync && !cmd.isManual) {
+            Log.d(TAG, "Automatic synchronization is disabled.");
+            return;
+        }
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
