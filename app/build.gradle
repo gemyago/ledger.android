@@ -7,6 +7,13 @@ def getGoauthApiClientId = { file ->
     return props.getProperty('goauth-api-client-id')
 }
 
+def loadSecretProperties = { file ->
+    Properties props = new Properties()
+    File propsFile = new File(file)
+    if(propsFile.exists()) props.load(propsFile.newDataInputStream())
+    return props;
+}
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
@@ -18,6 +25,15 @@ android {
         versionCode 1
         versionName "1.0-a"
     }
+    signingConfigs {
+        release {
+            def props = loadSecretProperties('secret.release.properties')
+            storeFile file(props.getProperty("keystore-path"))
+            storePassword props.getProperty("keystore-password")
+            keyAlias props.getProperty("keystore-key-alias")
+            keyPassword props.getProperty("keystore-key-password")
+        }
+    }
     buildTypes {
         debug {
             buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.debug.properties') + "\""
@@ -26,6 +42,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.release.properties') + "\""
+            signingConfig signingConfigs.release
         }
     }
 }
