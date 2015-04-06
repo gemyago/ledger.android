@@ -1,15 +1,8 @@
 apply plugin: 'com.android.application'
 
-def getGoauthApiClientId = { file ->
+def loadSecretProperties = { buildType ->
     Properties props = new Properties()
-    File propsFile = new File(file)
-    if(propsFile.exists()) props.load(propsFile.newDataInputStream())
-    return props.getProperty('goauth-api-client-id')
-}
-
-def loadSecretProperties = { file ->
-    Properties props = new Properties()
-    File propsFile = new File(file)
+    File propsFile = new File("secret.${buildType}.properties")
     if(propsFile.exists()) props.load(propsFile.newDataInputStream())
     return props;
 }
@@ -27,7 +20,7 @@ android {
     }
     signingConfigs {
         release {
-            def props = loadSecretProperties('secret.release.properties')
+            def props = loadSecretProperties('release')
             storeFile file(props.getProperty("keystore-path"))
             storePassword props.getProperty("keystore-password")
             keyAlias props.getProperty("keystore-key-alias")
@@ -36,12 +29,16 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.debug.properties') + "\""
+            def props = loadSecretProperties('debug')
+            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"${props.getProperty('goauth-api-client-id')}\""
+            buildConfigField "String", "DEFAULT_LEDGER_HOST", "\"${props.getProperty('ledger.default-host')}\""
         }
         release {
+            def props = loadSecretProperties('release')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"" + getGoauthApiClientId('secret.release.properties') + "\""
+            buildConfigField "String", "GOAUTH_API_CLIENT_ID", "\"${props.getProperty('goauth-api-client-id')}\""
+            buildConfigField "String", "DEFAULT_LEDGER_HOST", "\"${props.getProperty('ledger.default-host')}\""
             signingConfig signingConfigs.release
         }
     }

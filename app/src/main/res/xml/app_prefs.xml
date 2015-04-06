@@ -4,7 +4,6 @@
         android:key="ledger_host"
         android:title="@string/prefs_ledger_host"
         android:summary="@string/prefs_ledger_host_summary"
-        android:defaultValue="@string/prefs_ledger_host_default"
         >
     </EditTextPreference>
     <SwitchPreference
