@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.infora.ledger.application.RemoveTransactionsCommand;
@@ -60,6 +62,19 @@ public class ReportActivity extends ActionBarActivity {
             public void onChange(boolean selfChange, Uri uri) {
                 Log.d(TAG, "Content changed. Requesting sync...");
                 BusUtils.post(ReportActivity.this, new RequestSyncCommand());
+            }
+        });
+
+        EditText comment = (EditText) findViewById(R.id.comment);
+        final int imeActionReport = getResources().getInteger(R.integer.ime_action_report);
+        comment.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == imeActionReport) {
+                    reportNewTransaction(v);
+                    return true;
+                }
+                return false;
             }
         });
     }

@@ -56,7 +56,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertTrue("Is manual flag wasn't set", mockSubscriber.getEvent().isManual);
     }
 
-    public void testReportNewTransaction() {
+    public void testReportNewTransactionOnReportButtonClick() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
@@ -70,6 +70,28 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         View reportButton = wnd.findViewById(R.id.report);
         reportButton.callOnClick();
 
+        ReportTransactionCommand cmd = subscriber.getEvent();
+        assertNotNull(cmd);
+        assertEquals(amount.getText().toString(), cmd.getAmount());
+        assertEquals(comment.getText().toString(), cmd.getComment());
+        assertFalse("The report button was not disabled", reportButton.isEnabled());
+    }
+
+    public void testReportNewTransactionOnImeCommentEditorAction() {
+        EventBus bus = new EventBus();
+        BusUtils.setBus(getActivity(), bus);
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
+        bus.register(subscriber);
+        Window wnd = getActivity().getWindow();
+        EditText amount = (EditText) wnd.findViewById(R.id.amount);
+        amount.setText("100.22");
+        EditText comment = (EditText) wnd.findViewById(R.id.comment);
+        comment.setText("Commenting transaction 100.22");
+
+        int imeActionReportId = getActivity().getResources().getInteger(R.integer.ime_action_report);
+        comment.onEditorAction(imeActionReportId);
+
+        View reportButton = wnd.findViewById(R.id.report);
         ReportTransactionCommand cmd = subscriber.getEvent();
         assertNotNull(cmd);
         assertEquals(amount.getText().toString(), cmd.getAmount());

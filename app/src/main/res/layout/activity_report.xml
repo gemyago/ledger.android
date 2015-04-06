@@ -25,14 +25,18 @@
                 android:layout_height="wrap_content"
                 android:hint="0.00"
                 android:inputType="numberDecimal"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:imeOptions="actionNext"/>
 
             <EditText
                 android:id="@+id/comment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="New transaction"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:imeActionId="@integer/ime_action_report"
+                android:imeActionLabel="@string/action_report"
+                />
         </LinearLayout>
 
         <Button
@@ -40,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="reportNewTransaction"
-            android:text="Report" />
+            android:text="@string/action_report" />
     </LinearLayout>
 
     <ListView android:id="@+id/reported_transactions_list"
