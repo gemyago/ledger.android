@@ -15,7 +15,7 @@ android {
         applicationId "com.infora.ledger"
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 1
+        versionCode 2
         versionName "1.0-a"
     }
     signingConfigs {
