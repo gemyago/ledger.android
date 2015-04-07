@@ -30,7 +30,7 @@
             android:exported="false"
             android:syncable="true" />
 
-        <service android:name=".api.ApiAuthenticatorService">
+        <service android:name=".api.ApiAuthenticator$ApiAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -39,7 +39,7 @@
                 android:resource="@xml/api_authenticator" />
         </service>
         <service
-            android:name=".data.PendingTransactionsSyncService"
+            android:name=".data.PendingTransactionsSyncAdapter$PendingTransactionsSyncService"
             android:exported="true"
             android:process=":sync">
             <intent-filter>

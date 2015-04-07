@@ -1,16 +1,18 @@
 package com.infora.ledger.data;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -120,5 +122,23 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private void tryAuthenticate(ApiAdapter apiAdapter, LedgerApi api, String googleIdToken) {
         AuthenticityToken token = api.authenticateByIdToken(googleIdToken);
         apiAdapter.setAuthenticityToken(token.getValue());
+    }
+
+    public static class PendingTransactionsSyncService extends Service {
+
+        private static final Object initLock = new Object();
+        private PendingTransactionsSyncAdapter syncAdapter;
+
+        @Override
+        public void onCreate() {
+            synchronized (initLock) {
+                if(syncAdapter == null) syncAdapter = new PendingTransactionsSyncAdapter(this, true);
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return syncAdapter.getSyncAdapterBinder();
+        }
     }
 }

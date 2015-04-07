@@ -5,8 +5,11 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -87,5 +90,20 @@ public class ApiAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
         throw new UnsupportedOperationException();
+    }
+
+    public static class ApiAuthenticatorService extends Service {
+
+        private ApiAuthenticator authenticator;
+
+        @Override
+        public void onCreate() {
+            authenticator = new ApiAuthenticator(this);
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return authenticator.getIBinder();
+        }
     }
 }
