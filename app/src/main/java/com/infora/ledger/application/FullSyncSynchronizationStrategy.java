@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.infora.ledger.PendingTransaction;
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
 
@@ -37,7 +37,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         }
 
         Log.d(TAG, "Querying locally reported transactions");
-        Cursor localTransactions = resolver.query(PendingTransactionContract.CONTENT_URI, null, null, null, null);
+        Cursor localTransactions = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
         ArrayList<Integer> toRemoveIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);

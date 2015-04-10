@@ -20,22 +20,22 @@ public class PendingTransaction {
 
     public PendingTransaction(Cursor cursor) {
         setId(getId(cursor));
-        setTransactionId(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_TRANSACTION_ID)));
-        setAmount(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_AMOUNT)));
-        setComment(cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_COMMENT)));
-        setIsPublished(cursor.getInt(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_IS_PUBLISHED)) == 1);
-        String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_TIMESTAMP));
+        setTransactionId(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
+        setAmount(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
+        setComment(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT)));
+        setIsPublished(cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_PUBLISHED)) == 1);
+        String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TIMESTAMP));
         setTimestamp(LedgerDbHelper.parseISO8601(timestamp));
     }
 
     public static ContentValues appendValues(ContentValues values, String amount, String comment) {
-        values.put(PendingTransactionContract.COLUMN_AMOUNT, amount);
-        values.put(PendingTransactionContract.COLUMN_COMMENT, comment);
+        values.put(TransactionContract.COLUMN_AMOUNT, amount);
+        values.put(TransactionContract.COLUMN_COMMENT, comment);
         return values;
     }
 
     public static int getId(Cursor cursor) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(PendingTransactionContract.COLUMN_ID));
+        return cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_ID));
     }
 
     public int getId() {

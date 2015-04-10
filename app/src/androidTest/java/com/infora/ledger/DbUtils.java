@@ -27,12 +27,12 @@ public class DbUtils {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
-            values.put(PendingTransactionContract.COLUMN_TRANSACTION_ID, transactionId);
-            values.put(PendingTransactionContract.COLUMN_AMOUNT, amount);
-            values.put(PendingTransactionContract.COLUMN_COMMENT, comment);
-            values.put(PendingTransactionContract.COLUMN_IS_PUBLISHED, isPublished);
-            values.put(PendingTransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
-            return (int) db.insertOrThrow(PendingTransactionContract.TABLE_NAME, null, values);
+            values.put(TransactionContract.COLUMN_TRANSACTION_ID, transactionId);
+            values.put(TransactionContract.COLUMN_AMOUNT, amount);
+            values.put(TransactionContract.COLUMN_COMMENT, comment);
+            values.put(TransactionContract.COLUMN_IS_PUBLISHED, isPublished);
+            values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+            return (int) db.insertOrThrow(TransactionContract.TABLE_NAME, null, values);
         } finally {
             db.close();
         }

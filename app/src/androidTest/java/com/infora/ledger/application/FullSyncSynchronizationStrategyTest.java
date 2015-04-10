@@ -4,7 +4,7 @@ import android.database.MatrixCursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.mocks.MockLedgerApi;
@@ -28,7 +28,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
     private EventBus bus;
 
     public FullSyncSynchronizationStrategyTest() {
-        super(MockPendingTransactionsContentProvider.class, PendingTransactionContract.AUTHORITY);
+        super(MockPendingTransactionsContentProvider.class, TransactionContract.AUTHORITY);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
 
-        MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         for (PendingTransactionDto transaction : remoteTransactions) {
             matrixCursor.addRow(new Object[]{0, transaction.transactionId, transaction.amount, transaction.comment, 1, LedgerDbHelper.toISO8601(new Date())});
         }
@@ -60,14 +60,14 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertNull(provider.getDeleteArgs());
         assertNull(provider.getUpdateArgs());
         assertNotNull("The provider was not queried", provider.getQueryArgs());
-        assertEquals(PendingTransactionContract.CONTENT_URI, provider.getQueryArgs().uri);
+        assertEquals(TransactionContract.CONTENT_URI, provider.getQueryArgs().uri);
         assertEquals(0, api.getReportedTransactions().size());
     }
 
     public void testSynchronizeReportNew() {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
-        MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         Object[] t1 = {1, "t-1", "100", "t 100", 0, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t1);
         Object[] t2 = {2, "t-2", "101", "t 101", 0, LedgerDbHelper.toISO8601(new Date())};
@@ -113,7 +113,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
     public void testSynchronizeDeletePublished() {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
-        MatrixCursor matrixCursor = new MatrixCursor(PendingTransactionContract.ALL_COLUMNS);
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         Object[] t1 = {1, "t-1", "100", "t 100", 1, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t1);
         Object[] t2 = {2, "t-2", "101", "t 101", 1, LedgerDbHelper.toISO8601(new Date())};

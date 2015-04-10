@@ -43,7 +43,7 @@ public class ReportActivity extends ActionBarActivity {
         setContentView(R.layout.activity_report);
         reportedTransactionsAdapter = new SimpleCursorAdapter(this, R.layout.transactions_list,
                 null,
-                new String[]{PendingTransactionContract.COLUMN_AMOUNT, PendingTransactionContract.COLUMN_COMMENT},
+                new String[]{TransactionContract.COLUMN_AMOUNT, TransactionContract.COLUMN_COMMENT},
                 new int[]{R.id.amount, R.id.comment}, 0);
         lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
         lvReportedTransactions.setAdapter(reportedTransactionsAdapter);
@@ -52,7 +52,7 @@ public class ReportActivity extends ActionBarActivity {
         lvReportedTransactions.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         lvReportedTransactions.setMultiChoiceModeListener(new ModeCallback());
 
-        getContentResolver().registerContentObserver(PendingTransactionContract.CONTENT_URI, true, new ContentObserver(null) {
+        getContentResolver().registerContentObserver(TransactionContract.CONTENT_URI, true, new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange, null);
@@ -169,18 +169,18 @@ public class ReportActivity extends ActionBarActivity {
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(null, PendingTransactionContract.AUTHORITY, settingsBundle);
+        ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             return new CursorLoader(ReportActivity.this,
-                    PendingTransactionContract.CONTENT_URI,
+                    TransactionContract.CONTENT_URI,
                     null,
                     null,
                     null,
-                    PendingTransactionContract.COLUMN_TIMESTAMP + " DESC");
+                    TransactionContract.COLUMN_TIMESTAMP + " DESC");
         }
 
         @Override

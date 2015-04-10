@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.TransactionContract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,15 +26,15 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(TAG, "Initializing database schema. Creating table: " + PendingTransactionContract.TABLE_NAME);
+        Log.d(TAG, "Initializing database schema. Creating table: " + TransactionContract.TABLE_NAME);
         db.execSQL(
-                "CREATE TABLE " + PendingTransactionContract.TABLE_NAME + " (" +
-                        PendingTransactionContract.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                        PendingTransactionContract.COLUMN_TRANSACTION_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
-                        PendingTransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
-                        PendingTransactionContract.COLUMN_COMMENT + " TEXT NULL," +
-                        PendingTransactionContract.COLUMN_IS_PUBLISHED + " INTEGER NOT NULL DEFAULT(0)," +
-                        PendingTransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL" +
+                "CREATE TABLE " + TransactionContract.TABLE_NAME + " (" +
+                        TransactionContract.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        TransactionContract.COLUMN_TRANSACTION_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
+                        TransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
+                        TransactionContract.COLUMN_COMMENT + " TEXT NULL," +
+                        TransactionContract.COLUMN_IS_PUBLISHED + " INTEGER NOT NULL DEFAULT(0)," +
+                        TransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL" +
                         " )"
         );
     }
@@ -43,7 +43,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(TAG, "Database upgrade is not yet supported so just recreating the table.");
         //TODO: Implement actual upgrade logic before production
-        db.execSQL("DROP TABLE " + PendingTransactionContract.TABLE_NAME);
+        db.execSQL("DROP TABLE " + TransactionContract.TABLE_NAME);
         onCreate(db);
     }
 

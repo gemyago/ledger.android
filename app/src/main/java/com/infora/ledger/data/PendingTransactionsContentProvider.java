@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.TransactionContract;
 
 import java.util.Date;
 import java.util.UUID;
@@ -18,7 +18,7 @@ import java.util.UUID;
  * Created by jenya on 04.03.15.
  */
 public class PendingTransactionsContentProvider extends ContentProvider {
-    public static final String AUTHORITY = PendingTransactionContract.AUTHORITY;
+    public static final String AUTHORITY = TransactionContract.AUTHORITY;
     public static final String PENDING_TRANSACTIONS_LIST_TYPE = "vnd.android.cursor.dir/vnd." + AUTHORITY + ".pending-transactions";
     public static final String PENDING_TRANSACTIONS_ITEM_TYPE = "vnd.android.cursor.item/vnd." + AUTHORITY + ".pending-transactions";
     private static final String TAG = PendingTransactionsContentProvider.class.getName();
@@ -50,7 +50,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         switch (match) {
             case TRANSACTIONS:
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor query = db.query(PendingTransactionContract.TABLE_NAME, projection, null, null, null, null, sortOrder);
+                Cursor query = db.query(TransactionContract.TABLE_NAME, projection, null, null, null, null, sortOrder);
                 query.setNotificationUri(getContext().getContentResolver(), uri);
                 return query;
             default:
@@ -77,10 +77,10 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         switch (match) {
             case TRANSACTIONS:
                 String transactionId = UUID.randomUUID().toString();
-                values.put(PendingTransactionContract.COLUMN_TRANSACTION_ID, transactionId);
-                values.put(PendingTransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+                values.put(TransactionContract.COLUMN_TRANSACTION_ID, transactionId);
+                values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
                 Log.d(TAG, "Inserting new transaction transaction_id='" + transactionId + "'");
-                long id = dbHelper.getWritableDatabase().insert(PendingTransactionContract.TABLE_NAME, null, values);
+                long id = dbHelper.getWritableDatabase().insert(TransactionContract.TABLE_NAME, null, values);
                 notifyListChanged();
                 return ContentUris.withAppendedId(uri, id);
             default:
@@ -96,8 +96,8 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 long id = ContentUris.parseId(uri);
                 Log.d(TAG, "Removing transaction id=" + id);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                int deleted = db.delete(PendingTransactionContract.TABLE_NAME,
-                        PendingTransactionContract.COLUMN_ID + " = ?",
+                int deleted = db.delete(TransactionContract.TABLE_NAME,
+                        TransactionContract.COLUMN_ID + " = ?",
                         new String[]{String.valueOf(id)});
                 notifyListChanged();
                 return deleted;
@@ -114,9 +114,9 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 long id = ContentUris.parseId(uri);
                 Log.d(TAG, "Updating transaction id=" + id);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                db.update(PendingTransactionContract.TABLE_NAME,
+                db.update(TransactionContract.TABLE_NAME,
                         values,
-                        PendingTransactionContract.COLUMN_ID + " = ?",
+                        TransactionContract.COLUMN_ID + " = ?",
                         new String[]{String.valueOf(id)});
                 notifyListChanged();
                 return 1;
@@ -126,6 +126,6 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     }
 
     private void notifyListChanged() {
-        getContext().getContentResolver().notifyChange(PendingTransactionContract.CONTENT_URI, null);
+        getContext().getContentResolver().notifyChange(TransactionContract.CONTENT_URI, null);
     }
 }

@@ -38,12 +38,12 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
 
     public void testInsertNewTransaction() {
         ContentValues values = new ContentValues();
-        values.put(PendingTransactionContract.COLUMN_AMOUNT, "10.332");
-        values.put(PendingTransactionContract.COLUMN_COMMENT, "Comment 10.332");
-        Uri newUri = resolver.insert(PendingTransactionContract.CONTENT_URI, values);
+        values.put(TransactionContract.COLUMN_AMOUNT, "10.332");
+        values.put(TransactionContract.COLUMN_COMMENT, "Comment 10.332");
+        Uri newUri = resolver.insert(TransactionContract.CONTENT_URI, values);
         long id = ContentUris.parseId(newUri);
         assertFalse(id == 0);
-        assertEquals(PendingTransactionContract.CONTENT_URI + "/" + id, newUri.toString());
+        assertEquals(TransactionContract.CONTENT_URI + "/" + id, newUri.toString());
 
         PendingTransaction newTransaction = PendingTransactionsDbUtils.getById(dbHelper, id);
         assertNotNull(newTransaction.getTransactionId());
@@ -58,8 +58,8 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101", true);
         DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", true);
 
-        Cursor results = resolver.query(PendingTransactionContract.CONTENT_URI,
-                PendingTransactionContract.ASSIGNABLE_COLUMNS, null, null, PendingTransactionContract.COLUMN_AMOUNT);
+        Cursor results = resolver.query(TransactionContract.CONTENT_URI,
+                TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
 
         assertEquals(3, results.getCount());
         results.moveToFirst();
@@ -85,11 +85,11 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         int id = DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
 
         ContentValues values = new ContentValues();
-        values.put(PendingTransactionContract.COLUMN_AMOUNT, "110.01");
-        values.put(PendingTransactionContract.COLUMN_COMMENT, "Transaction 110.01");
-        values.put(PendingTransactionContract.COLUMN_IS_PUBLISHED, true);
+        values.put(TransactionContract.COLUMN_AMOUNT, "110.01");
+        values.put(TransactionContract.COLUMN_COMMENT, "Transaction 110.01");
+        values.put(TransactionContract.COLUMN_IS_PUBLISHED, true);
         resolver.update(
-                ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id),
+                ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id),
                 values, null, null);
 
         PendingTransaction transaction = PendingTransactionsDbUtils.getById(dbHelper, id);
@@ -102,10 +102,10 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         int id2 = DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101");
         int id3 = DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102");
 
-        assertEquals(1, resolver.delete(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id1), null, null));
-        assertEquals(1, resolver.delete(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, id3), null, null));
+        assertEquals(1, resolver.delete(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id1), null, null));
+        assertEquals(1, resolver.delete(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id3), null, null));
 
-        Cursor results = resolver.query(PendingTransactionContract.CONTENT_URI, null, null, null, null);
+        Cursor results = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
         assertEquals(results.getCount(), 1);
         results.moveToFirst();
         assertEquals(id2, PendingTransaction.getId(results));

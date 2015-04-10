@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.infora.ledger.support.ObjectNotFoundException;
 import com.infora.ledger.PendingTransaction;
-import com.infora.ledger.PendingTransactionContract;
+import com.infora.ledger.TransactionContract;
 
 /**
  * Created by jenya on 01.03.15.
@@ -29,8 +29,8 @@ public class PendingTransactionsDbUtils {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         PendingTransaction pendingTransaction;
         try {
-            Cursor result = db.query(PendingTransactionContract.TABLE_NAME, null,
-                    PendingTransactionContract.COLUMN_ID + " = ?",
+            Cursor result = db.query(TransactionContract.TABLE_NAME, null,
+                    TransactionContract.COLUMN_ID + " = ?",
                     new String[]{String.valueOf(id)},
                     null, null, null);
             if (result.getCount() == 0)
@@ -47,8 +47,8 @@ public class PendingTransactionsDbUtils {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         PendingTransaction pendingTransaction;
         try {
-            Cursor result = db.query(PendingTransactionContract.TABLE_NAME, null,
-                    PendingTransactionContract.COLUMN_TRANSACTION_ID + " = ?",
+            Cursor result = db.query(TransactionContract.TABLE_NAME, null,
+                    TransactionContract.COLUMN_TRANSACTION_ID + " = ?",
                     new String[]{id},
                     null, null, null);
             if (result.getCount() == 0)

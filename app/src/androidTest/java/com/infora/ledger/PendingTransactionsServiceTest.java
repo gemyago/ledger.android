@@ -26,7 +26,7 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     private EventBus bus;
 
     public PendingTransactionsServiceTest() {
-        super(MockPendingTransactionsContentProvider.class, PendingTransactionContract.AUTHORITY);
+        super(MockPendingTransactionsContentProvider.class, TransactionContract.AUTHORITY);
     }
 
     @Override
@@ -40,16 +40,16 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
 
     public void testReportPendingTransaction() {
         subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
-        assertEquals(PendingTransactionContract.CONTENT_URI, provider.getInsertArgs().getUri());
+        assertEquals(TransactionContract.CONTENT_URI, provider.getInsertArgs().getUri());
         assertEquals(2, provider.getInsertArgs().getValues().size());
-        assertEquals("100.01", provider.getInsertArgs().getValues().getAsString(PendingTransactionContract.COLUMN_AMOUNT));
-        assertEquals("Comment 100.01", provider.getInsertArgs().getValues().getAsString(PendingTransactionContract.COLUMN_COMMENT));
+        assertEquals("100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_AMOUNT));
+        assertEquals("Comment 100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_COMMENT));
     }
 
     public void testReportPendingTransactionRaisesReportedEvent() {
         MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>();
         bus.register(subscriber);
-        provider.setInsertedUri(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, 100));
+        provider.setInsertedUri(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 100));
         subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
         assertEquals(100, subscriber.getEvent().getId());
     }
@@ -58,15 +58,15 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         subject.onEvent(new MarkTransactionAsPublishedCommand(3321L));
         MockPendingTransactionsContentProvider.UpdateArgs updateArgs = provider.getUpdateArgs();
         assertNotNull(provider.getUpdateArgs());
-        assertEquals(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, 3321L), updateArgs.uri);
-        assertEquals(true, (boolean) updateArgs.values.getAsBoolean(PendingTransactionContract.COLUMN_IS_PUBLISHED));
+        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L), updateArgs.uri);
+        assertEquals(true, (boolean) updateArgs.values.getAsBoolean(TransactionContract.COLUMN_IS_PUBLISHED));
     }
 
     public void testDeleteTransaction() {
         MockSubscriber<TransactionsRemovedEvent> subscriber = new MockSubscriber<>();
         bus.register(subscriber);
         subject.onEventBackgroundThread(new RemoveTransactionsCommand(3321L));
-        assertEquals(ContentUris.withAppendedId(PendingTransactionContract.CONTENT_URI, 3321L), provider.getDeleteArgs().getUri());
+        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L), provider.getDeleteArgs().getUri());
         assertEquals(3321L, subscriber.getEvent().getIds()[0]);
     }
 }
