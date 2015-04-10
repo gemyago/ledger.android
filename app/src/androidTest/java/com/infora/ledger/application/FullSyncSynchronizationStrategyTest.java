@@ -110,7 +110,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(3, publishedSubscriber.getEvents().get(2).getId());
     }
 
-    public void testSynchronizeDeletePublished() {
+    public void testSynchronizePurgePublished() {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
