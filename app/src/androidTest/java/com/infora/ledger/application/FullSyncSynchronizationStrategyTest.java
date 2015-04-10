@@ -121,7 +121,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         Object[] t3 = {3, "t-3", "103", "t 103", 1, LedgerDbHelper.toISO8601(new Date())};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
-        MockSubscriber<RemoveTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
+        MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
         bus.register(publishedSubscriber);
 
         subject.synchronize(api, resolver, null);

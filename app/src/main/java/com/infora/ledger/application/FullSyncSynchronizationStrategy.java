@@ -58,8 +58,8 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
             for (int i = 0; i < toRemoveIds.size(); i++) {
                 ids[i] = toRemoveIds.get(i);
             }
-            Log.d(TAG, "Posting command to remove published transactions...");
-            bus.post(new RemoveTransactionsCommand(ids));
+            Log.d(TAG, "Posting command to purge required transactions...");
+            bus.post(new PurgeTransactionsCommand(ids));
         }
     }
 }

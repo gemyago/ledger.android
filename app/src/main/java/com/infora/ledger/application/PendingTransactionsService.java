@@ -31,7 +31,7 @@ public class PendingTransactionsService {
         bus.post(new TransactionReportedEvent(ContentUris.parseId(uri)));
     }
 
-    public void onEventBackgroundThread(RemoveTransactionsCommand command) {
+    public void onEventBackgroundThread(PurgeTransactionsCommand command) {
         Log.d(TAG, "Removing transactions. Count: " + command.getIds().length);
         for (long id : command.getIds()) {
             resolver.delete(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id), null, null);

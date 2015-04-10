@@ -25,7 +25,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.infora.ledger.application.RemoveTransactionsCommand;
+import com.infora.ledger.application.PurgeTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
 import com.infora.ledger.application.TransactionsRemovedEvent;
@@ -213,7 +213,7 @@ public class ReportActivity extends ActionBarActivity {
             switch (item.getItemId()) {
                 case R.id.menu_delete:
                     long[] checkedItemIds = lvReportedTransactions.getCheckedItemIds();
-                    BusUtils.post(ReportActivity.this, new RemoveTransactionsCommand(checkedItemIds));
+                    BusUtils.post(ReportActivity.this, new PurgeTransactionsCommand(checkedItemIds));
                     mode.finish();
                     break;
                 default:
