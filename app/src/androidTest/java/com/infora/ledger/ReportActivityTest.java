@@ -34,8 +34,9 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void setUp() throws Exception {
         super.setUp();
         startActivity(new Intent(), null, null);
+        getActivity().doNotCallRequestSync = true;
     }
-
+    
     public void testRequestSyncOnStart() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);

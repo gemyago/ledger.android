@@ -25,6 +25,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.infora.ledger.application.DeleteTransactionsCommand;
 import com.infora.ledger.application.PurgeTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
@@ -158,6 +159,8 @@ public class ReportActivity extends ActionBarActivity {
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 
+    protected boolean doNotCallRequestSync = false;
+
     @EventHandler
     public void onEvent(RequestSyncCommand cmd) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -169,7 +172,11 @@ public class ReportActivity extends ActionBarActivity {
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
+        if(doNotCallRequestSync) {
+            Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
+        } else {
+            ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
+        }
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -178,7 +185,7 @@ public class ReportActivity extends ActionBarActivity {
             return new CursorLoader(ReportActivity.this,
                     TransactionContract.CONTENT_URI,
                     null,
-                    null,
+                    TransactionContract.COLUMN_IS_DELETED + " = 0",
                     null,
                     TransactionContract.COLUMN_TIMESTAMP + " DESC");
         }
@@ -213,7 +220,7 @@ public class ReportActivity extends ActionBarActivity {
             switch (item.getItemId()) {
                 case R.id.menu_delete:
                     long[] checkedItemIds = lvReportedTransactions.getCheckedItemIds();
-                    BusUtils.post(ReportActivity.this, new PurgeTransactionsCommand(checkedItemIds));
+                    BusUtils.post(ReportActivity.this, new DeleteTransactionsCommand(checkedItemIds));
                     mode.finish();
                     break;
                 default:
