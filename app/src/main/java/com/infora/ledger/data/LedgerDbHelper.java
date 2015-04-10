@@ -17,7 +17,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
