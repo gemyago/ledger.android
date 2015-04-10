@@ -15,9 +15,14 @@ import retrofit.http.Field;
 public class MockLedgerApi implements LedgerApi {
     private ArrayList<PendingTransactionDto> pendingTransactions;
     private ArrayList<ReportPendingTransactionArgs> reportedTransactions = new ArrayList<ReportPendingTransactionArgs>();
+    private ArrayList<String> rejectedPendingTrasnsactions = new ArrayList<String>();
 
     public ArrayList<ReportPendingTransactionArgs> getReportedTransactions() {
         return reportedTransactions;
+    }
+
+    public ArrayList<String> getRejectedPendingTrasnsactions() {
+        return rejectedPendingTrasnsactions;
     }
 
     @Override
@@ -28,6 +33,12 @@ public class MockLedgerApi implements LedgerApi {
     @Override
     public Void reportPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("comment") String comment, @Field("date") Date date) {
         reportedTransactions.add(new ReportPendingTransactionArgs(transactionId, amount, comment, date));
+        return null;
+    }
+
+    @Override
+    public Void rejectPendingTransaction(@Field("aggregate_id") String transactionId) {
+        rejectedPendingTrasnsactions.add(transactionId);
         return null;
     }
 

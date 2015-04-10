@@ -41,9 +41,15 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         ArrayList<Integer> toRemoveIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);
-            if (!remoteTransactionsMap.containsKey(lt.getTransactionId())) {
+            if (remoteTransactionsMap.containsKey(lt.getTransactionId())) {
+                if(lt.isDeleted()) {
+                    Log.d(TAG, "Local transaction '" + lt.getTransactionId() + "' was marked as removed. Rejecting and marking for purge.");
+                    api.rejectPendingTransaction(lt.getTransactionId());
+                    toRemoveIds.add(lt.getId());
+                }
+            } else {
                 if (lt.isPublished()) {
-                    Log.d(TAG, "Pending transaction '" + lt.getTransactionId() + "' was approved. Marking for removal.");
+                    Log.d(TAG, "Pending transaction '" + lt.getTransactionId() + "' was approved or rejected. Marking for purge.");
                     toRemoveIds.add(lt.getId());
                 } else {
                     Log.d(TAG, "Publishing pending transaction: " + lt.getTransactionId());
