@@ -16,6 +16,7 @@ public class PendingTransaction {
     private String amount;
     private String comment;
     private Boolean isPublished;
+    private Boolean isDeleted;
     private Date timestamp;
 
     public PendingTransaction(Cursor cursor) {
@@ -24,6 +25,7 @@ public class PendingTransaction {
         setAmount(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
         setComment(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT)));
         setIsPublished(cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_PUBLISHED)) == 1);
+        setIsDeleted(cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_DELETED)) == 1);
         String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TIMESTAMP));
         setTimestamp(LedgerDbHelper.parseISO8601(timestamp));
     }
@@ -76,6 +78,14 @@ public class PendingTransaction {
 
     public void setIsPublished(Boolean isPublished) {
         this.isPublished = isPublished;
+    }
+
+    public Boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
     public Date getTimestamp() {

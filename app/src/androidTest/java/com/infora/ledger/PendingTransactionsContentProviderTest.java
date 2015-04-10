@@ -54,9 +54,9 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
     }
 
     public void testQuery() {
-        DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100", false);
-        DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101", true);
-        DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", true);
+        DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100", false, false);
+        DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101", true, false);
+        DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", true, false);
 
         Cursor results = resolver.query(TransactionContract.CONTENT_URI,
                 TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
@@ -81,6 +81,21 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals(1, results.getInt(3));
     }
 
+    public void testQuerySkipDeleted() {
+        DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100", false, false);
+        DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101", false, true);
+        DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", false, true);
+
+        Cursor results = resolver.query(TransactionContract.CONTENT_URI,
+                TransactionContract.ASSIGNABLE_COLUMNS, TransactionContract.COLUMN_IS_DELETED + " = 0", null, TransactionContract.COLUMN_AMOUNT);
+
+        assertEquals(1, results.getCount());
+        results.moveToFirst();
+        assertEquals("100", results.getString(0));
+        assertEquals("100.00", results.getString(1));
+
+    }
+
     public void testUpdate() {
         int id = DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
 
@@ -88,6 +103,7 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         values.put(TransactionContract.COLUMN_AMOUNT, "110.01");
         values.put(TransactionContract.COLUMN_COMMENT, "Transaction 110.01");
         values.put(TransactionContract.COLUMN_IS_PUBLISHED, true);
+        values.put(TransactionContract.COLUMN_IS_DELETED, true);
         resolver.update(
                 ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id),
                 values, null, null);
@@ -95,6 +111,8 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         PendingTransaction transaction = PendingTransactionsDbUtils.getById(dbHelper, id);
         assertEquals("110.01", transaction.getAmount());
         assertEquals("Transaction 110.01", transaction.getComment());
+        assertTrue("published flag was not updated", transaction.isPublished());
+        assertTrue("deleted flag was not updated", transaction.isDeleted());
     }
 
     public void testDelete() {

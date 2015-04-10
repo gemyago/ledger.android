@@ -50,7 +50,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         switch (match) {
             case TRANSACTIONS:
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor query = db.query(TransactionContract.TABLE_NAME, projection, null, null, null, null, sortOrder);
+                Cursor query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 query.setNotificationUri(getContext().getContentResolver(), uri);
                 return query;
             default:

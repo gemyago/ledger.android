@@ -34,6 +34,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         TransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
                         TransactionContract.COLUMN_COMMENT + " TEXT NULL," +
                         TransactionContract.COLUMN_IS_PUBLISHED + " INTEGER NOT NULL DEFAULT(0)," +
+                        TransactionContract.COLUMN_IS_DELETED + " INTEGER NOT NULL DEFAULT(0)," +
                         TransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL" +
                         " )"
         );
@@ -41,10 +42,11 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.w(TAG, "Database upgrade is not yet supported so just recreating the table.");
-        //TODO: Implement actual upgrade logic before production
-        db.execSQL("DROP TABLE " + TransactionContract.TABLE_NAME);
-        onCreate(db);
+        if (oldVersion == 2) {
+            db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
+                    + " ADD " + TransactionContract.COLUMN_IS_DELETED + " INTEGER NOT NULL DEFAULT 0;");
+
+        }
     }
 
     private static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -52,6 +54,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
     public static String toISO8601(Date date) {
         return ISO8601.format(date);
     }
+
     public static Date parseISO8601(String date) {
         try {
             return ISO8601.parse(date);
