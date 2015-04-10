@@ -4,14 +4,17 @@ import android.content.ContentUris;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
+import com.infora.ledger.application.DeleteTransactionsCommand;
 import com.infora.ledger.application.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.PurgeTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
-import com.infora.ledger.application.TransactionsRemovedEvent;
+import com.infora.ledger.application.TransactionsDeletedEvent;
 import com.infora.ledger.application.TransactionReportedEvent;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
+
+import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
@@ -62,11 +65,26 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         assertEquals(true, (boolean) updateArgs.values.getAsBoolean(TransactionContract.COLUMN_IS_PUBLISHED));
     }
 
-    public void testPurgeTransaction() {
-        MockSubscriber<TransactionsRemovedEvent> subscriber = new MockSubscriber<>();
-        bus.register(subscriber);
+    public void testDeleteTransactions() {
+        MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>();
+        bus.register(deletedSubscriber);
+
+        DeleteTransactionsCommand command = new DeleteTransactionsCommand(3321L, 3322L, 3323L);
+        subject.onEventBackgroundThread(command);
+        ArrayList<MockPendingTransactionsContentProvider.UpdateArgs> allUpdateArgs = provider.getAllUpdateArgs();
+        assertEquals(3, allUpdateArgs.size());
+
+        for (int i = 0; i < allUpdateArgs.size(); i++) {
+            MockPendingTransactionsContentProvider.UpdateArgs updateArgs = allUpdateArgs.get(i);
+            assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L + i), updateArgs.uri);
+            assertEquals(true, (boolean) updateArgs.values.getAsBoolean(TransactionContract.COLUMN_IS_DELETED));
+        }
+        assertEquals(1, deletedSubscriber.getEvents().size());
+        assertEquals(command.getIds(), deletedSubscriber.getEvent().getIds());
+    }
+
+    public void testPurgeTransactions() {
         subject.onEventBackgroundThread(new PurgeTransactionsCommand(3321L));
         assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L), provider.getDeleteArgs().getUri());
-        assertEquals(3321L, subscriber.getEvent().getIds()[0]);
     }
 }

@@ -28,7 +28,7 @@ import android.widget.Toast;
 import com.infora.ledger.application.PurgeTransactionsCommand;
 import com.infora.ledger.application.ReportTransactionCommand;
 import com.infora.ledger.application.TransactionReportedEvent;
-import com.infora.ledger.application.TransactionsRemovedEvent;
+import com.infora.ledger.application.TransactionsDeletedEvent;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 
@@ -152,7 +152,7 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     @EventHandler
-    public void onEventMainThread(TransactionsRemovedEvent event) {
+    public void onEventMainThread(TransactionsDeletedEvent event) {
         int removedLength = event.getIds().length;
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();

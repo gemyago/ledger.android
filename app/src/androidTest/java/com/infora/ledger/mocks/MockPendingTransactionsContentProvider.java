@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -19,6 +20,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     private DeleteArgs deleteArgs;
     private QueryArgs queryArgs;
     private UpdateArgs updateArgs;
+    private ArrayList<UpdateArgs> allUpdateArgs = new ArrayList<>();
     private Cursor queryResult;
 
     public QueryArgs getQueryArgs() {
@@ -31,6 +33,10 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     public UpdateArgs getUpdateArgs() {
         return updateArgs;
+    }
+
+    public ArrayList<UpdateArgs> getAllUpdateArgs() {
+        return allUpdateArgs;
     }
 
     public void setInsertedUri(Uri insertedUri) {
@@ -77,6 +83,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         updateArgs = new UpdateArgs(uri, values, selection, selectionArgs);
+        allUpdateArgs.add(updateArgs);
         return 0;
     }
 

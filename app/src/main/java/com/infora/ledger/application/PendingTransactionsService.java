@@ -31,12 +31,24 @@ public class PendingTransactionsService {
         bus.post(new TransactionReportedEvent(ContentUris.parseId(uri)));
     }
 
+    public void onEventBackgroundThread(DeleteTransactionsCommand command) {
+        Log.d(TAG, "Marking transactions as deleted. Count: " + command.getIds().length);
+        for (long id : command.getIds()) {
+            ContentValues values = new ContentValues();
+            values.put(TransactionContract.COLUMN_IS_DELETED, true);
+            resolver.update(
+                    ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id),
+                    values, null, null);
+
+        }
+        bus.post(new TransactionsDeletedEvent(command.getIds()));
+    }
+
     public void onEventBackgroundThread(PurgeTransactionsCommand command) {
-        Log.d(TAG, "Removing transactions. Count: " + command.getIds().length);
+        Log.d(TAG, "Purging transactions. Count: " + command.getIds().length);
         for (long id : command.getIds()) {
             resolver.delete(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id), null, null);
         }
-        bus.post(new TransactionsRemovedEvent(command.getIds()));
     }
 
     public void onEvent(MarkTransactionAsPublishedCommand command) {
