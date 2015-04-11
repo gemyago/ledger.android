@@ -1,4 +1,4 @@
-package com.infora.ledger.data;
+package com.infora.ledger.application;
 
 import android.accounts.Account;
 import android.accounts.AuthenticatorException;
@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.LedgerApplication;
@@ -22,13 +21,10 @@ import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
-import com.infora.ledger.application.FullSyncSynchronizationStrategy;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.io.IOException;
-
-import retrofit.RetrofitError;
 
 /**
  * Created by jenya on 13.03.15.
