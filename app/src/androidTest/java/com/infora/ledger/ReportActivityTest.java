@@ -2,13 +2,12 @@ package com.infora.ledger;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.internal.view.menu.MenuItemImpl;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 
-import com.infora.ledger.application.ReportTransactionCommand;
-import com.infora.ledger.application.TransactionReportedEvent;
+import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;

@@ -1,4 +1,4 @@
-package com.infora.ledger.application;
+package com.infora.ledger.application.commands;
 
 /**
  * Created by jenya on 26.03.15.

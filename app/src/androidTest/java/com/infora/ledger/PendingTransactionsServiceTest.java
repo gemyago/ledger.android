@@ -4,13 +4,13 @@ import android.content.ContentUris;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
-import com.infora.ledger.application.DeleteTransactionsCommand;
-import com.infora.ledger.application.MarkTransactionAsPublishedCommand;
+import com.infora.ledger.application.commands.DeleteTransactionsCommand;
+import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.PendingTransactionsService;
-import com.infora.ledger.application.PurgeTransactionsCommand;
-import com.infora.ledger.application.ReportTransactionCommand;
-import com.infora.ledger.application.TransactionsDeletedEvent;
-import com.infora.ledger.application.TransactionReportedEvent;
+import com.infora.ledger.application.commands.PurgeTransactionsCommand;
+import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 

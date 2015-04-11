@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
-import com.infora.ledger.application.CreateSystemAccountCommand;
+import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;

@@ -6,6 +6,8 @@ import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
+import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;

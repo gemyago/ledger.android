@@ -9,6 +9,8 @@ import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
+import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;

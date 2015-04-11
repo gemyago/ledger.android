@@ -1,4 +1,4 @@
-package com.infora.ledger.application;
+package com.infora.ledger.application.events;
 
 /**
  * Created by jenya on 11.03.15.

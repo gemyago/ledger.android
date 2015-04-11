@@ -3,7 +3,7 @@ package com.infora.ledger;
 import android.accounts.Account;
 import android.test.AndroidTestCase;
 
-import com.infora.ledger.application.CreateSystemAccountCommand;
+import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.mocks.MockAccountManagerWrapper;
 
 /**

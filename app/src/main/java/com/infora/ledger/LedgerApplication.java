@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.infora.ledger.application.CreateSystemAccountCommand;
+import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;

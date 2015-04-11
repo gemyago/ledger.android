@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 import android.view.View;
 
-import com.infora.ledger.application.CreateSystemAccountCommand;
+import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
