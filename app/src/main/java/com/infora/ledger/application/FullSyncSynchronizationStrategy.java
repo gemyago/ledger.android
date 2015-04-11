@@ -1,6 +1,7 @@
 package com.infora.ledger.application;
 
 import android.content.ContentResolver;
+import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +29,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         this.bus = bus;
     }
 
-    public void synchronize(LedgerApi api, ContentResolver resolver, Bundle options) {
+    public void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
         Log.i(TAG, "Starting full synchronization...");
 
         Log.d(TAG, "Retrieving pending transactions from the server...");

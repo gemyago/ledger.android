@@ -78,7 +78,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         Log.i(TAG, "Performing synchronization...");
         LedgerApi api = apiAdapter.createApi();
         apiAdapter.authenticateApi(api, account);
-        syncStrategy.synchronize(api, resolver, null);
+        syncStrategy.synchronize(api, resolver, extras, syncResult);
         Log.i(TAG, "Synchronization completed.");
     }
 

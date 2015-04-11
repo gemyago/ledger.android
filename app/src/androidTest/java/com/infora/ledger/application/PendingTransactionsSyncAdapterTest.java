@@ -33,6 +33,8 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
     public void testOnPerformSync() throws Exception {
         final Account testAccount = new Account("test-332", "test");
         final MockLedgerApi mockApi = new MockLedgerApi();
+        final SyncResult testSyncResult = new SyncResult();
+        final Bundle extras = new Bundle();
         apiAdapter.onAuthenticateApiCallback = new MockApiAdapter.OnAuthenticateApiCallback() {
             @Override
             public void perform(LedgerApi api, Account account) {
@@ -42,11 +44,13 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         };
         syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
             @Override
-            public void perform(LedgerApi api, ContentResolver resolver, Bundle options) {
+            public void perform(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
                 assertSame(mockApi, api);
+                assertSame(options, extras);
+                assertSame(testSyncResult, syncResult);
             }
         };
         apiAdapter.createdApi = mockApi;
-        subject.onPerformSync(testAccount, null, null, null, new SyncResult());
+        subject.onPerformSync(testAccount, extras, null, null, testSyncResult);
     }
 }

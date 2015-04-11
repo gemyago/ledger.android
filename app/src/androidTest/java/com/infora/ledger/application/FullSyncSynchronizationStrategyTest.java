@@ -1,5 +1,6 @@
 package com.infora.ledger.application;
 
+import android.content.SyncResult;
 import android.database.MatrixCursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
@@ -28,6 +29,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
     private FullSyncSynchronizationStrategy subject;
     private MockLedgerApi api;
     private EventBus bus;
+    private SyncResult syncResult;
 
     public FullSyncSynchronizationStrategyTest() {
         super(MockPendingTransactionsContentProvider.class, TransactionContract.AUTHORITY);
@@ -41,6 +43,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         bus = new EventBus();
         subject = new FullSyncSynchronizationStrategy(bus);
         api = new MockLedgerApi();
+        syncResult = new SyncResult();
     }
 
     public void testSynchronizeIgnoreExisting() throws Exception {
@@ -56,7 +59,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         }
         provider.setQueryResult(matrixCursor);
 
-        subject.synchronize(api, resolver, null);
+        subject.synchronize(api, resolver, null, syncResult);
 
         assertNull(provider.getInsertArgs());
         assertNull(provider.getDeleteArgs());
@@ -80,7 +83,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>();
         bus.register(publishedSubscriber);
 
-        subject.synchronize(api, resolver, null);
+        subject.synchronize(api, resolver, null, syncResult);
 
         assertNull(provider.getInsertArgs());
         assertNull(provider.getDeleteArgs());
@@ -126,7 +129,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
         bus.register(publishedSubscriber);
 
-        subject.synchronize(api, resolver, null);
+        subject.synchronize(api, resolver, null, syncResult);
 
         assertNull(provider.getInsertArgs());
         assertNull(provider.getDeleteArgs());
@@ -162,7 +165,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>();
         bus.register(purgedSubscriber);
 
-        subject.synchronize(api, resolver, null);
+        subject.synchronize(api, resolver, null, syncResult);
 
         assertNull(provider.getInsertArgs());
         assertNull(provider.getDeleteArgs());
