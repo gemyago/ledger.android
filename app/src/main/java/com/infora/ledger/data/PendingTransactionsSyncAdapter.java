@@ -24,6 +24,7 @@ import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.application.FullSyncSynchronizationStrategy;
 import com.infora.ledger.support.AccountManagerWrapper;
+import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.io.IOException;
 
@@ -56,7 +57,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         accountManager = new AccountManagerWrapper(context);
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
         syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
         ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -75,23 +76,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
 
         Log.d(TAG, "Using ledger host: " + ledgerHost);
         ApiAdapter apiAdapter = new ApiAdapter(accountManager, ledgerHost);
-        LedgerApi api = apiAdapter.getLedgerApi();
-        String googleIdToken;
-        googleIdToken = tryGettingToken(account, false);
-        Log.d(TAG, "Authenticating using google id_token.");
-        try {
-            tryAuthenticate(apiAdapter, api, googleIdToken);
-        } catch (RetrofitError ex) {
-            if (ex.getKind() == RetrofitError.Kind.HTTP && ex.getResponse().getStatus() == 401) {
-                Log.e(TAG, "Authentication failed. The token might have expired. Invalidating the token and retrying.");
-                googleIdToken = tryGettingToken(account, true);
-                tryAuthenticate(apiAdapter, api, googleIdToken);
-            } else {
-                Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
-                Log.e(TAG, ex.getMessage());
-                throw ex;
-            }
-        }
+        LedgerApi api = apiAdapter.createApi();
+        apiAdapter.authenticateApi(api, account);
 
         syncStrategy.synchronize(api, resolver, null);
 

@@ -96,13 +96,6 @@ public class ApiAdapter {
         setAuthenticityToken(authenticityToken.getValue());
     }
 
-    public LedgerApi getLedgerApi() {
-        if (ledgerApi == null) {
-            ledgerApi = restAdapter.create(LedgerApi.class);
-        }
-        return ledgerApi;
-    }
-
     private String tryGettingToken(Account account, boolean invalidate) {
         String googleIdToken;
         try {

@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.infora.ledger.data.SharedPreferencesProvider;
 import com.infora.ledger.support.AccountManagerWrapper;
 
 /**

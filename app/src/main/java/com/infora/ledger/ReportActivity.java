@@ -32,6 +32,7 @@ import com.infora.ledger.application.TransactionReportedEvent;
 import com.infora.ledger.application.TransactionsDeletedEvent;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
+import com.infora.ledger.support.SharedPreferencesUtil;
 
 public class ReportActivity extends ActionBarActivity {
     private static final String TAG = ReportActivity.class.getName();
@@ -163,7 +164,7 @@ public class ReportActivity extends ActionBarActivity {
 
     @EventHandler
     public void onEvent(RequestSyncCommand cmd) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(this);
         boolean shouldUseManualSync = prefs.getBoolean(SettingsFragment.KEY_USE_MANUAL_SYNC, false);
         if (shouldUseManualSync && !cmd.isManual) {
             Log.d(TAG, "Automatic synchronization is disabled.");

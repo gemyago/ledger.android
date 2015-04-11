@@ -9,6 +9,7 @@ import android.util.Log;
 import com.infora.ledger.application.CreateSystemAccountCommand;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.support.AccountManagerWrapper;
+import com.infora.ledger.support.SharedPreferencesUtil;
 
 import de.greenrobot.event.EventBus;
 
@@ -52,7 +53,7 @@ public class LedgerApplication extends Application {
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
 
         PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPreferences = SharedPreferencesUtil.getDefaultSharedPreferences(this);
         if(!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
             Log.d(TAG, "Ledger host preference not yet initialized. Assigning default value: " + BuildConfig.DEFAULT_LEDGER_HOST);
             SharedPreferences.Editor edit = sharedPreferences.edit();

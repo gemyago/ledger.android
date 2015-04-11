@@ -4,6 +4,7 @@ package com.infora.ledger;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,5 +22,10 @@ public class SettingsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.app_prefs);
+    }
+
+    @Override
+    public PreferenceManager getPreferenceManager() {
+        return super.getPreferenceManager();
     }
 }
