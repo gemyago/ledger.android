@@ -33,9 +33,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private static final String TAG = PendingTransactionsSyncAdapter.class.getName();
 
     private ContentResolver resolver;
-    private AccountManagerWrapper accountManager;
     private FullSyncSynchronizationStrategy syncStrategy;
-    private String ledgerHost;
+    private ApiAdapter apiAdapter;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -50,59 +49,21 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private void onInit(Context context) {
         Log.d(TAG, "Initializing sync adapter...");
         resolver = context.getContentResolver();
-        accountManager = new AccountManagerWrapper(context);
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
         syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
         SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
-        ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
-        prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                Log.d(TAG, "Shared pref changed. Key: " + key);
-                if (SettingsFragment.KEY_LEDGER_HOST.equals(key)) {
-                    ledgerHost = sharedPreferences.getString(key, null);
-                }
-            }
-        });
+        String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
+        Log.d(TAG, "Using ledger host: " + ledgerHost);
+        apiAdapter = new ApiAdapter(new AccountManagerWrapper(context), ledgerHost);
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Performing synchronization...");
-
-        Log.d(TAG, "Using ledger host: " + ledgerHost);
-        ApiAdapter apiAdapter = new ApiAdapter(accountManager, ledgerHost);
         LedgerApi api = apiAdapter.createApi();
         apiAdapter.authenticateApi(api, account);
-
         syncStrategy.synchronize(api, resolver, null);
-
         Log.i(TAG, "Synchronization completed.");
-    }
-
-    private String tryGettingToken(Account account, boolean invalidate) {
-        String googleIdToken;
-        try {
-            Log.d(TAG, "Trying to get the token.");
-            Bundle options = new Bundle();
-            options.putBoolean(ApiAuthenticator.OPTION_INVALIDATE_TOKEN, invalidate);
-            googleIdToken = accountManager.getAuthToken(account, options);
-        } catch (AuthenticatorException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        } catch (OperationCanceledException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            //TODO: Implement proper handling
-            throw new RuntimeException(e);
-        }
-        return googleIdToken;
-    }
-
-    private void tryAuthenticate(ApiAdapter apiAdapter, LedgerApi api, String googleIdToken) {
-        AuthenticityToken token = api.authenticateByIdToken(googleIdToken);
-        apiAdapter.setAuthenticityToken(token.getValue());
     }
 
     public static class PendingTransactionsSyncService extends Service {
