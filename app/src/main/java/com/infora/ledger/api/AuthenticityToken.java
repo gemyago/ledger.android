@@ -12,4 +12,11 @@ public class AuthenticityToken {
     public String getValue() {
         return value;
     }
+
+    public AuthenticityToken() {
+    }
+
+    public AuthenticityToken(String value) {
+        this.value = value;
+    }
 }

@@ -16,6 +16,9 @@ public class MockLedgerApi implements LedgerApi {
     private ArrayList<PendingTransactionDto> pendingTransactions;
     private ArrayList<ReportPendingTransactionArgs> reportedTransactions = new ArrayList<ReportPendingTransactionArgs>();
     private ArrayList<String> rejectedPendingTrasnsactions = new ArrayList<String>();
+    private String authenticatedGoogleIdToken;
+    private AuthenticatingByTokenCallback authenticatingByTokenCallback;
+    private AuthenticityToken authenticatedAuthenticityToken;
 
     public ArrayList<ReportPendingTransactionArgs> getReportedTransactions() {
         return reportedTransactions;
@@ -25,9 +28,23 @@ public class MockLedgerApi implements LedgerApi {
         return rejectedPendingTrasnsactions;
     }
 
+    public String getAuthenticatedGoogleIdToken() {
+        return authenticatedGoogleIdToken;
+    }
+
+    public void setAuthenticatedAuthenticityToken(AuthenticityToken authenticatedAuthenticityToken) {
+        this.authenticatedAuthenticityToken = authenticatedAuthenticityToken;
+    }
+
+    public void setAuthenticatingByTokenCallback(AuthenticatingByTokenCallback authenticatingByTokenCallback) {
+        this.authenticatingByTokenCallback = authenticatingByTokenCallback;
+    }
+
     @Override
     public AuthenticityToken authenticateByIdToken(@Field("google_id_token") String googleIdToken) {
-        return null;
+        if(authenticatingByTokenCallback != null) authenticatingByTokenCallback.authenticating(googleIdToken);
+        this.authenticatedGoogleIdToken = googleIdToken;
+        return authenticatedAuthenticityToken;
     }
 
     @Override
@@ -49,6 +66,10 @@ public class MockLedgerApi implements LedgerApi {
 
     public void setPendingTransactions(ArrayList<PendingTransactionDto> pendingTransactions) {
         this.pendingTransactions = pendingTransactions;
+    }
+
+    public interface AuthenticatingByTokenCallback {
+        void authenticating(String googleIdToken);
     }
 
     public static class ReportPendingTransactionArgs {

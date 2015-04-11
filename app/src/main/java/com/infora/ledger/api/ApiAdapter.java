@@ -1,7 +1,12 @@
 package com.infora.ledger.api;
 
+import android.accounts.Account;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.infora.ledger.support.AccountManagerWrapper;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
@@ -10,6 +15,7 @@ import java.io.IOException;
 
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
 import retrofit.client.OkClient;
 
 /**
@@ -18,11 +24,13 @@ import retrofit.client.OkClient;
 public class ApiAdapter {
     private static final String TAG = ApiAdapter.class.getName();
 
-    private final RestAdapter restAdapter;
+    private RestAdapter restAdapter;
     private LedgerApi ledgerApi;
     private String authenticityToken;
+    private final AccountManagerWrapper accountManager;
 
-    public ApiAdapter(String endpoint) {
+    public ApiAdapter(AccountManagerWrapper accountManager, String endpoint) {
+        this.accountManager = accountManager;
         OkHttpClient client = new OkHttpClient();
         final String[] apiCookie = new String[1];
         client.interceptors().add(new Interceptor() {
@@ -56,7 +64,6 @@ public class ApiAdapter {
                 .build();
     }
 
-
     public String getAuthenticityToken() {
         return authenticityToken;
     }
@@ -65,10 +72,55 @@ public class ApiAdapter {
         this.authenticityToken = authenticityToken;
     }
 
+    public LedgerApi createApi() {
+        return restAdapter.create(LedgerApi.class);
+    }
+
+    public void authenticateApi(LedgerApi api, Account account) {
+        String idToken = tryGettingToken(account, false);
+        AuthenticityToken authenticityToken;
+        Log.d(TAG, "Authenticating using google id_token.");
+        try {
+            authenticityToken = api.authenticateByIdToken(idToken);
+        } catch (RetrofitError ex) {
+            if (ex.getKind() == RetrofitError.Kind.HTTP && ex.getResponse().getStatus() == 401) {
+                Log.e(TAG, "Authentication failed. The token might have expired. Invalidating the token and retrying.");
+                idToken = tryGettingToken(account, true);
+                authenticityToken = api.authenticateByIdToken(idToken);
+            } else {
+                Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
+                Log.e(TAG, ex.getMessage());
+                throw ex;
+            }
+        }
+        setAuthenticityToken(authenticityToken.getValue());
+    }
+
     public LedgerApi getLedgerApi() {
         if (ledgerApi == null) {
             ledgerApi = restAdapter.create(LedgerApi.class);
         }
         return ledgerApi;
+    }
+
+    private String tryGettingToken(Account account, boolean invalidate) {
+        String googleIdToken;
+        try {
+            Log.d(TAG, "Trying to get the token.");
+            Bundle options = new Bundle();
+            if (invalidate)
+                options.putBoolean(ApiAuthenticator.OPTION_INVALIDATE_TOKEN, invalidate);
+            googleIdToken = accountManager.getAuthToken(account, options);
+        } catch (AuthenticatorException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (OperationCanceledException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            //TODO: Implement proper handling
+            throw new RuntimeException(e);
+        }
+        return googleIdToken;
     }
 }

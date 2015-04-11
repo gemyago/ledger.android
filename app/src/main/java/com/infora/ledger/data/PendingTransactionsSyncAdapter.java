@@ -74,7 +74,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         Log.i(TAG, "Performing synchronization...");
 
         Log.d(TAG, "Using ledger host: " + ledgerHost);
-        ApiAdapter apiAdapter = new ApiAdapter(ledgerHost);
+        ApiAdapter apiAdapter = new ApiAdapter(accountManager, ledgerHost);
         LedgerApi api = apiAdapter.getLedgerApi();
         String googleIdToken;
         googleIdToken = tryGettingToken(account, false);
@@ -86,7 +86,6 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
                 Log.e(TAG, "Authentication failed. The token might have expired. Invalidating the token and retrying.");
                 googleIdToken = tryGettingToken(account, true);
                 tryAuthenticate(apiAdapter, api, googleIdToken);
-                throw ex;
             } else {
                 Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
                 Log.e(TAG, ex.getMessage());

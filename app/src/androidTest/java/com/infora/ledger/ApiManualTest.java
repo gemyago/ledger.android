@@ -41,7 +41,7 @@ public class ApiManualTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        adapter = new ApiAdapter(endpointUrl);
+        adapter = new ApiAdapter(new AccountManagerWrapper(getContext()), endpointUrl);
         ledgerApi = adapter.getLedgerApi();
         accountManager = new AccountManagerWrapper(getContext());
     }
