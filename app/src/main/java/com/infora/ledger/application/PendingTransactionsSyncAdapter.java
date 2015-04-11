@@ -26,6 +26,8 @@ import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.io.IOException;
 
+import retrofit.RetrofitError;
+
 /**
  * Created by jenya on 13.03.15.
  */
@@ -77,7 +79,13 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Performing synchronization...");
         LedgerApi api = apiAdapter.createApi();
-        apiAdapter.authenticateApi(api, account);
+        try {
+            apiAdapter.authenticateApi(api, account);
+        } catch (RetrofitError error) {
+            syncResult.stats.numAuthExceptions++;
+            Log.e(TAG, "Authentication failed. Synchronization aborted.");
+            return;
+        }
         syncStrategy.synchronize(api, resolver, extras, syncResult);
         Log.i(TAG, "Synchronization completed.");
     }
