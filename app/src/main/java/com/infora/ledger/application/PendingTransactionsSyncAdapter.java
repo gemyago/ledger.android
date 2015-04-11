@@ -86,7 +86,13 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
             Log.e(TAG, "Authentication failed. Synchronization aborted.");
             return;
         }
-        syncStrategy.synchronize(api, resolver, extras, syncResult);
+        try {
+            syncStrategy.synchronize(api, resolver, extras, syncResult);
+        } catch (RetrofitError error) {
+            syncResult.stats.numIoExceptions++;
+            Log.e(TAG, "Synchronization aborted due to some network error.", error);
+            return;
+        }
         Log.i(TAG, "Synchronization completed.");
     }
 
@@ -98,7 +104,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         @Override
         public void onCreate() {
             synchronized (initLock) {
-                if(syncAdapter == null) syncAdapter = new PendingTransactionsSyncAdapter(this, true);
+                if (syncAdapter == null)
+                    syncAdapter = new PendingTransactionsSyncAdapter(this, true);
             }
         }
 

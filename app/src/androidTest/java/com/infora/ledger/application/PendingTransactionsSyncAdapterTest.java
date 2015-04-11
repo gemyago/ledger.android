@@ -82,4 +82,26 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         subject.onPerformSync(testAccount, extras, null, null, testSyncResult);
         assertEquals(1, testSyncResult.stats.numAuthExceptions);
     }
+
+    public void testOnPerformSyncNetworkError() throws Exception {
+        final Account testAccount = new Account("test-332", "test");
+        final MockLedgerApi mockApi = new MockLedgerApi();
+        final SyncResult testSyncResult = new SyncResult();
+        final Bundle extras = new Bundle();
+        apiAdapter.onAuthenticateApiCallback = new MockApiAdapter.OnAuthenticateApiCallback() {
+            @Override
+            public void perform(LedgerApi api, Account account) {
+            }
+        };
+        syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
+            @Override
+            public void perform(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
+                Response response = new Response("localhost", 500, "Internal server error", new ArrayList<Header>(), null);
+                throw RetrofitError.httpError("test", response, null, null);
+            }
+        };
+        apiAdapter.createdApi = mockApi;
+        subject.onPerformSync(testAccount, extras, null, null, testSyncResult);
+        assertEquals(1, testSyncResult.stats.numIoExceptions);
+    }
 }
