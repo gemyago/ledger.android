@@ -33,7 +33,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private static final String TAG = PendingTransactionsSyncAdapter.class.getName();
 
     private ContentResolver resolver;
-    private FullSyncSynchronizationStrategy syncStrategy;
+    private SynchronizationStrategy syncStrategy;
     private ApiAdapter apiAdapter;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
@@ -44,6 +44,22 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         onInit(context);
+    }
+
+    public SynchronizationStrategy getSyncStrategy() {
+        return syncStrategy;
+    }
+
+    public void setSyncStrategy(SynchronizationStrategy syncStrategy) {
+        this.syncStrategy = syncStrategy;
+    }
+
+    public ApiAdapter getApiAdapter() {
+        return apiAdapter;
+    }
+
+    public void setApiAdapter(ApiAdapter apiAdapter) {
+        this.apiAdapter = apiAdapter;
     }
 
     private void onInit(Context context) {
