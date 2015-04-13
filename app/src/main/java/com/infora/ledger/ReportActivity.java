@@ -61,7 +61,7 @@ public class ReportActivity extends ActionBarActivity {
                 Log.d(TAG, "Editing transaction: " + id);
                 EditTransactionDialog dialog = new EditTransactionDialog();
                 CursorWrapper clickedItem = (CursorWrapper) lvReportedTransactions.getItemAtPosition(position);
-                dialog.id = id;
+                dialog.transactionId = id;
                 dialog.amount = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_AMOUNT));
                 dialog.comment = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_COMMENT));
                 dialog.show(getSupportFragmentManager(), EDIT_TRANSACTION_DIALOG_TAG);

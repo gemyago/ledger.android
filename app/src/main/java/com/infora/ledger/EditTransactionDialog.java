@@ -12,13 +12,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.infora.ledger.application.commands.AdjustTransactionCommand;
+import com.infora.ledger.support.BusUtils;
+
+import java.util.Objects;
+
 /**
  * Created by jenya on 11.04.15.
  */
 public class EditTransactionDialog extends DialogFragment {
     private static final String TAG = EditTransactionDialog.class.getName();
 
-    public long id;
+    public long transactionId;
     public String amount;
     public String comment;
 
@@ -29,8 +34,8 @@ public class EditTransactionDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View view = inflater.inflate(R.layout.dialog_edit_transaction, null);
-        EditText etAmount = (EditText) view.findViewById(R.id.amount);
-        EditText etComment = (EditText) view.findViewById(R.id.comment);
+        final EditText etAmount = (EditText) view.findViewById(R.id.amount);
+        final EditText etComment = (EditText) view.findViewById(R.id.comment);
         etAmount.setText(amount);
         etComment.setText(comment);
         builder.setView(view)
@@ -38,15 +43,25 @@ public class EditTransactionDialog extends DialogFragment {
                 .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-
+                        Log.d(TAG, "Posting adjust comment");
+                        String newAmount = etAmount.getText().toString();
+                        String newComment = etComment.getText().toString();
+                        if(Objects.equals(newAmount, amount) && Objects.equals(newComment, comment)) {
+                            Log.d(TAG, "No changes.");
+                            return;
+                        }
+                        AdjustTransactionCommand cmd = new AdjustTransactionCommand(transactionId,
+                                newAmount,
+                                newComment);
+                        BusUtils.post(getActivity(), cmd);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        EditTransactionDialog.this.getDialog().cancel();
+                        dialog.cancel();
                     }
                 });
-        Log.d(TAG, "Edit dialog created. Editing transaction: " + id);
+        Log.d(TAG, "Edit dialog created. Editing transaction: " + transactionId);
         return builder.create();
     }
 }
