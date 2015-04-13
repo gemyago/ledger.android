@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,7 +14,7 @@ import java.util.Date;
  * Created by jenya on 10.03.15.
  */
 public class MockPendingTransactionsContentProvider extends ContentProvider {
-
+    private static final String TAG = MockPendingTransactionsContentProvider.class.getName();
 
     private Uri insertedUri;
     private InsertArgs insertArgs;
@@ -58,6 +59,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.d(TAG, "Executing query: " + uri);
         queryArgs = new QueryArgs(uri, projection, selection, selectionArgs, sortOrder);
         return queryResult;
     }

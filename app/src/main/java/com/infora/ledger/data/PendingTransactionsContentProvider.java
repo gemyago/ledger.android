@@ -46,6 +46,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.d(TAG, "Executing query: " + uri);
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case TRANSACTIONS:
