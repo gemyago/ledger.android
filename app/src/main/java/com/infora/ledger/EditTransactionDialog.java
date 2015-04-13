@@ -1,11 +1,13 @@
 package com.infora.ledger;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +16,8 @@ import android.widget.EditText;
  * Created by jenya on 11.04.15.
  */
 public class EditTransactionDialog extends DialogFragment {
+    private static final String TAG = EditTransactionDialog.class.getName();
+
     public long id;
     public String amount;
     public String comment;

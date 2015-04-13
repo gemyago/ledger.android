@@ -40,6 +40,8 @@ public class ReportActivity extends ActionBarActivity {
     private SimpleCursorAdapter reportedTransactionsAdapter;
     private ListView lvReportedTransactions;
 
+    public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
@@ -62,7 +64,7 @@ public class ReportActivity extends ActionBarActivity {
                 dialog.id = id;
                 dialog.amount = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_AMOUNT));
                 dialog.comment = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_COMMENT));
-                dialog.show(getSupportFragmentManager(), "EditTransactionDialog");
+                dialog.show(getSupportFragmentManager(), EDIT_TRANSACTION_DIALOG_TAG);
             }
         });
 
