@@ -3,6 +3,7 @@ package com.infora.ledger.mocks;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -15,6 +16,13 @@ import java.util.Date;
  */
 public class MockPendingTransactionsContentProvider extends ContentProvider {
     private static final String TAG = MockPendingTransactionsContentProvider.class.getName();
+
+    public MockPendingTransactionsContentProvider() {
+    }
+
+    public MockPendingTransactionsContentProvider(Context context) {
+        attachInfo(context, null);
+    }
 
     private Uri insertedUri;
     private InsertArgs insertArgs;

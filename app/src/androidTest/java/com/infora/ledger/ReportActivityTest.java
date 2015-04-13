@@ -1,14 +1,17 @@
 package com.infora.ledger;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.test.mock.MockContentResolver;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionReportedEvent;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
+import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
@@ -19,19 +22,22 @@ import de.greenrobot.event.EventBus;
  */
 public class ReportActivityTest extends android.test.ActivityUnitTestCase<ReportActivity> {
 
+    private EventBus bus;
+
     public ReportActivityTest() {
         super(ReportActivity.class);
     }
 
     @Override
-    protected void setActivity(Activity testActivity) {
-        if (testActivity != null) testActivity.setTheme(R.style.AppTheme);
-        super.setActivity(testActivity);
-    }
-
-    @Override
     public void setUp() throws Exception {
         super.setUp();
+        final Context baseContext = getInstrumentation().getTargetContext();
+        bus = new EventBus();
+        final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
+        MockContentResolver mockContentResolver = new MockContentResolver(app);
+        mockContentResolver.addProvider(TransactionContract.AUTHORITY, new MockPendingTransactionsContentProvider(app));
+        app.mockContentResolver = mockContentResolver;
+        setActivityContext(app);
         startActivity(new Intent(), null, null);
         getActivity().doNotCallRequestSync = true;
     }
