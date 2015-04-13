@@ -5,8 +5,13 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.util.Log;
+
+import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.TransactionContract;
+import com.infora.ledger.data.LedgerDbHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,9 +21,6 @@ import java.util.Date;
  */
 public class MockPendingTransactionsContentProvider extends ContentProvider {
     private static final String TAG = MockPendingTransactionsContentProvider.class.getName();
-
-    public MockPendingTransactionsContentProvider() {
-    }
 
     public MockPendingTransactionsContentProvider(Context context) {
         attachInfo(context, null);
@@ -58,6 +60,21 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
 
     public void setQueryResult(Cursor queryResult) {
         this.queryResult = queryResult;
+    }
+
+    public void setQueryResult(PendingTransaction... transactions) {
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
+        for (PendingTransaction transaction : transactions) {
+            matrixCursor.addRow(new Object[]{
+                    transaction.getId(),
+                    transaction.getTransactionId(),
+                    transaction.getAmount(),
+                    transaction.getComment(),
+                    transaction.isPublished() ? 1 : 0,
+                    transaction.isDeleted() ? 1 : 0,
+                    LedgerDbHelper.toISO8601(transaction.getTimestamp() == null ? new Date() : transaction.getTimestamp())});
+        }
+        setQueryResult(matrixCursor);
     }
 
     @Override
@@ -149,11 +166,13 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         public String getSelection() {
             return selection;
         }
+
         public String[] getSelectionArgs() {
             return selectionArgs;
         }
 
     }
+
     public class QueryArgs {
         public final Uri uri;
         public final String[] projection;
