@@ -2,18 +2,26 @@ package com.infora.ledger;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.test.mock.MockContentResolver;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.ListView;
 
+import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionReportedEvent;
+import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
+
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 import de.greenrobot.event.EventBus;
 
@@ -23,6 +31,7 @@ import de.greenrobot.event.EventBus;
 public class ReportActivityTest extends android.test.ActivityUnitTestCase<ReportActivity> {
 
     private EventBus bus;
+    private MockPendingTransactionsContentProvider mockProvider;
 
     public ReportActivityTest() {
         super(ReportActivity.class);
@@ -35,7 +44,8 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         bus = new EventBus();
         final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
         MockContentResolver mockContentResolver = new MockContentResolver(app);
-        mockContentResolver.addProvider(TransactionContract.AUTHORITY, new MockPendingTransactionsContentProvider(app));
+        mockProvider = new MockPendingTransactionsContentProvider(app);
+        mockContentResolver.addProvider(TransactionContract.AUTHORITY, mockProvider);
         app.mockContentResolver = mockContentResolver;
         setActivityContext(app);
         startActivity(new Intent(), null, null);
@@ -134,5 +144,30 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertEquals("", amount.getText().toString());
         assertEquals("", comment.getText().toString());
         assertTrue("The report button was not enabled", reportButton.isEnabled());
+    }
+
+    public void testDeleteAction() throws BrokenBarrierException, InterruptedException {
+        mockProvider.setQueryResult(
+                new PendingTransaction(1, "100", "Comment 100"),
+                new PendingTransaction(2, "101", "Comment 101"),
+                new PendingTransaction(3, "102", "Comment 102")
+        );
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>();
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+        ListView transactionsList = (ListView) getActivity().findViewById(R.id.reported_transactions_list);
+        assertEquals(3, transactionsList.getAdapter().getCount());
+        transactionsList.setItemChecked(0, true);
+        transactionsList.setItemChecked(2, true);
+
+        MockSubscriber<DeleteTransactionsCommand> deleteHandler = new MockSubscriber<>();
+        bus.register(deleteHandler);
+        getActivity().findViewById(R.id.menu_delete).callOnClick();
+        assertNotNull(deleteHandler.getEvent());
+        long[] deletedIds = deleteHandler.getEvent().getIds();
+        assertEquals(2, deletedIds.length);
+        assertEquals(1, deletedIds[0]);
+        assertEquals(3, deletedIds[1]);
     }
 }
