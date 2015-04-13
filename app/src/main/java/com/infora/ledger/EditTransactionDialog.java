@@ -46,6 +46,7 @@ public class EditTransactionDialog extends DialogFragment {
                         EditTransactionDialog.this.getDialog().cancel();
                     }
                 });
+        Log.d(TAG, "Edit dialog created. Editing transaction: " + id);
         return builder.create();
     }
 }
