@@ -15,8 +15,8 @@ public class PendingTransaction {
     private String transactionId;
     private String amount;
     private String comment;
-    private Boolean isPublished;
-    private Boolean isDeleted;
+    private boolean isPublished;
+    private boolean isDeleted;
     private Date timestamp;
 
     public PendingTransaction(Cursor cursor) {
@@ -28,6 +28,12 @@ public class PendingTransaction {
         setIsDeleted(cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_DELETED)) == 1);
         String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TIMESTAMP));
         setTimestamp(LedgerDbHelper.parseISO8601(timestamp));
+    }
+
+    public PendingTransaction(int id, String amount, String comment) {
+        this.id = id;
+        this.amount = amount;
+        this.comment = comment;
     }
 
     public static ContentValues appendValues(ContentValues values, String amount, String comment) {
@@ -72,7 +78,7 @@ public class PendingTransaction {
         this.comment = comment;
     }
 
-    public Boolean isPublished() {
+    public boolean isPublished() {
         return isPublished;
     }
 
@@ -80,7 +86,7 @@ public class PendingTransaction {
         this.isPublished = isPublished;
     }
 
-    public Boolean isDeleted() {
+    public boolean isDeleted() {
         return isDeleted;
     }
 
