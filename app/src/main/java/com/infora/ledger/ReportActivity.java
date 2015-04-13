@@ -205,7 +205,9 @@ public class ReportActivity extends ActionBarActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.d(TAG, "Finished loading transactions.");
             reportedTransactionsAdapter.swapCursor(data);
+            BusUtils.post(ReportActivity.this, new TransactionsLoaded());
         }
 
         @Override
@@ -263,4 +265,6 @@ public class ReportActivity extends ActionBarActivity {
     public static class RequestSyncCommand {
         public boolean isManual = false;
     }
+
+    public static class TransactionsLoaded {}
 }
