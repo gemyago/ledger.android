@@ -41,19 +41,19 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
 
         Log.d(TAG, "Querying locally reported transactions");
         Cursor localTransactions = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
-        ArrayList<Integer> toRemoveIds = new ArrayList<>();
+        ArrayList<Integer> toPurgeIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);
             if (remoteTransactionsMap.containsKey(lt.getTransactionId())) {
                 if(lt.isDeleted()) {
                     Log.d(TAG, "Local transaction '" + lt.getTransactionId() + "' was marked as removed. Rejecting and marking for purge.");
                     api.rejectPendingTransaction(lt.getTransactionId());
-                    toRemoveIds.add(lt.getId());
+                    toPurgeIds.add(lt.getId());
                 }
             } else {
                 if (lt.isPublished()) {
                     Log.d(TAG, "Pending transaction '" + lt.getTransactionId() + "' was approved or rejected. Marking for purge.");
-                    toRemoveIds.add(lt.getId());
+                    toPurgeIds.add(lt.getId());
                 } else {
                     Log.d(TAG, "Publishing pending transaction: " + lt.getTransactionId());
                     api.reportPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment(), lt.getTimestamp());
@@ -62,10 +62,10 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
             }
         }
 
-        if (!toRemoveIds.isEmpty()) {
-            long[] ids = new long[toRemoveIds.size()];
-            for (int i = 0; i < toRemoveIds.size(); i++) {
-                ids[i] = toRemoveIds.get(i);
+        if (!toPurgeIds.isEmpty()) {
+            long[] ids = new long[toPurgeIds.size()];
+            for (int i = 0; i < toPurgeIds.size(); i++) {
+                ids[i] = toPurgeIds.get(i);
             }
             Log.d(TAG, "Posting command to purge required transactions...");
             bus.post(new PurgeTransactionsCommand(ids));
