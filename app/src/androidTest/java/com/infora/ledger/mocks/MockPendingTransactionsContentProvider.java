@@ -13,6 +13,8 @@ import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.data.LedgerDbHelper;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -21,6 +23,9 @@ import java.util.Date;
  */
 public class MockPendingTransactionsContentProvider extends ContentProvider {
     private static final String TAG = MockPendingTransactionsContentProvider.class.getName();
+
+    public MockPendingTransactionsContentProvider() {
+    }
 
     public MockPendingTransactionsContentProvider(Context context) {
         attachInfo(context, null);
@@ -43,6 +48,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     }
 
     public UpdateArgs getUpdateArgs() {
+        Assert.assertNotNull("Update has not yet been performed.", updateArgs);
         return updateArgs;
     }
 

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
+import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.commands.PurgeTransactionsCommand;
@@ -48,6 +49,16 @@ public class PendingTransactionsService {
 
         }
         bus.post(new TransactionsDeletedEvent(command.getIds()));
+    }
+
+    public void onEventBackgroundThread(AdjustTransactionCommand command) {
+        Log.d(TAG, "Adjusting transaction.");
+        ContentValues values = new ContentValues();
+        values.put(TransactionContract.COLUMN_AMOUNT, command.amount);
+        values.put(TransactionContract.COLUMN_COMMENT, command.comment);
+        resolver.update(
+                ContentUris.withAppendedId(TransactionContract.CONTENT_URI, command.id),
+                values, null, null);
     }
 
     public void onEventBackgroundThread(PurgeTransactionsCommand command) {

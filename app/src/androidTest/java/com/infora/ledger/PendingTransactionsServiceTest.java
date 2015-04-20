@@ -4,6 +4,7 @@ import android.content.ContentUris;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
+import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.PendingTransactionsService;
@@ -55,6 +56,15 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         provider.setInsertedUri(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 100));
         subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
         assertEquals(100, subscriber.getEvent().getId());
+    }
+
+    public void testAdjustTransactionCommand() {
+        subject.onEventBackgroundThread(new AdjustTransactionCommand(10311, "100.01", "Comment 100.01"));
+        MockPendingTransactionsContentProvider.UpdateArgs updateArgs = provider.getUpdateArgs();
+        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 10311), updateArgs.uri);
+        assertEquals(2, updateArgs.values.size());
+        assertEquals("100.01", updateArgs.values.getAsString(TransactionContract.COLUMN_AMOUNT));
+        assertEquals("Comment 100.01", updateArgs.values.getAsString(TransactionContract.COLUMN_COMMENT));
     }
 
     public void testMarkTransactionAsPublished() {
