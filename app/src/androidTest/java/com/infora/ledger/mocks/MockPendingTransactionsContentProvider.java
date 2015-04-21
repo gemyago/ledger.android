@@ -48,7 +48,6 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     }
 
     public UpdateArgs getUpdateArgs() {
-        Assert.assertNotNull("Update has not yet been performed.", updateArgs);
         return updateArgs;
     }
 

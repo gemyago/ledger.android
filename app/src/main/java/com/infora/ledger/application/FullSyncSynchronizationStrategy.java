@@ -15,6 +15,7 @@ import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
 
@@ -45,10 +46,16 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);
             if (remoteTransactionsMap.containsKey(lt.getTransactionId())) {
-                if(lt.isDeleted()) {
+                if (lt.isDeleted()) {
                     Log.d(TAG, "Local transaction '" + lt.getTransactionId() + "' was marked as removed. Rejecting and marking for purge.");
                     api.rejectPendingTransaction(lt.getTransactionId());
                     toPurgeIds.add(lt.getId());
+                } else {
+                    PendingTransactionDto remoteTransaction = remoteTransactionsMap.get(lt.getTransactionId());
+                    if (!Objects.equals(remoteTransaction.amount, lt.getAmount()) ||
+                            !remoteTransaction.comment.equals(lt.getComment())) {
+                        api.adjustPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment());
+                    }
                 }
             } else {
                 if (lt.isPublished()) {

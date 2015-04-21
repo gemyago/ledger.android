@@ -25,6 +25,10 @@ public class MockLedgerApi implements LedgerApi {
         return reportedTransactions;
     }
 
+    public ArrayList<AdjustPendingTransactionArgs> getAdjustTransactions() {
+        return adjustTransactions;
+    }
+
     public ArrayList<String> getRejectedPendingTrasnsactions() {
         return rejectedPendingTrasnsactions;
     }

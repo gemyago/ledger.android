@@ -185,4 +185,42 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-2"));
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-3"));
     }
+
+    public void testSynchronizeUpdateChanged() {
+        ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
+        remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));
+        remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
+        remoteTransactions.add(new PendingTransactionDto("t-3", "103", "t 103"));
+        api.setPendingTransactions(remoteTransactions);
+
+
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
+        Object[] t1 = {1, "t-1", "100.01", "t 100.01", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t1);
+        Object[] t2 = {2, "t-2", "101", "t 101", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t2);
+        Object[] t3 = {3, "t-3", "103.03", "t 103.03", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        matrixCursor.addRow(t3);
+        provider.setQueryResult(matrixCursor);
+
+        subject.synchronize(api, resolver, null, syncResult);
+
+        assertNull(provider.getInsertArgs());
+        assertNull(provider.getDeleteArgs());
+        assertNull(provider.getUpdateArgs());
+
+        assertEquals(0, api.getReportedTransactions().size());
+        assertEquals(2, api.getAdjustTransactions().size());
+        assertEquals(0, api.getRejectedPendingTrasnsactions().size());
+
+        MockLedgerApi.AdjustPendingTransactionArgs adjustedT1 = api.getAdjustTransactions().get(0);
+        assertEquals("t-1", adjustedT1.transactionId);
+        assertEquals("100.01", adjustedT1.amount);
+        assertEquals("t 100.01", adjustedT1.comment);
+
+        MockLedgerApi.AdjustPendingTransactionArgs adjustedT3 = api.getAdjustTransactions().get(1);
+        assertEquals("t-3", adjustedT3.transactionId);
+        assertEquals("103.03", adjustedT3.amount);
+        assertEquals("t 103.03", adjustedT3.comment);
+    }
 }
