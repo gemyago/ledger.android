@@ -63,4 +63,15 @@ public class ApiManualTest extends AndroidTestCase {
             assertNotNull(pendingTransaction.comment);
         }
     }
+
+    public void testAdjustPendingTransaction() {
+        ArrayList<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
+        for (PendingTransactionDto transaction : transactions) {
+            float newAmount = Float.parseFloat(transaction.amount) + 1;
+            ledgerApi.adjustPendingTransaction(
+                    transaction.transactionId,
+                    String.valueOf(newAmount),
+                    "Comment " + newAmount);
+        }
+    }
 }

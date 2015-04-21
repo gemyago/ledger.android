@@ -8,6 +8,7 @@ import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.POST;
+import retrofit.http.PUT;
 import retrofit.http.Path;
 
 /**
@@ -18,6 +19,9 @@ public interface LedgerApi {
     @POST("/api/sessions.json")
     AuthenticityToken authenticateByIdToken(@Field("google_id_token") String googleIdToken);
 
+    @GET("/pending-transactions.json")
+    ArrayList<PendingTransactionDto> getPendingTransactions();
+
     @FormUrlEncoded
     @POST("/pending-transactions")
     Void reportPendingTransaction(
@@ -26,8 +30,12 @@ public interface LedgerApi {
             @Field("comment") String comment,
             @Field("date") Date date);
 
-    @GET("/pending-transactions.json")
-    ArrayList<PendingTransactionDto> getPendingTransactions();
+    @FormUrlEncoded
+    @PUT("/pending-transactions/{aggregate_id}")
+    Void adjustPendingTransaction(
+            @Path("aggregate_id") String transactionId,
+            @Field("amount") String amount,
+            @Field("comment") String comment);
 
     @DELETE("/pending-transactions/{aggregate_id}")
     Void rejectPendingTransaction(@Path("aggregate_id") String transactionId);

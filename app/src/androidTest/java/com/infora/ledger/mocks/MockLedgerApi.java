@@ -15,6 +15,7 @@ import retrofit.http.Field;
 public class MockLedgerApi implements LedgerApi {
     private ArrayList<PendingTransactionDto> pendingTransactions;
     private ArrayList<ReportPendingTransactionArgs> reportedTransactions = new ArrayList<ReportPendingTransactionArgs>();
+    private ArrayList<AdjustPendingTransactionArgs> adjustTransactions = new ArrayList<AdjustPendingTransactionArgs>();
     private ArrayList<String> rejectedPendingTrasnsactions = new ArrayList<String>();
     private String authenticatedGoogleIdToken;
     private AuthenticatingByTokenCallback authenticatingByTokenCallback;
@@ -54,6 +55,12 @@ public class MockLedgerApi implements LedgerApi {
     }
 
     @Override
+    public Void adjustPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("comment") String comment) {
+        adjustTransactions.add(new AdjustPendingTransactionArgs(transactionId, amount, comment));
+        return null;
+    }
+
+    @Override
     public Void rejectPendingTransaction(@Field("aggregate_id") String transactionId) {
         rejectedPendingTrasnsactions.add(transactionId);
         return null;
@@ -70,6 +77,20 @@ public class MockLedgerApi implements LedgerApi {
 
     public interface AuthenticatingByTokenCallback {
         void authenticating(String googleIdToken);
+    }
+
+    public static class AdjustPendingTransactionArgs {
+        public final String transactionId;
+        public final String amount;
+        public final String comment;
+
+        public AdjustPendingTransactionArgs(String transactionId,
+                                            String amount,
+                                            String comment) {
+            this.transactionId = transactionId;
+            this.amount = amount;
+            this.comment = comment;
+        }
     }
 
     public static class ReportPendingTransactionArgs {
