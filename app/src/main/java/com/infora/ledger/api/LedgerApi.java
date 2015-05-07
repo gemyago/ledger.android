@@ -10,6 +10,7 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
+import retrofit.http.Query;
 
 /**
  * Created by jenya on 11.03.15.
@@ -25,18 +26,18 @@ public interface LedgerApi {
     @FormUrlEncoded
     @POST("/pending-transactions")
     Void reportPendingTransaction(
-            @Field("aggregate_id") String transactionId,
+            @Field("id") String transactionId,
             @Field("amount") String amount,
             @Field("comment") String comment,
             @Field("date") Date date);
 
     @FormUrlEncoded
-    @PUT("/pending-transactions/{aggregate_id}")
+    @PUT("/pending-transactions/{id}")
     Void adjustPendingTransaction(
-            @Path("aggregate_id") String transactionId,
+            @Path("id") String transactionId,
             @Field("amount") String amount,
             @Field("comment") String comment);
 
-    @DELETE("/pending-transactions/{aggregate_id}")
-    Void rejectPendingTransaction(@Path("aggregate_id") String transactionId);
+    @DELETE("/pending-transactions/{id}")
+    Void rejectPendingTransaction(@Path("id") String transactionId);
 }
