@@ -29,7 +29,9 @@ public class PrivatBankApi {
         RequestBody body = RequestBody.create(XML, request.toXml());
         Request httpRequest = new Request.Builder().url(API_URL).post(body).build();
         Response httpResponse = client.newCall(httpRequest).execute();
-        LogUtil.d(this, "Data fetched with status: " + httpResponse.code() + ". Parsing...");
-        return responseParser.parseTransactions(httpResponse.body().string());
+        LogUtil.d(this, "Data fetched with status: " + httpResponse.code() + ".");
+        if (httpResponse.isSuccessful())
+            return responseParser.parseTransactions(httpResponse.body().string());
+        else throw new IOException("Request failed. " + httpResponse);
     }
 }

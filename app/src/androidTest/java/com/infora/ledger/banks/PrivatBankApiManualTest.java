@@ -33,10 +33,10 @@ public class PrivatBankApiManualTest extends AndroidTestCase {
         api = new PrivatBankApi();
     }
 
-    public void testGetTransactions() throws IOException {
+    public void testGetTransactions() throws IOException, PrivatBankException {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.DATE, -3);
         Date yesterday = calendar.getTime();
 
         GetTransactionsRequest request = new GetTransactionsRequest(

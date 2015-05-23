@@ -28,12 +28,20 @@ public class PrivatBankResponseParser {
             }
             parser.require(XmlPullParser.START_TAG, null, "data");
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("info"))
-                    break;
+                if (parser.getEventType() == XmlPullParser.START_TAG) {
+                    if (parser.getName().equals("info")) break;
+                    if (parser.getName().equals("error"))
+                        throw new PrivatBankException(parser.getAttributeValue(null, "message"));
+                }
                 continue;
             }
             parser.require(XmlPullParser.START_TAG, null, "info");
-            parser.nextTag();
+            parser.next();
+            if (parser.getEventType() == XmlPullParser.TEXT) {
+                String message = parser.getText().trim();
+                if (!message.equals("")) throw new PrivatBankException(message);
+                parser.nextTag();
+            }
             parser.require(XmlPullParser.START_TAG, null, "statements");
             ArrayList<PrivatBankTransaction> result = new ArrayList<>();
             while (!(parser.nextTag() == XmlPullParser.END_TAG && "statements".equals(parser.getName()))) {

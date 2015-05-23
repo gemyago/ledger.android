@@ -65,4 +65,48 @@ public class PrivatBankResponseParserTest extends TestCase {
         assertEquals("Food marked", transaction3.terminal);
         assertEquals("General purchase", transaction3.description);
     }
+
+    public void testParseTransactionsWithInfoMessage() throws Exception {
+        String body ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<response version=\"1.0\">" +
+                "   <merchant>" +
+                "       <id>merchant-110</id>" +
+                "       <signature>signature-110</signature>" +
+                "   </merchant>" +
+                "   <data>" +
+                "       <oper>cmt</oper>" +
+                "       <info>this card is not in merchants card" +
+                "           <statements status=\"excellent\" credit=\"6692.95\" debet=\"1173.36\">\n" +
+                "           </statements>" +
+                "       </info>" +
+                "   </data>" +
+                "</response>";
+        boolean isRaised = false;
+        try {
+            subject.parseTransactions(body);
+        } catch (PrivatBankException ex) {
+            isRaised = true;
+            assertEquals("this card is not in merchants card", ex.getMessage());
+        }
+        assertTrue(isRaised);
+    }
+
+    public void testParseTransactionsWithError() throws Exception {
+        String body ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<response version=\"1.0\">" +
+                "   <merchant>" +
+                "       <id>merchant-110</id>" +
+                "       <signature>signature-110</signature>" +
+                "   </merchant>" +
+                "   <data><error message =\"invalid merchant id\" /></data>" +
+                "</response>";
+        boolean isRaised = false;
+        try {
+            subject.parseTransactions(body);
+        } catch (PrivatBankException ex) {
+            isRaised = true;
+            assertEquals("invalid merchant id", ex.getMessage());
+        }
+        assertTrue(isRaised);
+    }
 }
