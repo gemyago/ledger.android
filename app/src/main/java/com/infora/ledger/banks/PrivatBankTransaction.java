@@ -11,4 +11,17 @@ public class PrivatBankTransaction {
     public String rest;
     public String terminal;
     public String description;
+
+    @Override
+    public String toString() {
+        return "PrivatBankTransaction{" +
+                "trandate='" + trandate + '\'' +
+                ", trantime='" + trantime + '\'' +
+                ", amount='" + amount + '\'' +
+                ", cardamount='" + cardamount + '\'' +
+                ", rest='" + rest + '\'' +
+                ", terminal='" + terminal + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }
