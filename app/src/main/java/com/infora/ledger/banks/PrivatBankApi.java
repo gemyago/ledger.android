@@ -25,9 +25,11 @@ public class PrivatBankApi {
     }
 
     public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, PrivatBankException {
+        LogUtil.d(this, "Fetching privatbank transactions...");
         RequestBody body = RequestBody.create(XML, request.toXml());
         Request httpRequest = new Request.Builder().url(API_URL).post(body).build();
         Response httpResponse = client.newCall(httpRequest).execute();
+        LogUtil.d(this, "Data fetched with status: " + httpResponse.code() + ". Parsing...");
         return responseParser.parseTransactions(httpResponse.body().string());
     }
 }
