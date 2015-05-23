@@ -15,14 +15,19 @@ import java.util.List;
  */
 public class PrivatBankApi {
     private static final String API_URL = "https://api.privatbank.ua/p24api/rest_fiz";
+    private final OkHttpClient client;
+    private final PrivatBankResponseParser responseParser;
     private MediaType XML = MediaType.parse("application/xml");
 
-    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+    public PrivatBankApi() {
+        client = new OkHttpClient();
+        responseParser = new PrivatBankResponseParser();
+    }
+
+    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, PrivatBankException {
         RequestBody body = RequestBody.create(XML, request.toXml());
         Request httpRequest = new Request.Builder().url(API_URL).post(body).build();
         Response httpResponse = client.newCall(httpRequest).execute();
-        LogUtil.d(this, "Response body: " + httpResponse.body().string());
-        return null;
+        return responseParser.parseTransactions(httpResponse.body().string());
     }
 }

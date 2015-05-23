@@ -1,0 +1,59 @@
+package com.infora.ledger.banks;
+
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by jenya on 24.05.15.
+ */
+public class PrivatBankResponseParser {
+    public List<PrivatBankTransaction> parseTransactions(String body) throws PrivatBankException {
+        XmlPullParser parser = Xml.newPullParser();
+        try {
+            parser.setInput(new StringReader(body));
+            parser.nextTag();
+            parser.require(XmlPullParser.START_TAG, null, "response");
+
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("data"))
+                    break;
+                continue;
+            }
+            parser.require(XmlPullParser.START_TAG, null, "data");
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("info"))
+                    break;
+                continue;
+            }
+            parser.require(XmlPullParser.START_TAG, null, "info");
+            parser.nextTag();
+            parser.require(XmlPullParser.START_TAG, null, "statements");
+            ArrayList<PrivatBankTransaction> result = new ArrayList<>();
+            while (!(parser.nextTag() == XmlPullParser.END_TAG && "statements".equals(parser.getName()))) {
+                if (parser.getEventType() == XmlPullParser.START_TAG && "statement".equals(parser.getName())) {
+                    PrivatBankTransaction transaction = new PrivatBankTransaction();
+                    transaction.trandate = parser.getAttributeValue(null, "trandate");
+                    transaction.trantime = parser.getAttributeValue(null, "trantime");
+                    transaction.amount = parser.getAttributeValue(null, "amount");
+                    transaction.cardamount = parser.getAttributeValue(null, "cardamount");
+                    transaction.rest = parser.getAttributeValue(null, "rest");
+                    transaction.terminal = parser.getAttributeValue(null, "terminal");
+                    transaction.description = parser.getAttributeValue(null, "description");
+                    result.add(transaction);
+                }
+            }
+            return result;
+        } catch (XmlPullParserException e) {
+            throw new PrivatBankException(e);
+        } catch (IOException e) {
+            throw new PrivatBankException(e);
+        }
+    }
+}
