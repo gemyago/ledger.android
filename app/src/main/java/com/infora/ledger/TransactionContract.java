@@ -20,6 +20,9 @@ public class TransactionContract implements BaseColumns {
     public static final String COLUMN_IS_DELETED= "is_deleted";
     public static final String COLUMN_TIMESTAMP= "timestamp";
 
+    public static final int TRANSACTION_TYPE_INCOME = 1;
+    public static final int TRANSACTION_TYPE_EXPENSE = 2;
+
     public static final String[] ALL_COLUMNS = new String[]{
             TransactionContract.COLUMN_ID,
             TransactionContract.COLUMN_TRANSACTION_ID,
