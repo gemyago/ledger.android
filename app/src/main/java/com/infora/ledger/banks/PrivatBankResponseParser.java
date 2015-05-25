@@ -47,6 +47,7 @@ public class PrivatBankResponseParser {
             while (!(parser.nextTag() == XmlPullParser.END_TAG && "statements".equals(parser.getName()))) {
                 if (parser.getEventType() == XmlPullParser.START_TAG && "statement".equals(parser.getName())) {
                     PrivatBankTransaction transaction = new PrivatBankTransaction();
+                    transaction.card = parser.getAttributeValue(null, "card");
                     transaction.trandate = parser.getAttributeValue(null, "trandate");
                     transaction.trantime = parser.getAttributeValue(null, "trantime");
                     transaction.amount = parser.getAttributeValue(null, "amount");

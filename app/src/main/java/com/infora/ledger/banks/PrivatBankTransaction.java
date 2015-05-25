@@ -16,6 +16,7 @@ public class PrivatBankTransaction {
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("-?(\\d+\\.?\\d*) \\w{2,3}");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    public String card;
     public String trandate;
     public String trantime;
     public String amount;
@@ -45,7 +46,8 @@ public class PrivatBankTransaction {
     @Override
     public String toString() {
         return "PrivatBankTransaction{" +
-                "trandate='" + trandate + '\'' +
+                "card='" + card + '\'' +
+                ", trandate='" + trandate + '\'' +
                 ", trantime='" + trantime + '\'' +
                 ", amount='" + amount + '\'' +
                 ", cardamount='" + cardamount + '\'' +
