@@ -11,6 +11,8 @@ import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.data.PendingTransactionsContentProvider;
 import com.infora.ledger.data.PendingTransactionsDbUtils;
 
+import java.util.Calendar;
+
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
     private MockContentResolver resolver;
@@ -51,6 +53,21 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals("10.332", newTransaction.getAmount());
         assertEquals("Comment 10.332", newTransaction.getComment());
         assertFalse(newTransaction.isPublished());
+    }
+
+    public void testInsertNewTransactionWithExplicitTimestamp() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, -3);
+
+        ContentValues values = new ContentValues();
+        values.put(TransactionContract.COLUMN_AMOUNT, "10.332");
+        values.put(TransactionContract.COLUMN_COMMENT, "Comment 10.332");
+        values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(calendar.getTime()));
+        Uri newUri = resolver.insert(TransactionContract.CONTENT_URI, values);
+        long id = ContentUris.parseId(newUri);
+
+        PendingTransaction newTransaction = PendingTransactionsDbUtils.getById(dbHelper, id);
+        assertEquals(newTransaction.getTimestamp(), calendar.getTime());
     }
 
     public void testQuery() {

@@ -79,7 +79,10 @@ public class PendingTransactionsContentProvider extends ContentProvider {
             case TRANSACTIONS:
                 String transactionId = UUID.randomUUID().toString();
                 values.put(TransactionContract.COLUMN_TRANSACTION_ID, transactionId);
-                values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+                Date date = values.containsKey(TransactionContract.COLUMN_TIMESTAMP) ?
+                        LedgerDbHelper.parseISO8601((String) values.get(TransactionContract.COLUMN_TIMESTAMP)) :
+                        new Date();
+                values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(date));
                 Log.d(TAG, "Inserting new transaction transaction_id='" + transactionId + "'");
                 long id = dbHelper.getWritableDatabase().insert(TransactionContract.TABLE_NAME, null, values);
                 notifyListChanged();
