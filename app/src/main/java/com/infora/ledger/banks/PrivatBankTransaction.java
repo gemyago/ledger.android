@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * Created by jenya on 23.05.15.
  */
 public class PrivatBankTransaction {
-    public static final String PRIVATBANK_BIC = "TODO";
+    public static final String PRIVATBANK_BIC = "PBANUA2X";
 
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("-?(\\d+\\.?\\d*) \\w{2,3}");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
