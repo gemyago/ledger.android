@@ -42,4 +42,13 @@ public class PrivatBankTransactionTest extends TestCase {
         subject.cardamount = "-6692.95 UAH";
         assertEquals(TransactionContract.TRANSACTION_TYPE_EXPENSE, subject.getTypeId());
     }
+
+    public void testGetTransactionId() {
+        PrivatBankTransaction transaction = new PrivatBankTransaction();
+        transaction.card = "443334";
+        transaction.trandate = "2015-05-23";
+        transaction.trantime = "21:56:23";
+        transaction.cardamount = "100.31 UAH";
+        assertEquals(PrivatBankTransaction.PRIVATBANK_BIC + "44333420150523215623100P31", transaction.getTransactionId());
+    }
 }

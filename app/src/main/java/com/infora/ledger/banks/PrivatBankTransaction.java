@@ -5,6 +5,7 @@ import com.infora.ledger.TransactionContract;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,8 @@ import java.util.regex.Pattern;
  * Created by jenya on 23.05.15.
  */
 public class PrivatBankTransaction {
+    public static final String PRIVATBANK_BIC = "TODO";
+
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("-?(\\d+\\.?\\d*) \\w{2,3}");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -41,6 +44,10 @@ public class PrivatBankTransaction {
 
     public int getTypeId() {
         return cardamount.startsWith("-") ? TransactionContract.TRANSACTION_TYPE_EXPENSE : TransactionContract.TRANSACTION_TYPE_INCOME;
+    }
+
+    public String getTransactionId() {
+        return PRIVATBANK_BIC + card + trandate.replace("-", "") + trantime.replace(":", "") + getAmount().replace(".", "P");
     }
 
     @Override
