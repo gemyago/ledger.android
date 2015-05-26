@@ -23,12 +23,16 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     public static final String PENDING_TRANSACTIONS_ITEM_TYPE = "vnd.android.cursor.item/vnd." + AUTHORITY + ".pending-transactions";
     private static final String TAG = PendingTransactionsContentProvider.class.getName();
     private static final int TRANSACTIONS = 1000;
-    private static final int TRANSACTION_ID = 1001;
+    private static final int TRANSACTIONS_REPORTED_BY_USER = 1001;
+    private static final int TRANSACTIONS_FETCHED_FROM_BANK = 1002;
+    private static final int TRANSACTION_ID = 1003;
     private static final UriMatcher sUriMatcher;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(AUTHORITY, "pending-transactions", TRANSACTIONS);
+        sUriMatcher.addURI(AUTHORITY, "pending-transactions/reported-by-user", TRANSACTIONS_REPORTED_BY_USER);
+        sUriMatcher.addURI(AUTHORITY, "pending-transactions/fetched-from-bank/*", TRANSACTIONS_FETCHED_FROM_BANK);
         sUriMatcher.addURI(AUTHORITY, "pending-transactions/#", TRANSACTION_ID);
     }
 
@@ -48,15 +52,36 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Log.d(TAG, "Executing query: " + uri);
         final int match = sUriMatcher.match(uri);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor query;
         switch (match) {
             case TRANSACTIONS:
-                SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 query.setNotificationUri(getContext().getContentResolver(), uri);
-                return query;
+                break;
+            case TRANSACTIONS_REPORTED_BY_USER:
+                if (selection != null)
+                    throw new IllegalArgumentException("selection can not be provided for this query type");
+                if (selectionArgs != null)
+                    throw new IllegalArgumentException("selectionArgs can not be provided for this query type");
+                selection = TransactionContract.COLUMN_BIC + " IS NULL";
+                query = db.query(TransactionContract.TABLE_NAME, projection, selection, null, null, null, sortOrder);
+                query.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case TRANSACTIONS_FETCHED_FROM_BANK:
+                if (selection != null)
+                    throw new IllegalArgumentException("selection can not be provided for this query type");
+                if (selectionArgs != null)
+                    throw new IllegalArgumentException("selectionArgs can not be provided for this query type");
+                selection = TransactionContract.COLUMN_BIC + " = ?";
+                selectionArgs = new String[]{uri.getLastPathSegment()};
+                query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                query.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
             default:
                 throw newInvalidUrlException(uri);
         }
+        return query;
     }
 
     @Override
@@ -64,6 +89,10 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case TRANSACTIONS:
+                return PENDING_TRANSACTIONS_LIST_TYPE;
+            case TRANSACTIONS_REPORTED_BY_USER:
+                return PENDING_TRANSACTIONS_LIST_TYPE;
+            case TRANSACTIONS_FETCHED_FROM_BANK:
                 return PENDING_TRANSACTIONS_LIST_TYPE;
             case TRANSACTION_ID:
                 return PENDING_TRANSACTIONS_ITEM_TYPE;

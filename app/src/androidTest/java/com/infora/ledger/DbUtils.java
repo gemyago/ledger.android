@@ -23,7 +23,15 @@ public class DbUtils {
         return insertPendingTransaction(dbHelper, transactionId, amount, comment, false, false);
     }
 
+    public static int insertPendingTransaction(SQLiteOpenHelper dbHelper, String transactionId, String amount, String comment, String bic) {
+        return insertPendingTransaction(dbHelper, transactionId, amount, comment, false, false, bic);
+    }
+
     public static int insertPendingTransaction(SQLiteOpenHelper dbHelper, String transactionId, String amount, String comment, boolean isPublished, boolean isDeleted) {
+        return insertPendingTransaction(dbHelper, transactionId, amount, comment, isPublished, isDeleted, null);
+    }
+
+    public static int insertPendingTransaction(SQLiteOpenHelper dbHelper, String transactionId, String amount, String comment, boolean isPublished, boolean isDeleted, String bic) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
@@ -33,6 +41,7 @@ public class DbUtils {
             values.put(TransactionContract.COLUMN_IS_PUBLISHED, isPublished);
             values.put(TransactionContract.COLUMN_IS_DELETED, isDeleted);
             values.put(TransactionContract.COLUMN_TIMESTAMP, LedgerDbHelper.toISO8601(new Date()));
+            values.put(TransactionContract.COLUMN_BIC, bic);
             return (int) db.insertOrThrow(TransactionContract.TABLE_NAME, null, values);
         } finally {
             db.close();
