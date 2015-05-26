@@ -19,6 +19,7 @@ public class TransactionContract implements BaseColumns {
     public static final String COLUMN_IS_PUBLISHED= "is_published";
     public static final String COLUMN_IS_DELETED= "is_deleted";
     public static final String COLUMN_TIMESTAMP= "timestamp";
+    public static final String COLUMN_BIC= "bank_identifier_code";
 
     public static final int TRANSACTION_TYPE_INCOME = 1;
     public static final int TRANSACTION_TYPE_EXPENSE = 2;
@@ -30,7 +31,8 @@ public class TransactionContract implements BaseColumns {
             TransactionContract.COLUMN_COMMENT,
             TransactionContract.COLUMN_IS_PUBLISHED,
             TransactionContract.COLUMN_IS_DELETED,
-            TransactionContract.COLUMN_TIMESTAMP
+            TransactionContract.COLUMN_TIMESTAMP,
+            TransactionContract.COLUMN_BIC
     };
 
     public static final String[] ASSIGNABLE_COLUMNS = new String[]{
@@ -39,6 +41,7 @@ public class TransactionContract implements BaseColumns {
             TransactionContract.COLUMN_COMMENT,
             TransactionContract.COLUMN_IS_PUBLISHED,
             TransactionContract.COLUMN_IS_DELETED,
-            TransactionContract.COLUMN_TIMESTAMP
+            TransactionContract.COLUMN_TIMESTAMP,
+            TransactionContract.COLUMN_BIC
     };
 }

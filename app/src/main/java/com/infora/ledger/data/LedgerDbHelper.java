@@ -17,7 +17,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -35,7 +35,8 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         TransactionContract.COLUMN_COMMENT + " TEXT NULL," +
                         TransactionContract.COLUMN_IS_PUBLISHED + " INTEGER NOT NULL DEFAULT(0)," +
                         TransactionContract.COLUMN_IS_DELETED + " INTEGER NOT NULL DEFAULT(0)," +
-                        TransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL" +
+                        TransactionContract.COLUMN_TIMESTAMP + " NVARCHAR(50) NOT NULL," +
+                        TransactionContract.COLUMN_BIC + " NVARCHAR(50) NULL" +
                         " )"
         );
     }
@@ -46,6 +47,10 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
                     + " ADD " + TransactionContract.COLUMN_IS_DELETED + " INTEGER NOT NULL DEFAULT 0;");
 
+        }
+        if(oldVersion <= 4) {
+            db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
+                    + " ADD " + TransactionContract.COLUMN_BIC + " NVARCHAR(50) NULL;");
         }
     }
 
