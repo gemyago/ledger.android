@@ -36,6 +36,16 @@ public class PendingTransaction {
         this.comment = comment;
     }
 
+    public PendingTransaction(String transactionId, String amount, String comment, boolean isPublished, boolean isDeleted, Date timestamp, String bic) {
+        this.transactionId = transactionId;
+        this.amount = amount;
+        this.comment = comment;
+        this.isPublished = isPublished;
+        this.isDeleted = isDeleted;
+        this.timestamp = timestamp;
+        this.bic = bic;
+    }
+
     public static ContentValues appendValues(ContentValues values, String amount, String comment) {
         values.put(TransactionContract.COLUMN_AMOUNT, amount);
         values.put(TransactionContract.COLUMN_COMMENT, comment);

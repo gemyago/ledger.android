@@ -12,6 +12,7 @@ import com.infora.ledger.data.PendingTransactionsContentProvider;
 import com.infora.ledger.data.PendingTransactionsDbUtils;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
@@ -125,30 +126,35 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
     }
 
     public void testQueryFetchedFromBankByBic() {
-        DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100", "bic-1");
-        DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101", "bic-1");
-        DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", "bic-2");
-        DbUtils.insertPendingTransaction(dbHelper, "103", "103.00", "Transaction 103", "bic-2");
-        DbUtils.insertPendingTransaction(dbHelper, "104", "104.00", "Transaction 103", null);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, 4);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("100", "100.00", "Transaction 100", false, false, cal.getTime(), "bic-1"));
+        cal.add(Calendar.HOUR, 3);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("101", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-1"));
+        cal.add(Calendar.HOUR, 2);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("102", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-1"));
+
+        Calendar.getInstance();
+        cal.add(Calendar.HOUR, 4);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("200", "100.00", "Transaction 100", false, false, cal.getTime(), "bic-2"));
+        cal.add(Calendar.HOUR, 3);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("201", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-2"));
+        cal.add(Calendar.HOUR, 2);
+        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("202", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-2"));
 
         Cursor results = resolver.query(LedgerContentUris.withAppendedString(TransactionContract.CONTENT_URI_FETCHED_FROM_BANK, "/bic-1"),
-                TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
-
-        assertEquals(2, results.getCount());
+                TransactionContract.ALL_COLUMNS, null, null, null);
+        assertEquals(1, results.getCount());
         results.moveToFirst();
-        assertEquals("100", results.getString(0));
-
-        results.moveToNext();
-        assertEquals("101", results.getString(0));
+        PendingTransaction tran102 = new PendingTransaction(results);
+        assertEquals("102", tran102.transactionId);
 
         results = resolver.query(LedgerContentUris.withAppendedString(TransactionContract.CONTENT_URI_FETCHED_FROM_BANK, "/bic-2"),
-                TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
-
-        assertEquals(2, results.getCount());
+                TransactionContract.ALL_COLUMNS, null, null, null);
+        assertEquals(1, results.getCount());
         results.moveToFirst();
-        assertEquals("102", results.getString(0));
-        results.moveToNext();
-        assertEquals("103", results.getString(0));
+        PendingTransaction tran202 = new PendingTransaction(results);
+        assertEquals("202", tran202.transactionId);
     }
 
     public void testQuerySkipDeleted() {

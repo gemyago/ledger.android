@@ -73,9 +73,12 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                     throw new IllegalArgumentException("selection can not be provided for this query type");
                 if (selectionArgs != null)
                     throw new IllegalArgumentException("selectionArgs can not be provided for this query type");
+                if (sortOrder != null)
+                    throw new IllegalArgumentException("sortOrder can not be provided for this query type");
                 selection = TransactionContract.COLUMN_BIC + " = ?";
                 selectionArgs = new String[]{uri.getLastPathSegment()};
-                query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                sortOrder = TransactionContract.COLUMN_TIMESTAMP + " DESC";
+                query = db.query(TransactionContract.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder, "1");
                 query.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
             default:
