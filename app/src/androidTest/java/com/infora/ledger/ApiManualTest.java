@@ -28,6 +28,7 @@ public class ApiManualTest extends AndroidTestCase {
     private ApiAdapter adapter;
     private LedgerApi ledgerApi;
     private AccountManagerWrapper accountManager;
+    private Account account;
 
     @Override
     protected void runTest() throws Throwable {
@@ -44,15 +45,16 @@ public class ApiManualTest extends AndroidTestCase {
         accountManager = new AccountManagerWrapper(getContext());
         adapter = new ApiAdapter(accountManager, endpointUrl);
         ledgerApi = adapter.createApi();
-        Account account = accountManager.getApplicationAccounts()[0];
-        adapter.authenticateApi(ledgerApi, account);
+        account = accountManager.getApplicationAccounts()[0];
     }
 
     public void testReportPendingTransaction() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
+        adapter.authenticateApi(ledgerApi, account);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
     }
 
     public void testGetPendingTransactions() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
+        adapter.authenticateApi(ledgerApi, account);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.01", "Comment for transaction 101", new Date());
         ArrayList<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
@@ -63,8 +65,9 @@ public class ApiManualTest extends AndroidTestCase {
             assertNotNull(pendingTransaction.comment);
         }
     }
-
+    
     public void testAdjustPendingTransaction() {
+        adapter.authenticateApi(ledgerApi, account);
         ArrayList<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto transaction : transactions) {
             float newAmount = Float.parseFloat(transaction.amount) + 1;

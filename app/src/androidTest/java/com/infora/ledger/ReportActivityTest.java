@@ -1,5 +1,6 @@
 package com.infora.ledger;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -35,6 +36,12 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
 
     public ReportActivityTest() {
         super(ReportActivity.class);
+    }
+
+    @Override
+    protected void setActivity(Activity testActivity) {
+        if (testActivity != null) testActivity.setTheme(R.style.AppTheme);
+        super.setActivity(testActivity);
     }
 
     @Override

@@ -55,7 +55,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         for (PendingTransactionDto transaction : remoteTransactions) {
-            matrixCursor.addRow(new Object[]{0, transaction.transactionId, transaction.amount, transaction.comment, 1, 0, LedgerDbHelper.toISO8601(new Date())});
+            matrixCursor.addRow(new Object[]{0, transaction.transactionId, transaction.amount, transaction.comment, 1, 0, LedgerDbHelper.toISO8601(new Date()), null});
         }
         provider.setQueryResult(matrixCursor);
 
@@ -73,11 +73,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = {1, "t-1", "100", "t 100", 0, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t1 = {1, "t-1", "100", "t 100", 0, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t1);
-        Object[] t2 = {2, "t-2", "101", "t 101", 0, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t2 = {2, "t-2", "101", "t 101", 0, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t2);
-        Object[] t3 = {3, "t-3", "103", "t 103", 0, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t3 = {3, "t-3", "103", "t 103", 0, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>();
@@ -119,11 +119,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = {1, "t-1", "100", "t 100", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t1 = {1, "t-1", "100", "t 100", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t1);
-        Object[] t2 = {2, "t-2", "101", "t 101", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t2 = {2, "t-2", "101", "t 101", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t2);
-        Object[] t3 = {3, "t-3", "103", "t 103", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t3 = {3, "t-3", "103", "t 103", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
         MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
@@ -154,11 +154,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
 
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = {1, "t-1", "100", "t 100", 1, 1, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t1 = {1, "t-1", "100", "t 100", 1, 1, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t1);
-        Object[] t2 = {2, "t-2", "101", "t 101", 1, 1, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t2 = {2, "t-2", "101", "t 101", 1, 1, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t2);
-        Object[] t3 = {3, "t-3", "103", "t 103", 1, 1, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t3 = {3, "t-3", "103", "t 103", 1, 1, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
 
@@ -195,11 +195,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
 
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = {1, "t-1", "100.01", "t 100.01", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t1 = {1, "t-1", "100.01", "t 100.01", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t1);
-        Object[] t2 = {2, "t-2", "101", "t 101", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t2 = {2, "t-2", "101", "t 101", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t2);
-        Object[] t3 = {3, "t-3", "103.03", "t 103.03", 1, 0, LedgerDbHelper.toISO8601(new Date())};
+        Object[] t3 = {3, "t-3", "103.03", "t 103.03", 1, 0, LedgerDbHelper.toISO8601(new Date()), null};
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
 

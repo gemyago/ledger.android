@@ -1,7 +1,6 @@
 package com.infora.ledger;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -37,9 +36,9 @@ public class EditTransactionDialogTest extends ActivityInstrumentationTestCase2<
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         EditTransactionDialog fragment = new EditTransactionDialog();
-        fragment.transactionId = t.getId();
-        fragment.amount = t.getAmount();
-        fragment.comment = t.getComment();
+        fragment.transactionId = t.id;
+        fragment.amount = t.amount;
+        fragment.comment = t.comment;
         transaction.add(fragment, "tag");
         transaction.commit();
         getInstrumentation().waitForIdleSync();

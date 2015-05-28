@@ -45,26 +45,26 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         ArrayList<Integer> toPurgeIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);
-            if (remoteTransactionsMap.containsKey(lt.getTransactionId())) {
-                if (lt.isDeleted()) {
-                    Log.d(TAG, "Local transaction '" + lt.getTransactionId() + "' was marked as removed. Rejecting and marking for purge.");
-                    api.rejectPendingTransaction(lt.getTransactionId());
-                    toPurgeIds.add(lt.getId());
+            if (remoteTransactionsMap.containsKey(lt.transactionId)) {
+                if (lt.isDeleted) {
+                    Log.d(TAG, "Local transaction '" + lt.transactionId + "' was marked as removed. Rejecting and marking for purge.");
+                    api.rejectPendingTransaction(lt.transactionId);
+                    toPurgeIds.add(lt.id);
                 } else {
-                    PendingTransactionDto remoteTransaction = remoteTransactionsMap.get(lt.getTransactionId());
-                    if (!Objects.equals(remoteTransaction.amount, lt.getAmount()) ||
-                            !remoteTransaction.comment.equals(lt.getComment())) {
-                        api.adjustPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment());
+                    PendingTransactionDto remoteTransaction = remoteTransactionsMap.get(lt.transactionId);
+                    if (!Objects.equals(remoteTransaction.amount, lt.amount) ||
+                            !remoteTransaction.comment.equals(lt.comment)) {
+                        api.adjustPendingTransaction(lt.transactionId, lt.amount, lt.comment);
                     }
                 }
             } else {
-                if (lt.isPublished()) {
-                    Log.d(TAG, "Pending transaction '" + lt.getTransactionId() + "' was approved or rejected. Marking for purge.");
-                    toPurgeIds.add(lt.getId());
+                if (lt.isPublished) {
+                    Log.d(TAG, "Pending transaction '" + lt.transactionId + "' was approved or rejected. Marking for purge.");
+                    toPurgeIds.add(lt.id);
                 } else {
-                    Log.d(TAG, "Publishing pending transaction: " + lt.getTransactionId());
-                    api.reportPendingTransaction(lt.getTransactionId(), lt.getAmount(), lt.getComment(), lt.getTimestamp());
-                    bus.post(new MarkTransactionAsPublishedCommand(lt.getId()));
+                    Log.d(TAG, "Publishing pending transaction: " + lt.transactionId);
+                    api.reportPendingTransaction(lt.transactionId, lt.amount, lt.comment, lt.timestamp);
+                    bus.post(new MarkTransactionAsPublishedCommand(lt.id));
                 }
             }
         }

@@ -54,11 +54,11 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals(TransactionContract.CONTENT_URI + "/" + id, newUri.toString());
 
         PendingTransaction newTransaction = PendingTransactionsDbUtils.getById(dbHelper, id);
-        assertNotNull(newTransaction.getTransactionId());
-        assertNotNull(newTransaction.getTimestamp());
-        assertEquals("10.332", newTransaction.getAmount());
-        assertEquals("Comment 10.332", newTransaction.getComment());
-        assertFalse(newTransaction.isPublished());
+        assertNotNull(newTransaction.transactionId);
+        assertNotNull(newTransaction.timestamp);
+        assertEquals("10.332", newTransaction.amount);
+        assertEquals("Comment 10.332", newTransaction.comment);
+        assertFalse(newTransaction.isPublished);
     }
 
     public void testInsertNewTransactionWithExplicitTimestamp() {
@@ -73,7 +73,7 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         long id = ContentUris.parseId(newUri);
 
         PendingTransaction newTransaction = PendingTransactionsDbUtils.getById(dbHelper, id);
-        assertEquals(newTransaction.getTimestamp(), calendar.getTime());
+        assertEquals(newTransaction.timestamp, calendar.getTime());
     }
 
     public void testQuery() {
@@ -179,10 +179,10 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
                 values, null, null);
 
         PendingTransaction transaction = PendingTransactionsDbUtils.getById(dbHelper, id);
-        assertEquals("110.01", transaction.getAmount());
-        assertEquals("Transaction 110.01", transaction.getComment());
-        assertTrue("published flag was not updated", transaction.isPublished());
-        assertTrue("deleted flag was not updated", transaction.isDeleted());
+        assertEquals("110.01", transaction.amount);
+        assertEquals("Transaction 110.01", transaction.comment);
+        assertTrue("published flag was not updated", transaction.isPublished);
+        assertTrue("deleted flag was not updated", transaction.isDeleted);
     }
 
     public void testDelete() {

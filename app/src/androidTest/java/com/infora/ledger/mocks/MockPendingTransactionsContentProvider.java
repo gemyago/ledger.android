@@ -13,8 +13,6 @@ import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.data.LedgerDbHelper;
 
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -71,13 +69,14 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         for (PendingTransaction transaction : transactions) {
             matrixCursor.addRow(new Object[]{
-                    transaction.getId(),
-                    transaction.getTransactionId(),
-                    transaction.getAmount(),
-                    transaction.getComment(),
-                    transaction.isPublished() ? 1 : 0,
-                    transaction.isDeleted() ? 1 : 0,
-                    LedgerDbHelper.toISO8601(transaction.getTimestamp() == null ? new Date() : transaction.getTimestamp())});
+                    transaction.id,
+                    transaction.transactionId,
+                    transaction.amount,
+                    transaction.comment,
+                    transaction.isPublished ? 1 : 0,
+                    transaction.isDeleted ? 1 : 0,
+                    LedgerDbHelper.toISO8601(transaction.timestamp == null ? new Date() : transaction.timestamp),
+                    transaction.bic});
         }
         setQueryResult(matrixCursor);
     }
