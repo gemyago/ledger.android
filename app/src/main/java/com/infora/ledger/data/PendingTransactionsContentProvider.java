@@ -24,7 +24,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
     private static final String TAG = PendingTransactionsContentProvider.class.getName();
     private static final int TRANSACTIONS = 1000;
     private static final int TRANSACTIONS_REPORTED_BY_USER = 1001;
-    private static final int TRANSACTIONS_FETCHED_FROM_BANK = 1002;
+    private static final int RECENT_TRANSACTION_FETCHED_FROM_BANK = 1002;
     private static final int TRANSACTION_ID = 1003;
     private static final UriMatcher sUriMatcher;
 
@@ -32,7 +32,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(AUTHORITY, "pending-transactions", TRANSACTIONS);
         sUriMatcher.addURI(AUTHORITY, "pending-transactions/reported-by-user", TRANSACTIONS_REPORTED_BY_USER);
-        sUriMatcher.addURI(AUTHORITY, "pending-transactions/fetched-from-bank/*", TRANSACTIONS_FETCHED_FROM_BANK);
+        sUriMatcher.addURI(AUTHORITY, "pending-transactions/recent-fetched-from-bank/*", RECENT_TRANSACTION_FETCHED_FROM_BANK);
         sUriMatcher.addURI(AUTHORITY, "pending-transactions/#", TRANSACTION_ID);
     }
 
@@ -68,7 +68,7 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 query = db.query(TransactionContract.TABLE_NAME, projection, selection, null, null, null, sortOrder);
                 query.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
-            case TRANSACTIONS_FETCHED_FROM_BANK:
+            case RECENT_TRANSACTION_FETCHED_FROM_BANK:
                 if (selection != null)
                     throw new IllegalArgumentException("selection can not be provided for this query type");
                 if (selectionArgs != null)
@@ -92,8 +92,8 @@ public class PendingTransactionsContentProvider extends ContentProvider {
                 return PENDING_TRANSACTIONS_LIST_TYPE;
             case TRANSACTIONS_REPORTED_BY_USER:
                 return PENDING_TRANSACTIONS_LIST_TYPE;
-            case TRANSACTIONS_FETCHED_FROM_BANK:
-                return PENDING_TRANSACTIONS_LIST_TYPE;
+            case RECENT_TRANSACTION_FETCHED_FROM_BANK:
+                return PENDING_TRANSACTIONS_ITEM_TYPE;
             case TRANSACTION_ID:
                 return PENDING_TRANSACTIONS_ITEM_TYPE;
             default:

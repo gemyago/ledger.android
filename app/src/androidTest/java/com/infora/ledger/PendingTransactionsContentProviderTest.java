@@ -37,8 +37,8 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/reported-by-user");
         assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_LIST_TYPE, resolver.getType(itemsUrl));
 
-        itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/fetched-from-bank/bic-1");
-        assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_LIST_TYPE, resolver.getType(itemsUrl));
+        itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/recent-fetched-from-bank/bic-1");
+        assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_ITEM_TYPE, resolver.getType(itemsUrl));
 
         Uri itemUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/10");
         assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_ITEM_TYPE, resolver.getType(itemUrl));

@@ -10,7 +10,7 @@ public class TransactionContract implements BaseColumns {
     public static final String AUTHORITY = "com.infora.ledger.provider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/pending-transactions");
     public static final Uri CONTENT_URI_REPORTED_BY_USER = Uri.parse("content://" + AUTHORITY + "/pending-transactions/reported-by-user");
-    public static final Uri CONTENT_URI_FETCHED_FROM_BANK = Uri.parse("content://" + AUTHORITY + "/pending-transactions/fetched-from-bank");
+    public static final Uri CONTENT_URI_FETCHED_FROM_BANK = Uri.parse("content://" + AUTHORITY + "/pending-transactions/recent-fetched-from-bank");
 
     public static final String TABLE_NAME = "pending_transactions";
 
