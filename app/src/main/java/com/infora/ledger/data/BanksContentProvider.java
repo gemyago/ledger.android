@@ -38,7 +38,16 @@ public class BanksContentProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case BANKS_BANK_LINKS:
+                return BANK_LINKS_LIST_TYPE;
+            case BANKS_BANK_LINK:
+                return BANK_LINKS_ITEM_TYPE;
+            default:
+                throw newInvalidUrlException(uri);
+        }
+
     }
 
     @Override
@@ -54,5 +63,9 @@ public class BanksContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    private static IllegalArgumentException newInvalidUrlException(Uri uri) {
+        return new IllegalArgumentException("The uri " + uri + " can not be matched.");
     }
 }
