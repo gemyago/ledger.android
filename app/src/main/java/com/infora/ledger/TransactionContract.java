@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
  * Created by jenya on 01.03.15.
  */
 public class TransactionContract implements BaseColumns {
-    public static final String AUTHORITY = "com.infora.ledger.provider";
+    public static final String AUTHORITY = "com.infora.ledger.transactions-provider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/pending-transactions");
     public static final Uri CONTENT_URI_REPORTED_BY_USER = Uri.parse("content://" + AUTHORITY + "/pending-transactions/reported-by-user");
     public static final Uri CONTENT_URI_FETCHED_FROM_BANK = Uri.parse("content://" + AUTHORITY + "/pending-transactions/recent-fetched-from-bank");

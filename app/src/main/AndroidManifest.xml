@@ -25,7 +25,7 @@
             android:label="@string/action_settings"/>
 
         <provider
-            android:authorities="com.infora.ledger.provider"
+            android:authorities="com.infora.ledger.transactions-provider"
             android:name=".data.PendingTransactionsContentProvider"
             android:exported="false"
             android:syncable="true" />
