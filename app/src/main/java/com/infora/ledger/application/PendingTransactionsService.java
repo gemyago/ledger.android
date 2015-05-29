@@ -33,7 +33,10 @@ public class PendingTransactionsService {
 
     public void onEventBackgroundThread(ReportTransactionCommand command) {
         Log.d(TAG, "Reporting new transaction");
-        ContentValues values = PendingTransaction.appendValues(new ContentValues(), command.getAmount(), command.getComment());
+        ContentValues values = new ContentValues();
+        values.put(TransactionContract.COLUMN_AMOUNT, command.getAmount());
+        values.put(TransactionContract.COLUMN_COMMENT, command.getComment());
+
         Uri uri = resolver.insert(TransactionContract.CONTENT_URI, values);
         bus.post(new TransactionReportedEvent(ContentUris.parseId(uri)));
     }

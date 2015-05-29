@@ -83,26 +83,29 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102", true, false);
 
         Cursor results = resolver.query(TransactionContract.CONTENT_URI,
-                TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
+                TransactionContract.ALL_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
 
         assertEquals(3, results.getCount());
         results.moveToFirst();
-        assertEquals("100", results.getString(0));
-        assertEquals("100.00", results.getString(1));
-        assertEquals("Transaction 100", results.getString(2));
-        assertEquals(0, results.getInt(3));
+        PendingTransaction t100 = new PendingTransaction(results);
+        assertEquals("100", t100.transactionId);
+        assertEquals("100.00", t100.amount);
+        assertEquals("Transaction 100", t100.comment);
+        assertEquals(false, t100.isPublished);
 
         results.moveToNext();
-        assertEquals("101", results.getString(0));
-        assertEquals("101.00", results.getString(1));
-        assertEquals("Transaction 101", results.getString(2));
-        assertEquals(1, results.getInt(3));
+        PendingTransaction t101 = new PendingTransaction(results);
+        assertEquals("101", t101.transactionId);
+        assertEquals("101.00", t101.amount);
+        assertEquals("Transaction 101", t101.comment);
+        assertEquals(true, t101.isPublished);
 
         results.moveToNext();
-        assertEquals("102", results.getString(0));
-        assertEquals("102.00", results.getString(1));
-        assertEquals("Transaction 102", results.getString(2));
-        assertEquals(1, results.getInt(3));
+        PendingTransaction t102 = new PendingTransaction(results);
+        assertEquals("102", t102.transactionId);
+        assertEquals("102.00", t102.amount);
+        assertEquals("Transaction 102", t102.comment);
+        assertEquals(true, t101.isPublished);
     }
 
     public void testQueryReportedByUser() {
@@ -116,13 +119,13 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
 
         assertEquals(3, results.getCount());
         results.moveToFirst();
-        assertEquals("100", results.getString(0));
+        assertEquals("100", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
 
         results.moveToNext();
-        assertEquals("101", results.getString(0));
+        assertEquals("101", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
 
         results.moveToNext();
-        assertEquals("102", results.getString(0));
+        assertEquals("102", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
     }
 
     public void testQueryFetchedFromBankByBic() {
@@ -167,8 +170,8 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
 
         assertEquals(1, results.getCount());
         results.moveToFirst();
-        assertEquals("100", results.getString(0));
-        assertEquals("100.00", results.getString(1));
+        assertEquals("100", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
+        assertEquals("100.00", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
 
     }
 
@@ -202,6 +205,6 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         Cursor results = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
         assertEquals(results.getCount(), 1);
         results.moveToFirst();
-        assertEquals(id2, PendingTransaction.getId(results));
+        assertEquals(id2, new PendingTransaction(results).id);
     }
 }

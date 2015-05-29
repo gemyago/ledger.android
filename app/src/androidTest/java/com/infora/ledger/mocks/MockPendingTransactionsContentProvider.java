@@ -9,6 +9,7 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.infora.ledger.DbUtils;
 import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.data.LedgerDbHelper;
@@ -68,15 +69,7 @@ public class MockPendingTransactionsContentProvider extends ContentProvider {
     public void setQueryResult(PendingTransaction... transactions) {
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         for (PendingTransaction transaction : transactions) {
-            matrixCursor.addRow(new Object[]{
-                    transaction.id,
-                    transaction.transactionId,
-                    transaction.amount,
-                    transaction.comment,
-                    transaction.isPublished ? 1 : 0,
-                    transaction.isDeleted ? 1 : 0,
-                    LedgerDbHelper.toISO8601(transaction.timestamp == null ? new Date() : transaction.timestamp),
-                    transaction.bic});
+            matrixCursor.addRow(DbUtils.toArray(transaction));
         }
         setQueryResult(matrixCursor);
     }

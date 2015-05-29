@@ -1,6 +1,5 @@
 package com.infora.ledger;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.infora.ledger.data.LedgerDbHelper;
@@ -12,6 +11,7 @@ import java.util.Date;
  */
 public class PendingTransaction {
     public int id;
+    public String accountId;
     public String transactionId;
     public String amount;
     public String comment;
@@ -21,7 +21,7 @@ public class PendingTransaction {
     public String bic;
 
     public PendingTransaction(Cursor cursor) {
-        id = getId(cursor);
+        id = cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_ID));
         transactionId = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID));
         amount = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT));
         comment = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT));
@@ -46,13 +46,8 @@ public class PendingTransaction {
         this.bic = bic;
     }
 
-    public static ContentValues appendValues(ContentValues values, String amount, String comment) {
-        values.put(TransactionContract.COLUMN_AMOUNT, amount);
-        values.put(TransactionContract.COLUMN_COMMENT, comment);
-        return values;
-    }
-
-    public static int getId(Cursor cursor) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_ID));
+    public PendingTransaction setId(int id) {
+        this.id = id;
+        return this;
     }
 }

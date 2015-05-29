@@ -19,6 +19,19 @@ public class DbUtils {
         }
     }
 
+    public static Object[] toArray(PendingTransaction transaction) {
+        return new Object[]{
+                transaction.id,
+                transaction.accountId,
+                transaction.transactionId,
+                transaction.amount,
+                transaction.comment,
+                transaction.isPublished ? 1 : 0,
+                transaction.isDeleted ? 1 : 0,
+                LedgerDbHelper.toISO8601(transaction.timestamp == null ? new Date() : transaction.timestamp),
+                transaction.bic};
+    }
+
     public static int insertPendingTransaction(SQLiteOpenHelper dbHelper, String transactionId, String amount, String comment) {
         return insertPendingTransaction(dbHelper, transactionId, amount, comment, false, false);
     }

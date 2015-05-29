@@ -1,6 +1,7 @@
 package com.infora.ledger.api;
 
 import com.google.gson.annotations.SerializedName;
+import com.infora.ledger.PendingTransaction;
 
 /**
  * Created by jenya on 25.03.15.
@@ -21,4 +22,9 @@ public class PendingTransactionDto {
         this.amount = amount;
         this.comment = comment;
     }
+
+    public PendingTransaction toTransaction() {
+        return new PendingTransaction(transactionId, amount, comment, false, false, null, null);
+    }
+
 }
