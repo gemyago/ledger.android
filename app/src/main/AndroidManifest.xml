@@ -30,6 +30,12 @@
             android:exported="false"
             android:syncable="true" />
 
+        <provider
+            android:authorities="com.infora.ledger.banks-provider"
+            android:name=".data.BanksContentProvider"
+            android:exported="false"
+            android:syncable="false" />
+
         <service android:name=".api.ApiAuthenticator$ApiAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

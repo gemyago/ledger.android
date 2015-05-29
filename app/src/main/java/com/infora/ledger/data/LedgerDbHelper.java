@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.infora.ledger.BanksContract;
 import com.infora.ledger.TransactionContract;
 
 import java.text.ParseException;
@@ -17,7 +18,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -40,6 +41,8 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         TransactionContract.COLUMN_BIC + " NVARCHAR(50) NULL" +
                         " )"
         );
+
+        createBankLinksTable(db);
     }
 
     @Override
@@ -57,6 +60,9 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
                     + " ADD " + TransactionContract.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL;");
         }
+        if (oldVersion < 6) {
+            createBankLinksTable(db);
+        }
     }
 
     private static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -71,5 +77,16 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void createBankLinksTable(SQLiteDatabase db) {
+        db.execSQL(
+                "CREATE TABLE " + BanksContract.BankLinks.TABLE_NAME + " (" +
+                        BanksContract.BankLinks._ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        BanksContract.BankLinks.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL" +
+                        BanksContract.BankLinks.COLUMN_BIC + " NVARCHAR(50) NOT NULL," +
+                        BanksContract.BankLinks.COLUMN_LINK_DATA + " TEXT NULL" +
+                        " )"
+        );
     }
 }
