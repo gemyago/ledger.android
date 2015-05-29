@@ -15,6 +15,7 @@ public class TransactionContract implements BaseColumns {
     public static final String TABLE_NAME = "pending_transactions";
 
     public static final String COLUMN_ID = _ID;
+    public static final String COLUMN_ACCOUNT_ID = "account_id";
     public static final String COLUMN_TRANSACTION_ID = "transaction_id";
     public static final String COLUMN_AMOUNT = "amount";
     public static final String COLUMN_COMMENT= "content";
@@ -28,6 +29,7 @@ public class TransactionContract implements BaseColumns {
 
     public static final String[] ALL_COLUMNS = new String[]{
             TransactionContract.COLUMN_ID,
+            TransactionContract.COLUMN_ACCOUNT_ID,
             TransactionContract.COLUMN_TRANSACTION_ID,
             TransactionContract.COLUMN_AMOUNT,
             TransactionContract.COLUMN_COMMENT,
@@ -38,6 +40,7 @@ public class TransactionContract implements BaseColumns {
     };
 
     public static final String[] ASSIGNABLE_COLUMNS = new String[]{
+            TransactionContract.COLUMN_ACCOUNT_ID,
             TransactionContract.COLUMN_TRANSACTION_ID,
             TransactionContract.COLUMN_AMOUNT,
             TransactionContract.COLUMN_COMMENT,

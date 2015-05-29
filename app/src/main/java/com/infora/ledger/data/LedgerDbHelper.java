@@ -17,7 +17,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -30,6 +30,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE TABLE " + TransactionContract.TABLE_NAME + " (" +
                         TransactionContract.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        TransactionContract.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL," +
                         TransactionContract.COLUMN_TRANSACTION_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
                         TransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
                         TransactionContract.COLUMN_COMMENT + " TEXT NULL," +
@@ -48,9 +49,13 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                     + " ADD " + TransactionContract.COLUMN_IS_DELETED + " INTEGER NOT NULL DEFAULT 0;");
 
         }
-        if(oldVersion <= 4) {
+        if(oldVersion < 4) {
             db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
                     + " ADD " + TransactionContract.COLUMN_BIC + " NVARCHAR(50) NULL;");
+        }
+        if(oldVersion < 5) {
+            db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
+                    + " ADD " + TransactionContract.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL;");
         }
     }
 
