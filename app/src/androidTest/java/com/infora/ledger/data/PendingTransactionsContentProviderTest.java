@@ -1,4 +1,4 @@
-package com.infora.ledger;
+package com.infora.ledger.data;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -7,12 +7,12 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
-import com.infora.ledger.data.LedgerDbHelper;
-import com.infora.ledger.data.PendingTransactionsContentProvider;
-import com.infora.ledger.data.PendingTransactionsDbUtils;
+import com.infora.ledger.DbUtils;
+import com.infora.ledger.LedgerContentUris;
+import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.TransactionContract;
 
 import java.util.Calendar;
-import java.util.Date;
 
 public class PendingTransactionsContentProviderTest extends ProviderTestCase2<PendingTransactionsContentProvider> {
 
