@@ -2,6 +2,7 @@ package com.infora.ledger.data;
 
 import android.database.Cursor;
 
+import com.google.gson.Gson;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -33,5 +34,13 @@ public class BankLink {
         account_id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID));
         bic = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BIC));
         link_data = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
+    }
+
+    public <T> T getLinkData(Class<T> classOfT) {
+        return new Gson().fromJson(link_data, classOfT);
+    }
+
+    public <T> void setLinkData(T data) {
+        link_data = new Gson().toJson(data);
     }
 }
