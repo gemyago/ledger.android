@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;

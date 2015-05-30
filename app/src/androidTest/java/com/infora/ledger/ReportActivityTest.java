@@ -3,9 +3,7 @@ package com.infora.ledger;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.test.mock.MockContentResolver;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -14,6 +12,7 @@ import android.widget.ListView;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionReportedEvent;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
@@ -22,7 +21,6 @@ import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
 import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 
 import de.greenrobot.event.EventBus;
 

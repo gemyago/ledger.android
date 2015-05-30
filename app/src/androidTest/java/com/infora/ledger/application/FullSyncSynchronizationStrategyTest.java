@@ -6,7 +6,7 @@ import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.DbUtils;
-import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
@@ -17,7 +17,6 @@ import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 

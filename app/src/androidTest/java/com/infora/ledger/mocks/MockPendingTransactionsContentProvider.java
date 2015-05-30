@@ -10,9 +10,8 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.infora.ledger.DbUtils;
-import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.TransactionContract;
-import com.infora.ledger.data.LedgerDbHelper;
 
 import java.util.ArrayList;
 import java.util.Date;

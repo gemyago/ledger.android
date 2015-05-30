@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerDbHelper;
+import com.infora.ledger.data.PendingTransaction;
 import com.j256.ormlite.android.AndroidConnectionSource;
-import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;

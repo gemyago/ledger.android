@@ -1,8 +1,8 @@
-package com.infora.ledger;
+package com.infora.ledger.data;
 
 import android.database.Cursor;
 
-import com.infora.ledger.data.LedgerDbHelper;
+import com.infora.ledger.TransactionContract;
 
 import java.util.Date;
 

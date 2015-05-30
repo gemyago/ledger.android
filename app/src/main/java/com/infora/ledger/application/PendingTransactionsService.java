@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.util.Log;
 
-import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;

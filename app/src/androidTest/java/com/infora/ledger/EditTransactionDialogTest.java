@@ -8,6 +8,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.widget.EditText;
 
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 

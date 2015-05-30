@@ -9,7 +9,6 @@ import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.DbUtils;
 import com.infora.ledger.LedgerContentUris;
-import com.infora.ledger.PendingTransaction;
 import com.infora.ledger.TransactionContract;
 
 import java.util.Calendar;

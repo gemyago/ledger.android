@@ -1,7 +1,7 @@
 package com.infora.ledger.api;
 
 import com.google.gson.annotations.SerializedName;
-import com.infora.ledger.PendingTransaction;
+import com.infora.ledger.data.PendingTransaction;
 
 /**
  * Created by jenya on 25.03.15.
