@@ -13,4 +13,10 @@
         android:defaultValue="false"
         >
     </SwitchPreference>
+    <Preference android:title="@string/action_bank_links">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.infora.ledger"
+            android:targetClass="com.infora.ledger.BankLinksActivity" />
+    </Preference>
 </PreferenceScreen>

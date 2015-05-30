@@ -25,6 +25,11 @@
             android:label="@string/action_settings"
             android:parentActivityName=".ReportActivity"
             />
+        <activity
+            android:name=".BankLinksActivity"
+            android:label="@string/action_bank_links"
+            android:parentActivityName=".SettingsActivity"
+            />
         <provider
             android:authorities="com.infora.ledger.transactions-provider"
             android:name=".data.PendingTransactionsContentProvider"
