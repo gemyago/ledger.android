@@ -17,7 +17,7 @@ import static com.infora.ledger.BanksContract.BankLinks._ID;
  */
 @DatabaseTable(tableName = TABLE_NAME)
 public class BankLink {
-    @DatabaseField(id = true, columnName = _ID)
+    @DatabaseField(columnName = _ID, generatedId = true)
     public int id;
     @DatabaseField
     public String account_id;
@@ -25,6 +25,22 @@ public class BankLink {
     public String bic;
     @DatabaseField
     public String link_data;
+
+    public BankLink setAccountId(String value) {
+        account_id = value;
+        return this;
+    }
+
+    public BankLink setBic(String value) {
+        bic = value;
+        account_id = value;
+        return this;
+    }
+
+    public BankLink setLinkDataValue(String value) {
+        link_data = value;
+        return this;
+    }
 
     public BankLink() {
     }
@@ -42,5 +58,28 @@ public class BankLink {
 
     public <T> void setLinkData(T data) {
         link_data = new Gson().toJson(data);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BankLink bankLink = (BankLink) o;
+
+        if (id != bankLink.id) return false;
+        if (!account_id.equals(bankLink.account_id)) return false;
+        if (!bic.equals(bankLink.bic)) return false;
+        return link_data.equals(bankLink.link_data);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + account_id.hashCode();
+        result = 31 * result + bic.hashCode();
+        result = 31 * result + link_data.hashCode();
+        return result;
     }
 }

@@ -54,5 +54,4 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         assertEquals("BANK-100", bankLink.bic);
         assertEquals("account-data-100", bankLink.link_data);
     }
-
 }
