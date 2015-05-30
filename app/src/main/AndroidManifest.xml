@@ -22,8 +22,9 @@
             android:label="@string/title_activity_login"/>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/action_settings"/>
-
+            android:label="@string/action_settings"
+            android:parentActivityName=".ReportActivity"
+            />
         <provider
             android:authorities="com.infora.ledger.transactions-provider"
             android:name=".data.PendingTransactionsContentProvider"
