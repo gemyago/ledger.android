@@ -30,5 +30,5 @@
     <string name="prefs_use_manual_sync_summary">Local and remote data will be synchronized only on synchronize action.</string>
     <string name="action_report">Report</string>
     <string name="action_bank_links">Bank Links</string>
-    <string name="add_bank_link_action">Add link</string>
+    <string name="action_add_bank_link">Add link</string>
 </resources>

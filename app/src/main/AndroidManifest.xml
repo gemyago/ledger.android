@@ -3,11 +3,11 @@
     package="com.infora.ledger">
 
     <application
+        android:name=".LedgerApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name=".LedgerApplication">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".ReportActivity"
             android:label="@string/app_name">
@@ -19,26 +19,29 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"/>
+            android:label="@string/title_activity_login" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".ReportActivity"
-            />
+            android:parentActivityName=".ReportActivity" />
         <activity
             android:name=".BankLinksActivity"
             android:label="@string/action_bank_links"
-            android:parentActivityName=".SettingsActivity"
-            />
+            android:parentActivityName=".SettingsActivity" />
+        <activity
+            android:name=".AddBankLinkActivity"
+            android:label="@string/action_add_bank_link"
+            android:parentActivityName=".BankLinksActivity" />
+
         <provider
-            android:authorities="com.infora.ledger.transactions-provider"
             android:name=".data.PendingTransactionsContentProvider"
+            android:authorities="com.infora.ledger.transactions-provider"
             android:exported="false"
             android:syncable="true" />
 
         <provider
-            android:authorities="com.infora.ledger.banks-provider"
             android:name=".data.BanksContentProvider"
+            android:authorities="com.infora.ledger.banks-provider"
             android:exported="false"
             android:syncable="false" />
 
