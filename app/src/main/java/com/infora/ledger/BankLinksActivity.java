@@ -3,16 +3,31 @@ package com.infora.ledger;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+
+import com.infora.ledger.data.BankLink;
 
 /**
  * Created by jenya on 30.05.15.
  */
 public class BankLinksActivity extends ActionBarActivity {
+    private SimpleCursorAdapter bankLinksAdapter;
+    private ListView lvBankLinks;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bank_links);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        bankLinksAdapter = new SimpleCursorAdapter(this, R.layout.transactions_list,
+                null,
+                new String[]{BanksContract.BankLinks.COLUMN_BIC},
+                new int[]{R.id.bank_link_data}, 0);
+        lvBankLinks = (ListView) findViewById(R.id.bank_links_list);
+        lvBankLinks.setAdapter(bankLinksAdapter);
+        lvBankLinks.setEmptyView(findViewById(android.R.id.empty));
     }
 
     @Override
