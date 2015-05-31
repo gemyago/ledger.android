@@ -5,6 +5,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,11 +76,13 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
                 card.getText().toString(),
                 merchantId.getText().toString(),
                 merchantPassword.getText().toString());
-        BusUtils.post(this, command);
         addButton.setEnabled(false);
+        Log.d(TAG, "Posting command to create bank link");
+        BusUtils.post(this, command);
     }
 
     public void onEventMainThread(BankLinkAdded event) {
+        Log.d(TAG, "Bank link created. Resetting UI.");
         Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
         EditText merchantId = (EditText) findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) findViewById(R.id.privat_bank_merchant_password);
