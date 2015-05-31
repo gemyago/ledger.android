@@ -56,8 +56,9 @@ public class BankLink {
         return new Gson().fromJson(link_data, classOfT);
     }
 
-    public <T> void setLinkData(T data) {
+    public <T> BankLink setLinkData(T data) {
         link_data = new Gson().toJson(data);
+        return this;
     }
 
     @Override
