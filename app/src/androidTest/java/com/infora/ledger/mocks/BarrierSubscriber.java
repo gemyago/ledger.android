@@ -21,7 +21,9 @@ public class BarrierSubscriber<TEvent> {
 
     public void await() {
         try {
-            barrier.await(2, TimeUnit.SECONDS);
+            if(!barrier.await(2, TimeUnit.SECONDS)) {
+                throw new AssertionError("Barrier waiting time elapsed.");
+            };
         } catch (InterruptedException e) {
             throw new AssertionError("Something went wrong", e);
         }
