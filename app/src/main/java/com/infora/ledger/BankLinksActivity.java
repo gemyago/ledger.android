@@ -5,6 +5,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,7 +13,9 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -29,7 +32,9 @@ import com.infora.ledger.support.EventHandler;
  * Created by jenya on 30.05.15.
  */
 public class BankLinksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String TAG = BankLinksActivity.class.getName();
     private static final int BANK_LINKS_LOADER_ID = 1;
+    public static final String BANK_LINK_ID_EXTR = "BANK_LINK_ID";
     private SimpleCursorAdapter bankLinksAdapter;
     private ListView lvBankLinks;
 
@@ -49,6 +54,16 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         lvBankLinks.setEmptyView(findViewById(android.R.id.empty));
         lvBankLinks.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         lvBankLinks.setMultiChoiceModeListener(new BankLinksChoiceListener());
+        lvBankLinks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, "Editing bank link: " + id);
+                Intent intent = new Intent(BankLinksActivity.this, EditBankLinkActivity.class);
+                intent.putExtra(BANK_LINK_ID_EXTR, id);
+                startActivity(intent);
+            }
+        });
+
 
         getLoaderManager().initLoader(BANK_LINKS_LOADER_ID, null, this);
     }

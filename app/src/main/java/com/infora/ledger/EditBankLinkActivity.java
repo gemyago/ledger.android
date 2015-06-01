@@ -11,7 +11,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 
 import com.infora.ledger.data.LedgerAccountsLoader;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 
 /**
@@ -45,13 +44,13 @@ public class EditBankLinkActivity extends AppCompatActivity implements LoaderMan
     @Override
     protected void onStart() {
         super.onStart();
-        BusUtils.register(this);
+//        BusUtils.register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        BusUtils.unregister(this);
+//        BusUtils.unregister(this);
     }
 
     public void updateBankLink(View view) {

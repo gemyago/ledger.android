@@ -63,6 +63,24 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         assertEquals(link3, new BankLink((Cursor) bankLinksList.getAdapter().getItem(2)));
     }
 
+    public void testEditBankLink() throws SQLException {
+        repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy"));
+        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
+
+        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        ListView bankLinksList = (ListView) getActivity().findViewById(R.id.bank_links_list);
+        bankLinksList.performItemClick(bankLinksList.getChildAt(1), 1, link2.id);
+
+        Intent intent = getStartedActivityIntent();
+        assertNotNull(intent);
+        assertEquals(EditBankLinkActivity.class.getName(), intent.getComponent().getClassName());
+        assertEquals(link2.id, intent.getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTR, 0));
+    }
+
     public void testDeleteBankLinks() throws SQLException {
         BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy"));
         repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
