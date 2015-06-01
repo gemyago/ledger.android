@@ -3,11 +3,9 @@ package com.infora.ledger;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.test.RenamingDelegatingContext;
 import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
-import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.BankLinksRepository;
 import com.infora.ledger.mocks.BarrierSubscriber;
@@ -42,8 +40,6 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         bus = new EventBus();
         startActivity(new Intent(), null, null);
         BusUtils.setBus(getActivity(), bus);
-        RenamingDelegatingContext context = new RenamingDelegatingContext(getActivity(), "-bank-links-activity-test");
-        setActivityContext(context);
 
         repo = new BankLinksRepository(getActivity());
         DbUtils.deleteAllDatabases(getActivity());
