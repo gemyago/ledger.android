@@ -41,6 +41,7 @@ public class BankLinksService {
     public void onEventBackgroundThread(DeleteBankLinksCommand command) throws SQLException {
         Log.d(TAG, "Deleting bank links: " + Arrays.toString(command.ids));
         repository.deleteAll(command.ids);
+        Log.d(TAG, "Bank links deleted. Posting deleted event...");
         bus.post(new BankLinksDeletedEvent(command.ids));
     }
 }

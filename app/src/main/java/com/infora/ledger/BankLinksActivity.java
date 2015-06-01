@@ -7,6 +7,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,11 +15,15 @@ import android.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.infora.ledger.BanksContract.BankLinks;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
+import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.support.EventHandler;
 
 /**
  * Created by jenya on 30.05.15.
@@ -46,6 +51,26 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         lvBankLinks.setMultiChoiceModeListener(new BankLinksChoiceListener());
 
         getLoaderManager().initLoader(BANK_LINKS_LOADER_ID, null, this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        BusUtils.register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        BusUtils.unregister(this);
+    }
+
+
+    @EventHandler
+    public void onEventMainThread(BankLinksDeletedEvent event) {
+        int removedLength = event.ids.length;
+        String message = getResources().getQuantityString(R.plurals.bank_links_removed, removedLength, removedLength);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

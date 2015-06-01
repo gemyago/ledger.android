@@ -36,5 +36,10 @@
         <item quantity="one">%d bank link selected.</item>
         <item quantity="other">%d bank links selected.</item>
     </plurals>
+    <plurals name="bank_links_removed">
+        <item quantity="one">Bank Link deleted.</item>
+        <item quantity="other">%d Bank Links deleted.</item>
+    </plurals>
+
 
 </resources>
