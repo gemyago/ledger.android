@@ -63,9 +63,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
     public void addBankLink(View view) {
         Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        EditText merchantId = (EditText) findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) findViewById(R.id.privat_bank_card_number);
+        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
         Button addButton = (Button) findViewById(R.id.action_add_bank_link);
 
         AddBankLinkCommand<PrivatBankLinkData> command = new AddBankLinkCommand<>();
@@ -73,10 +71,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
         command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
         command.bic = PrivatBankTransaction.PRIVATBANK_BIC;
-        command.linkData = new PrivatBankLinkData(
-                card.getText().toString(),
-                merchantId.getText().toString(),
-                merchantPassword.getText().toString());
+        command.linkData = bankLinkFragment.getBankLinkData();
         addButton.setEnabled(false);
         Log.d(TAG, "Posting command to create bank link");
         BusUtils.post(this, command);
@@ -84,16 +79,13 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
     public void onEventMainThread(BankLinkAdded event) {
         Log.d(TAG, "Bank link created. Resetting UI.");
+
+        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
         Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        EditText merchantId = (EditText) findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) findViewById(R.id.privat_bank_card_number);
         Button addButton = (Button) findViewById(R.id.action_add_bank_link);
 
         ledgerAccountId.setSelection(0);
-        merchantId.setText("");
-        merchantPassword.setText("");
-        card.setText("");
+        bankLinkFragment.clearLinkData();
         addButton.setEnabled(true);
 
         Toast.makeText(this, "Bank link added", Toast.LENGTH_SHORT).show();

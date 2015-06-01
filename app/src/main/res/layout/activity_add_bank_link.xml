@@ -14,23 +14,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></Spinner>
 
-    <EditText
-        android:id="@+id/privat_bank_merchant_id"
+    <fragment
+        android:id="@+id/bank_link_fragment"
+        android:name="com.infora.ledger.PrivatBankLinkFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Merchant Id" />
-
-    <EditText
-        android:id="@+id/privat_bank_merchant_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Merchant Password" />
-
-    <EditText
-        android:id="@+id/privat_bank_card_number"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Card Number" />
+        android:layout_height="wrap_content"></fragment>
 
     <Button android:id="@+id/action_add_bank_link"
         android:layout_height="wrap_content"
