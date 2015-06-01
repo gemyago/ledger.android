@@ -45,7 +45,6 @@ public class BankLink {
 
     public BankLink setBic(String value) {
         bic = value;
-        accountId = value;
         return this;
     }
 
