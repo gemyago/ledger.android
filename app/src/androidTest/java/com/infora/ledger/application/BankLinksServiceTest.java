@@ -3,7 +3,9 @@ package com.infora.ledger.application;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.application.commands.AddBankLinkCommand;
+import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.events.BankLinkAdded;
+import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockBankLinksRepository;
@@ -54,5 +56,23 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals(1, subscriber.getEvents().size());
         assertEquals("account-100", subscriber.getEvent().accountId);
         assertEquals("bank-100", subscriber.getEvent().bic);
+    }
+
+    public void testDeleteBankLinksCommand() throws SQLException {
+        MockSubscriber<BankLinksDeletedEvent> subscriber = new MockSubscriber<>();
+        bus.register(subscriber);
+        subject.onEventBackgroundThread(new DeleteBankLinksCommand(new long[]{1, 2, 443}));
+        assertEquals(3, repository.deletedIds.length);
+        assertEquals(1, repository.deletedIds[0]);
+        assertEquals(2, repository.deletedIds[1]);
+        assertEquals(443, repository.deletedIds[2]);
+
+        BankLinksDeletedEvent deletedEvent = subscriber.getEvent();
+        assertNotNull(deletedEvent);
+
+        assertEquals(3, deletedEvent.ids.length);
+        assertEquals(1, deletedEvent.ids[0]);
+        assertEquals(2, deletedEvent.ids[1]);
+        assertEquals(443, deletedEvent.ids[2]);
     }
 }

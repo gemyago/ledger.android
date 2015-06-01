@@ -15,6 +15,7 @@ import java.util.List;
 public class MockBankLinksRepository extends BankLinksRepository {
 
     public final ArrayList<BankLink> savedBankLinks;
+    public long[] deletedIds;
 
     public MockBankLinksRepository() {
         super(null);
@@ -35,5 +36,10 @@ public class MockBankLinksRepository extends BankLinksRepository {
     @Override
     public List<BankLink> getAll() throws SQLException {
         return super.getAll();
+    }
+
+    @Override
+    public void deleteAll(long[] ids) {
+        deletedIds = ids;
     }
 }

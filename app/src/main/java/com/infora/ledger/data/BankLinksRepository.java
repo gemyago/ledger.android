@@ -9,6 +9,9 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,6 +54,20 @@ public class BankLinksRepository {
         try {
             Dao<BankLink, Long> dao = DaoManager.createDao(connectionSource, BankLink.class);
             return dao.queryForAll();
+        } finally {
+            connectionSource.close();
+        }
+    }
+
+    public void deleteAll(long[] ids) throws SQLException {
+        ConnectionSource connectionSource = new AndroidConnectionSource(dbHelper);
+        try {
+            Dao<BankLink, Long> dao = DaoManager.createDao(connectionSource, BankLink.class);
+            ArrayList<Long> idsCollection = new ArrayList<>();
+            for (long id : ids) {
+                idsCollection.add(id);
+            }
+            dao.deleteIds(idsCollection);
         } finally {
             connectionSource.close();
         }

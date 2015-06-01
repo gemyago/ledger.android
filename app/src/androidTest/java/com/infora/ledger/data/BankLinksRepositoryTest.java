@@ -128,4 +128,30 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
         assertTrue(all.contains(link1));
         assertTrue(all.contains(link2));
     }
+
+    public void testDeleteAll() throws SQLException {
+        BankLink link0 = subject.save(new BankLink()
+                .setAccountId("account-0")
+                .setAccountName("Account 0")
+                .setBic("bank-0")
+                .setLinkDataValue("link-0"));
+
+        BankLink link1 = subject.save(new BankLink()
+                .setAccountId("account-1")
+                .setAccountName("Account 1")
+                .setBic("bank-1")
+                .setLinkDataValue("link-1"));
+
+        BankLink link2 = subject.save(new BankLink()
+                .setAccountId("account-2")
+                .setAccountName("Account 2")
+                .setBic("bank-2")
+                .setLinkDataValue("link-2"));
+
+        subject.deleteAll(new long[]{link0.id, link2.id});
+
+        List<BankLink> all = subject.getAll();
+        assertEquals(1, all.size());
+        assertTrue(all.contains(link1));
+    }
 }
