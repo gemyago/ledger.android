@@ -60,6 +60,7 @@ public class BankLink {
     public BankLink(Cursor cursor) {
         id = cursor.getInt(cursor.getColumnIndexOrThrow(_ID));
         accountId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID));
+        accountName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_NAME));
         bic = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BIC));
         linkData = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
     }
@@ -96,5 +97,16 @@ public class BankLink {
         result = 31 * result + bic.hashCode();
         result = 31 * result + linkData.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "BankLink{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", accountName='" + accountName + '\'' +
+                ", bic='" + bic + '\'' +
+                ", linkData='" + linkData + '\'' +
+                '}';
     }
 }

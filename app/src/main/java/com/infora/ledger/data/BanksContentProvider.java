@@ -37,8 +37,16 @@ public class BanksContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-
-        return null;
+        final int match = sUriMatcher.match(uri);
+        LedgerDbHelper dbHelper = new LedgerDbHelper(getContext());
+        switch (match) {
+            case BANKS_BANK_LINKS:
+                LogUtil.d(this, "Querying bank links...");
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                return db.query(BanksContract.BankLinks.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+            default:
+                throw newInvalidUrlException(uri);
+        }
     }
 
     @Override

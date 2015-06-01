@@ -2,6 +2,7 @@ package com.infora.ledger.data;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.net.Uri;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
@@ -18,6 +19,7 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
 
     private MockContentResolver resolver;
     private LedgerDbHelper dbHelper;
+    private BankLinksRepository repository;
 
     public BanksContentProviderTest() {
         super(BanksContentProvider.class, BanksContentProvider.AUTHORITY);
@@ -28,6 +30,8 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         super.setUp();
         resolver = getMockContentResolver();
         dbHelper = new LedgerDbHelper(getMockContext());
+        repository = new BankLinksRepository(getMockContext());
+        DbUtils.deleteAllDatabases(getMockContext());
     }
 
     public void testGetType() throws Exception {
@@ -53,5 +57,23 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         assertEquals("Account 100", bankLink.accountName);
         assertEquals("BANK-100", bankLink.bic);
         assertEquals("account-data-100", bankLink.linkData);
+    }
+
+    public void testQueryBankLinks() throws SQLException {
+        BankLink link1 = new BankLink().setAccountId("a-1").setAccountName("A 1").setBic("BANK-1").setLinkDataValue("link-data-1");
+        BankLink link2 = new BankLink().setAccountId("a-2").setAccountName("A 2").setBic("BANK-2").setLinkDataValue("link-data-2");
+        BankLink link3 = new BankLink().setAccountId("a-3").setAccountName("A 3").setBic("BANK-3").setLinkDataValue("link-data-3");
+        repository.save(link1);
+        repository.save(link2);
+        repository.save(link3);
+
+        Cursor result = resolver.query(BanksContract.BankLinks.CONTENT_URI, null, null, null, null);
+        assertEquals(3, result.getCount());
+        result.moveToFirst();
+        assertEquals(link1, new BankLink(result));
+        result.moveToNext();
+        assertEquals(link2, new BankLink(result));
+        result.moveToNext();
+        assertEquals(link3, new BankLink(result));
     }
 }
