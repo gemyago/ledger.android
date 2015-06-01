@@ -83,9 +83,10 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE TABLE " + BanksContract.BankLinks.TABLE_NAME + " (" +
                         BanksContract.BankLinks._ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                        BanksContract.BankLinks.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL," +
+                        BanksContract.BankLinks.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
+                        BanksContract.BankLinks.COLUMN_ACCOUNT_NAME + " NVARCHAR(256) NOT NULL," +
                         BanksContract.BankLinks.COLUMN_BIC + " NVARCHAR(50) NOT NULL," +
-                        BanksContract.BankLinks.COLUMN_LINK_DATA + " TEXT NULL" +
+                        BanksContract.BankLinks.COLUMN_LINK_DATA + " TEXT NOT NULL" +
                         " )"
         );
     }

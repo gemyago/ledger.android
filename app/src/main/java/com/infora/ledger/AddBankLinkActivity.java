@@ -71,6 +71,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         AddBankLinkCommand<PrivatBankLinkData> command = new AddBankLinkCommand<>();
         Cursor selectedAccount = (Cursor) ledgerAccountId.getSelectedItem();
         command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
+        command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
         command.bic = PrivatBankTransaction.PRIVATBANK_BIC;
         command.linkData = new PrivatBankLinkData(
                 card.getText().toString(),

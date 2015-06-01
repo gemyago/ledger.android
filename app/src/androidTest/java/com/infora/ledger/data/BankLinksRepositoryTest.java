@@ -33,12 +33,14 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
         try {
             ContentValues values = new ContentValues();
             values.put(BankLinks.COLUMN_ACCOUNT_ID, "account-100");
+            values.put(BankLinks.COLUMN_ACCOUNT_NAME, "Account 100");
             values.put(BankLinks.COLUMN_BIC, "bank-100");
             values.put(BankLinks.COLUMN_LINK_DATA, "link-data-100");
             id0 = db.insert(BankLinks.TABLE_NAME, null, values);
 
             values = new ContentValues();
             values.put(BankLinks.COLUMN_ACCOUNT_ID, "account-101");
+            values.put(BankLinks.COLUMN_ACCOUNT_NAME, "Account 101");
             values.put(BankLinks.COLUMN_BIC, "bank-101");
             values.put(BankLinks.COLUMN_LINK_DATA, "link-data-101");
             id1 = db.insert(BankLinks.TABLE_NAME, null, values);
@@ -47,14 +49,16 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
         }
 
         BankLink link0 = subject.getById(id0);
-        assertEquals("account-100", link0.account_id);
+        assertEquals("account-100", link0.accountId);
+        assertEquals("Account 100", link0.accountName);
         assertEquals("bank-100", link0.bic);
-        assertEquals("link-data-100", link0.link_data);
+        assertEquals("link-data-100", link0.linkData);
 
         BankLink link1 = subject.getById(id1);
-        assertEquals("account-101", link1.account_id);
+        assertEquals("account-101", link1.accountId);
+        assertEquals("Account 101", link1.accountName);
         assertEquals("bank-101", link1.bic);
-        assertEquals("link-data-101", link1.link_data);
+        assertEquals("link-data-101", link1.linkData);
 
         boolean notFoundRaised = false;
         try {
@@ -68,13 +72,15 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
     public void testSaveNew() throws SQLException {
         BankLink link0 = new BankLink()
                 .setAccountId("account-0")
+                .setAccountName("Account 0")
                 .setBic("bank-0")
                 .setLinkDataValue("link-0");
 
         BankLink link1 = new BankLink()
-                .setAccountId("account-0")
-                .setBic("bank-0")
-                .setLinkDataValue("link-0");
+                .setAccountId("account-1")
+                .setAccountName("Account 1")
+                .setBic("bank-1")
+                .setLinkDataValue("link-1");
         subject.save(link0);
         assertFalse(link0.id == 0);
         subject.save(link1);
@@ -87,10 +93,11 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
     public void testSaveUpdateExisting() throws SQLException {
         BankLink link0 = new BankLink()
                 .setAccountId("account-0")
+                .setAccountName("Account 0")
                 .setBic("bank-0")
                 .setLinkDataValue("link-0");
         subject.save(link0);
-        link0.setAccountId("new-account-0").setBic("new-bic-0").setLinkDataValue("new-link-0");
+        link0.setAccountId("new-account-0").setAccountName("New Account 0").setBic("new-bic-0").setLinkDataValue("new-link-0");
         subject.save(link0);
 
         assertEquals(link0, subject.getById(link0.id));
@@ -99,18 +106,21 @@ public class BankLinksRepositoryTest extends AndroidTestCase {
     public void testGetAll() throws SQLException {
         BankLink link0 = subject.save(new BankLink()
                 .setAccountId("account-0")
+                .setAccountName("Account 0")
                 .setBic("bank-0")
                 .setLinkDataValue("link-0"));
 
         BankLink link1 = subject.save(new BankLink()
-                .setAccountId("account-0")
-                .setBic("bank-0")
-                .setLinkDataValue("link-0"));
+                .setAccountId("account-1")
+                .setAccountName("Account 1")
+                .setBic("bank-1")
+                .setLinkDataValue("link-1"));
 
         BankLink link2 = subject.save(new BankLink()
-                .setAccountId("account-0")
-                .setBic("bank-0")
-                .setLinkDataValue("link-0"));
+                .setAccountId("account-2")
+                .setAccountName("Account 2")
+                .setBic("bank-2")
+                .setLinkDataValue("link-2"));
 
         List<BankLink> all = subject.getAll();
         assertEquals(3, all.size());

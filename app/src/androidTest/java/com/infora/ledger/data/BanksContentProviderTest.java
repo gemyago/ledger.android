@@ -40,6 +40,7 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
     public void testInsertNewBankLink() throws SQLException {
         ContentValues values = new ContentValues();
         values.put(BanksContract.BankLinks.COLUMN_ACCOUNT_ID, "account-100");
+        values.put(BanksContract.BankLinks.COLUMN_ACCOUNT_NAME, "Account 100");
         values.put(BanksContract.BankLinks.COLUMN_BIC, "BANK-100");
         values.put(BanksContract.BankLinks.COLUMN_LINK_DATA, "account-data-100");
         Uri newUri = resolver.insert(BanksContract.BankLinks.CONTENT_URI, values);
@@ -48,8 +49,9 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         assertEquals(BanksContract.BankLinks.CONTENT_URI + "/" + id, newUri.toString());
 
         BankLink bankLink = DbUtils.getBankLinkById(dbHelper, id);
-        assertEquals("account-100", bankLink.account_id);
+        assertEquals("account-100", bankLink.accountId);
+        assertEquals("Account 100", bankLink.accountName);
         assertEquals("BANK-100", bankLink.bic);
-        assertEquals("account-data-100", bankLink.link_data);
+        assertEquals("account-data-100", bankLink.linkData);
     }
 }

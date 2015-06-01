@@ -72,6 +72,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         AddBankLinkCommand cmd = addHandler.getEvent();
         assertEquals(PrivatBankTransaction.PRIVATBANK_BIC, cmd.bic);
         assertEquals("a-2", cmd.accountId);
+        assertEquals("Account 2", cmd.accountName);
         PrivatBankLinkData linkData = (PrivatBankLinkData) cmd.linkData;
         assertEquals("merchant-100", linkData.merchantId);
         assertEquals("password-100", linkData.password);

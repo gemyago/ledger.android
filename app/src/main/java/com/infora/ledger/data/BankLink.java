@@ -7,6 +7,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_ID;
+import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_NAME;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_BIC;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_LINK_DATA;
 import static com.infora.ledger.BanksContract.BankLinks.TABLE_NAME;
@@ -19,26 +20,37 @@ import static com.infora.ledger.BanksContract.BankLinks._ID;
 public class BankLink {
     @DatabaseField(columnName = _ID, generatedId = true)
     public int id;
-    @DatabaseField
-    public String account_id;
+
+    @DatabaseField(columnName = COLUMN_ACCOUNT_ID)
+    public String accountId;
+
+    @DatabaseField(columnName = COLUMN_ACCOUNT_NAME)
+    public String accountName;
+
     @DatabaseField(columnName = COLUMN_BIC)
     public String bic;
-    @DatabaseField
-    public String link_data;
+
+    @DatabaseField(columnName = COLUMN_LINK_DATA)
+    public String linkData;
 
     public BankLink setAccountId(String value) {
-        account_id = value;
+        accountId = value;
+        return this;
+    }
+
+    public BankLink setAccountName(String value) {
+        accountName = value;
         return this;
     }
 
     public BankLink setBic(String value) {
         bic = value;
-        account_id = value;
+        accountId = value;
         return this;
     }
 
     public BankLink setLinkDataValue(String value) {
-        link_data = value;
+        linkData = value;
         return this;
     }
 
@@ -47,17 +59,17 @@ public class BankLink {
 
     public BankLink(Cursor cursor) {
         id = cursor.getInt(cursor.getColumnIndexOrThrow(_ID));
-        account_id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID));
+        accountId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID));
         bic = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BIC));
-        link_data = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
+        linkData = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
     }
 
     public <T> T getLinkData(Class<T> classOfT) {
-        return new Gson().fromJson(link_data, classOfT);
+        return new Gson().fromJson(linkData, classOfT);
     }
 
     public <T> BankLink setLinkData(T data) {
-        link_data = new Gson().toJson(data);
+        linkData = new Gson().toJson(data);
         return this;
     }
 
@@ -69,18 +81,20 @@ public class BankLink {
         BankLink bankLink = (BankLink) o;
 
         if (id != bankLink.id) return false;
-        if (!account_id.equals(bankLink.account_id)) return false;
+        if (!accountId.equals(bankLink.accountId)) return false;
+        if (!accountName.equals(bankLink.accountName)) return false;
         if (!bic.equals(bankLink.bic)) return false;
-        return link_data.equals(bankLink.link_data);
+        return linkData.equals(bankLink.linkData);
 
     }
 
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + account_id.hashCode();
+        result = 31 * result + accountId.hashCode();
+        result = 31 * result + accountName.hashCode();
         result = 31 * result + bic.hashCode();
-        result = 31 * result + link_data.hashCode();
+        result = 31 * result + linkData.hashCode();
         return result;
     }
 }

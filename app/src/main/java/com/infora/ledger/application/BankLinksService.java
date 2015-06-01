@@ -24,6 +24,7 @@ public class BankLinksService {
     public void onEventBackgroundThread(AddBankLinkCommand command) throws SQLException {
         BankLink bankLink = new BankLink()
                 .setAccountId(command.accountId)
+                .setAccountName(command.accountName)
                 .setBic(command.bic)
                 .setLinkData(command.linkData);
         repository.save(bankLink);

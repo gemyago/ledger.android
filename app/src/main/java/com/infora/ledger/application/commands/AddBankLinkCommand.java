@@ -5,6 +5,7 @@ package com.infora.ledger.application.commands;
  */
 public class AddBankLinkCommand<TLinkData> {
     public String accountId;
+    public String accountName;
     public String bic;
     public TLinkData linkData;
 }

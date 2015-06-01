@@ -34,6 +34,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     public void testAddBankLinkCommand() throws SQLException {
         AddBankLinkCommand command = new AddBankLinkCommand();
         command.accountId = "account-100";
+        command.accountName = "Account 100";
         command.bic = "bank-100";
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
@@ -45,6 +46,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals(1, repository.savedBankLinks.size());
         assertTrue(repository.savedBankLinks.contains(new BankLink()
                         .setAccountId("account-100")
+                        .setAccountName("Account 100")
                         .setBic("bank-100")
                         .setLinkData(command.linkData)
         ));

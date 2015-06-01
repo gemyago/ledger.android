@@ -15,6 +15,7 @@ public class BanksContract {
 
         public static final String COLUMN_BIC = "bank_identifier_code";
         public static final String COLUMN_ACCOUNT_ID = "account_id";
+        public static final String COLUMN_ACCOUNT_NAME = "account_name";
         public static final String COLUMN_LINK_DATA = "link_data";
     }
 }
