@@ -51,7 +51,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
         BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy"));
 
-        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>();
+        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();
@@ -69,7 +69,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
         BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy"));
 
-        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>();
+        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();

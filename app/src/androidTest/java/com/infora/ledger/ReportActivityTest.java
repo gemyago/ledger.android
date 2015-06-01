@@ -157,7 +157,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
                 new PendingTransaction(2, "101", "Comment 101"),
                 new PendingTransaction(3, "102", "Comment 102")
         );
-        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>();
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();
