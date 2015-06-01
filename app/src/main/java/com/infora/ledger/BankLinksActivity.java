@@ -78,6 +78,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         bankLinksAdapter.swapCursor(data);
+        BusUtils.post(this, new BankLinksLoaded());
     }
 
     @Override
@@ -134,4 +135,6 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
             }
         }
     }
+
+    public static class BankLinksLoaded {}
 }
