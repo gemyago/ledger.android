@@ -9,6 +9,7 @@ import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.BanksContract;
 import com.infora.ledger.DbUtils;
+import com.infora.ledger.mocks.MockLedgerApplication;
 
 import java.sql.SQLException;
 
