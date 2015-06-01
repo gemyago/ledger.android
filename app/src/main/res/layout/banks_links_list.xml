@@ -15,4 +15,11 @@
         android:layout_marginRight="8dip"
         android:layout_marginTop="8dip"
         android:textAppearance="?android:attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/ledger_account_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dip" />
+
 </LinearLayout>
