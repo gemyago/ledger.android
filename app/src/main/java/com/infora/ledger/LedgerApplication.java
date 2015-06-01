@@ -7,8 +7,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.application.BankLinksService;
-import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.application.PendingTransactionsService;
+import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.data.BankLinksRepository;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
@@ -36,7 +36,11 @@ public class LedgerApplication extends Application {
     }
 
     public EventBus getBus() {
-        return bus;
+        if (bus == null) {
+            Log.d(TAG, "Creating event bus.");
+            return (bus = new EventBus());
+        }
+        else return bus;
     }
 
     public void setBus(EventBus bus) {
@@ -44,10 +48,10 @@ public class LedgerApplication extends Application {
     }
 
     public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "Application created");
-        bus = new EventBus();
+        Log.d(TAG, "Initializing application...");
+        EventBus bus = getBus();
         bus.register(this);
+
 
         PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);
@@ -59,12 +63,14 @@ public class LedgerApplication extends Application {
 
         PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
         SharedPreferences sharedPreferences = SharedPreferencesUtil.getDefaultSharedPreferences(this);
-        if(!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
+        if (!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
             Log.d(TAG, "Ledger host preference not yet initialized. Assigning default value: " + BuildConfig.DEFAULT_LEDGER_HOST);
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putString(SettingsFragment.KEY_LEDGER_HOST, BuildConfig.DEFAULT_LEDGER_HOST);
             edit.apply();
         }
+
+        super.onCreate();
     }
 
     @Override

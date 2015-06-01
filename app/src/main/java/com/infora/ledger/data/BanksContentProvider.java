@@ -7,15 +7,20 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import com.infora.ledger.BanksContract;
 import com.infora.ledger.TransactionContract;
+import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 
 /**
  * Created by jenya on 30.05.15.
  */
 public class BanksContentProvider extends ContentProvider {
+    private static final String TAG = BanksContentProvider.class.getName();
+
     public static final String AUTHORITY = BanksContract.AUTHORITY;
     public static final String BANK_LINKS_LIST_TYPE = "vnd.android.cursor.dir/vnd." + AUTHORITY + ".banks.bank-links";
     public static final String BANK_LINKS_ITEM_TYPE = "vnd.android.cursor.item/vnd." + AUTHORITY + ".banks.bank-links";
@@ -32,7 +37,16 @@ public class BanksContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        return false;
+        Log.d(TAG, "Initializing provider. Subscribing to the bus...");
+        BusUtils.getBus(getContext()).register(this);
+        return true;
+    }
+
+    @Override
+    public void shutdown() {
+        Log.d(TAG, "Provider shutdown.");
+        super.shutdown();
+        BusUtils.getBus(getContext()).unregister(this);
     }
 
     @Override
@@ -43,7 +57,9 @@ public class BanksContentProvider extends ContentProvider {
             case BANKS_BANK_LINKS:
                 LogUtil.d(this, "Querying bank links...");
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                return db.query(BanksContract.BankLinks.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                Cursor query = db.query(BanksContract.BankLinks.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                query.setNotificationUri(getContext().getContentResolver(), uri);
+                return query;
             default:
                 throw newInvalidUrlException(uri);
         }
@@ -97,7 +113,12 @@ public class BanksContentProvider extends ContentProvider {
         return new IllegalArgumentException("The uri " + uri + " can not be matched.");
     }
 
+    public void onEvent(BankLinksDeletedEvent event) {
+        notifyListChanged();
+    }
+
     private void notifyListChanged() {
-        getContext().getContentResolver().notifyChange(TransactionContract.CONTENT_URI, null);
+        Log.d(TAG, "Notifying " + BanksContract.BankLinks.CONTENT_URI + " changed.");
+        getContext().getContentResolver().notifyChange(BanksContract.BankLinks.CONTENT_URI, null);
     }
 }
