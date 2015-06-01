@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.infora.ledger.application.commands.AddBankLinkCommand;
+import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.banks.PrivatBankTransaction;
@@ -89,6 +90,12 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         addButton.setEnabled(true);
 
         Toast.makeText(this, "Bank link added", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onEventMainThread(AddBankLinkFailed event) {
+        Button addButton = (Button) findViewById(R.id.action_add_bank_link);
+        addButton.setEnabled(true);
+        Toast.makeText(this, "Failure adding bank link: " + event.exception.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     @Override

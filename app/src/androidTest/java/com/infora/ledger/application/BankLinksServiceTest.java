@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.data.BankLink;
@@ -27,13 +28,12 @@ public class BankLinksServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
         bus = new EventBus();
         repository = new MockBankLinksRepository();
         subject = new BankLinksService(bus, repository);
     }
 
-    public void testAddBankLinkCommand() throws SQLException {
+    public void testAddBankLinkCommand() {
         AddBankLinkCommand command = new AddBankLinkCommand();
         command.accountId = "account-100";
         command.accountName = "Account 100";
@@ -56,6 +56,26 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals(1, subscriber.getEvents().size());
         assertEquals("account-100", subscriber.getEvent().accountId);
         assertEquals("bank-100", subscriber.getEvent().bic);
+    }
+
+    public void testAddBankLinkCommandFailed() {
+        AddBankLinkCommand command = new AddBankLinkCommand();
+        command.accountId = "account-100";
+        command.accountName = "Account 100";
+        command.bic = "bank-100";
+        command.linkData = new MockBankLinkData("login-332", "password-332");
+
+        MockSubscriber<AddBankLinkFailed> subscriber = new MockSubscriber<>();
+        bus.register(subscriber);
+
+        SQLException saveFailure = new SQLException("Some failure");
+        repository.saveException = saveFailure;
+        subject.onEventBackgroundThread(command);
+
+        assertEquals(0, repository.savedBankLinks.size());
+
+        assertEquals(1, subscriber.getEvents().size());
+        assertEquals(saveFailure, subscriber.getEvent().exception);
     }
 
     public void testDeleteBankLinksCommand() throws SQLException {

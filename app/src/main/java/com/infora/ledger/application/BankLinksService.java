@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.data.BankLink;
@@ -27,15 +28,20 @@ public class BankLinksService {
         this.repository = repository;
     }
 
-    public void onEventBackgroundThread(AddBankLinkCommand command) throws SQLException {
+    public void onEventBackgroundThread(AddBankLinkCommand command) {
         Log.d(TAG, "Inserting new bank link for bank: " + command.bic + ", account: " + command.accountName);
         BankLink bankLink = new BankLink()
                 .setAccountId(command.accountId)
                 .setAccountName(command.accountName)
                 .setBic(command.bic)
                 .setLinkData(command.linkData);
-        repository.save(bankLink);
-        bus.post(new BankLinkAdded(command.accountId, command.bic));
+        try {
+            repository.save(bankLink);
+            bus.post(new BankLinkAdded(command.accountId, command.bic));
+        } catch (SQLException e) {
+            Log.e(TAG, "Failed to save the bank link.", e);
+            bus.post(new AddBankLinkFailed(e));
+        }
     }
 
     public void onEventBackgroundThread(DeleteBankLinksCommand command) throws SQLException {

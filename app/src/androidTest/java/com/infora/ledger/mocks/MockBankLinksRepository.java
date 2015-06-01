@@ -22,8 +22,11 @@ public class MockBankLinksRepository extends BankLinksRepository {
         savedBankLinks = new ArrayList<>();
     }
 
+    public SQLException saveException;
+
     @Override
     public BankLink save(BankLink bankLink) throws SQLException {
+        if(saveException != null) throw saveException;
         savedBankLinks.add(bankLink);
         return bankLink;
     }

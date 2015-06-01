@@ -13,6 +13,7 @@ import android.widget.Spinner;
 
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
+import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.banks.PrivatBankTransaction;
@@ -101,6 +102,17 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         assertEquals("", merchantId.getText().toString());
         assertEquals("", merchantPassword.getText().toString());
         assertEquals("", cardNumber.getText().toString());
+        assertTrue(addButton.isEnabled());
+    }
+
+    public void testAddBankLinkFailed() {
+        Window wnd = getActivity().getWindow();
+
+        Button addButton = (Button) wnd.findViewById(R.id.action_add_bank_link);
+        addButton.setEnabled(false);
+
+        getActivity().onEventMainThread(new AddBankLinkFailed(new Exception("Some exception")));
+
         assertTrue(addButton.isEnabled());
     }
 
