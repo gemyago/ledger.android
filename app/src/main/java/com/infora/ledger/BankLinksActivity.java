@@ -7,12 +7,17 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import com.infora.ledger.BanksContract.BankLinks;
+import com.infora.ledger.application.commands.DeleteTransactionsCommand;
+import com.infora.ledger.support.BusUtils;
 
 /**
  * Created by jenya on 30.05.15.
@@ -36,6 +41,8 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         lvBankLinks = (ListView) findViewById(R.id.bank_links_list);
         lvBankLinks.setAdapter(bankLinksAdapter);
         lvBankLinks.setEmptyView(findViewById(android.R.id.empty));
+        lvBankLinks.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        lvBankLinks.setMultiChoiceModeListener(new BankLinksChoiceListener());
 
         getLoaderManager().initLoader(BANK_LINKS_LOADER_ID, null, this);
     }
@@ -76,5 +83,55 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         bankLinksAdapter.swapCursor(null);
+    }
+
+    private class BankLinksChoiceListener implements ListView.MultiChoiceModeListener {
+        @Override
+        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+            setSubtitle(mode);
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.bank_links_actions, menu);
+            mode.setTitle(getString(R.string.select_bank_links));
+            setSubtitle(mode);
+            return true;
+
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_delete:
+                    long[] checkedItemIds = lvBankLinks.getCheckedItemIds();
+                    mode.finish();
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Action item " + item.getTitle() + " is not supported.");
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+
+        }
+
+        private void setSubtitle(ActionMode mode) {
+            final int checkedCount = lvBankLinks.getCheckedItemCount();
+            if (checkedCount == 0) {
+                mode.setSubtitle(null);
+            } else {
+                String selectedString = getResources().getQuantityString(R.plurals.number_of_selected_bank_links, checkedCount, checkedCount);
+                mode.setSubtitle(selectedString);
+            }
+        }
     }
 }
