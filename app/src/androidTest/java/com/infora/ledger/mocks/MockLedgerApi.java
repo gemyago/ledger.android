@@ -1,6 +1,7 @@
 package com.infora.ledger.mocks;
 
 import com.infora.ledger.api.AuthenticityToken;
+import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
 
@@ -20,6 +21,7 @@ public class MockLedgerApi implements LedgerApi {
     private String authenticatedGoogleIdToken;
     private AuthenticatingByTokenCallback authenticatingByTokenCallback;
     private AuthenticityToken authenticatedAuthenticityToken;
+    private ArrayList<LedgerAccountDto> accounts;
 
     public ArrayList<ReportPendingTransactionArgs> getReportedTransactions() {
         return reportedTransactions;
@@ -50,6 +52,15 @@ public class MockLedgerApi implements LedgerApi {
         if(authenticatingByTokenCallback != null) authenticatingByTokenCallback.authenticating(googleIdToken);
         this.authenticatedGoogleIdToken = googleIdToken;
         return authenticatedAuthenticityToken;
+    }
+
+    public void setAccounts(ArrayList<LedgerAccountDto> accounts) {
+        this.accounts = accounts;
+    }
+
+    @Override
+    public ArrayList<LedgerAccountDto> getAccounts() {
+        return accounts;
     }
 
     @Override

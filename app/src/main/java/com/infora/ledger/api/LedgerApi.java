@@ -20,6 +20,9 @@ public interface LedgerApi {
     @POST("/api/sessions.json")
     AuthenticityToken authenticateByIdToken(@Field("google_id_token") String googleIdToken);
 
+    @GET("/accounts.json")
+    ArrayList<LedgerAccountDto> getAccounts();
+
     @GET("/pending-transactions.json")
     ArrayList<PendingTransactionDto> getPendingTransactions();
 
