@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import com.infora.ledger.BanksContract.BankLinks;
+import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.support.BusUtils;
 
@@ -112,6 +113,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
             switch (item.getItemId()) {
                 case R.id.menu_delete:
                     long[] checkedItemIds = lvBankLinks.getCheckedItemIds();
+                    BusUtils.post(BankLinksActivity.this, new DeleteBankLinksCommand(checkedItemIds));
                     mode.finish();
                     break;
                 default:
