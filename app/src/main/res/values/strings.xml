@@ -31,6 +31,7 @@
     <string name="action_report">Report</string>
     <string name="action_bank_links">Bank Links</string>
     <string name="action_add_bank_link">Add link</string>
+    <string name="activity_edit_bank_link">Edit bank link</string>
     <string name="select_bank_links">Select Bank Links</string>
     <plurals name="number_of_selected_bank_links">
         <item quantity="one">%d bank link selected.</item>

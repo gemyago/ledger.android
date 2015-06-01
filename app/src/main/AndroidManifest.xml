@@ -32,6 +32,10 @@
             android:name=".AddBankLinkActivity"
             android:label="@string/action_add_bank_link"
             android:parentActivityName=".BankLinksActivity" />
+        <activity
+            android:name=".EditBankLinkActivity"
+            android:label="@string/activity_edit_bank_link"
+            android:parentActivityName=".BankLinksActivity" />
 
         <provider
             android:name=".data.PendingTransactionsContentProvider"

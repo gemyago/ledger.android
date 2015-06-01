@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="8dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginBottom="16dp"
+    android:orientation="vertical">
+
+    <Spinner
+        android:hint="Ledger Account"
+        android:id="@+id/ledger_account_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></Spinner>
+
+    <fragment
+        android:id="@+id/bank_link_fragment"
+        android:name="com.infora.ledger.PrivatBankLinkFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></fragment>
+
+    <Button android:id="@+id/action_add_bank_link"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="Update bank link"
+        android:onClick="updateBankLink"
+        ></Button>
+</LinearLayout>
