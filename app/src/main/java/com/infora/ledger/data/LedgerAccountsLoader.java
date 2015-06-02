@@ -29,6 +29,7 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
     public static final String COLUMN_NAME = "name";
 
     private LedgerApi ledgerApi;
+    private boolean addSelectionPrompt;
 
     public LedgerAccountsLoader(Context context) {
         super(context);
@@ -37,6 +38,11 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
     public LedgerAccountsLoader(Context context, LedgerApi ledgerApi) {
         super(context);
         this.ledgerApi = ledgerApi;
+    }
+
+    public LedgerAccountsLoader withSelectionPrompt() {
+        addSelectionPrompt = true;
+        return this;
     }
 
     @Override
@@ -50,7 +56,7 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
         if (ledgerApi == null) ledgerApi = createApi(getContext());
         LogUtil.d(this, "Loading ledger accounts...");
         final MatrixCursor cursor = new MatrixCursor(new String[]{COLUMN_ID, COLUMN_ACCOUNT_ID, COLUMN_NAME});
-        cursor.addRow(new Object[]{0, null, "Please select account..."});
+        if(addSelectionPrompt) cursor.addRow(new Object[]{0, null, "Please select account..."});
         ArrayList<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         int serialId = 0;
         for (LedgerAccountDto account : accounts) {

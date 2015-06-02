@@ -32,6 +32,27 @@ public class LedgerAccountsLoaderTest extends AndroidTestCase {
 
         Cursor cursor = subject.loadInBackground();
 
+        assertEquals(3, cursor.getCount());
+
+        int serialId = 0;
+        for (LedgerAccountDto account : accounts) {
+            cursor.moveToNext();
+            assertEquals(++serialId, cursor.getInt(cursor.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ID)));
+            assertEquals(account.id, cursor.getString(cursor.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)));
+            assertEquals(account.name, cursor.getString(cursor.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME)));
+        }
+    }
+
+    public void testLoadInBackgroundWithSelectionPrompt() throws Exception {
+        ArrayList<LedgerAccountDto> accounts = new ArrayList<>();
+        accounts.add(new LedgerAccountDto("an-account-1", "An Account 1"));
+        accounts.add(new LedgerAccountDto("an-account-2", "An Account 2"));
+        accounts.add(new LedgerAccountDto("an-account-3", "An Account 3"));
+        api.setAccounts(accounts);
+
+        subject.withSelectionPrompt();
+        Cursor cursor = subject.loadInBackground();
+
         assertEquals(4, cursor.getCount());
 
         cursor.moveToFirst();
