@@ -7,6 +7,7 @@ import com.infora.ledger.api.PendingTransactionDto;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import retrofit.http.Field;
 
@@ -21,7 +22,7 @@ public class MockLedgerApi implements LedgerApi {
     private String authenticatedGoogleIdToken;
     private AuthenticatingByTokenCallback authenticatingByTokenCallback;
     private AuthenticityToken authenticatedAuthenticityToken;
-    private ArrayList<LedgerAccountDto> accounts;
+    private List<LedgerAccountDto> accounts;
 
     public ArrayList<ReportPendingTransactionArgs> getReportedTransactions() {
         return reportedTransactions;
@@ -54,12 +55,12 @@ public class MockLedgerApi implements LedgerApi {
         return authenticatedAuthenticityToken;
     }
 
-    public void setAccounts(ArrayList<LedgerAccountDto> accounts) {
+    public void setAccounts(List<LedgerAccountDto> accounts) {
         this.accounts = accounts;
     }
 
     @Override
-    public ArrayList<LedgerAccountDto> getAccounts() {
+    public List<LedgerAccountDto> getAccounts() {
         return accounts;
     }
 
@@ -82,7 +83,7 @@ public class MockLedgerApi implements LedgerApi {
     }
 
     @Override
-    public ArrayList<PendingTransactionDto> getPendingTransactions() {
+    public List<PendingTransactionDto> getPendingTransactions() {
         return pendingTransactions;
     }
 

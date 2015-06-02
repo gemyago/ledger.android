@@ -101,7 +101,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         LogUtil.d(this, "Creating loader");
-        return new LedgerAccountsLoader(this);
+        return new LedgerAccountsLoader(this).withSelectionPrompt();
     }
 
     @Override

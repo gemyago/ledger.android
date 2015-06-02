@@ -1,7 +1,7 @@
 package com.infora.ledger.api;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import retrofit.http.DELETE;
 import retrofit.http.Field;
@@ -10,7 +10,6 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
-import retrofit.http.Query;
 
 /**
  * Created by jenya on 11.03.15.
@@ -21,10 +20,11 @@ public interface LedgerApi {
     AuthenticityToken authenticateByIdToken(@Field("google_id_token") String googleIdToken);
 
     @GET("/accounts.json")
-    ArrayList<LedgerAccountDto> getAccounts();
+
+    List<LedgerAccountDto> getAccounts();
 
     @GET("/pending-transactions.json")
-    ArrayList<PendingTransactionDto> getPendingTransactions();
+    List<PendingTransactionDto> getPendingTransactions();
 
     @FormUrlEncoded
     @POST("/pending-transactions")

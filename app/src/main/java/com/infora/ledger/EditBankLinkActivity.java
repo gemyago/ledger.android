@@ -2,11 +2,11 @@ package com.infora.ledger;
 
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
-import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.CursorWindow;
+import android.database.CursorWrapper;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +21,7 @@ import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 /**
  * Created by jenya on 01.06.15.
@@ -32,6 +33,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
 
     private SimpleCursorAdapter spinnerAdapter;
     private BankLinksRepository bankLinksRepo;
+    private LedgerAccountsLoader.Factory accountsLoaderFactory;
 
     public BankLinksRepository getBankLinksRepo() {
         return bankLinksRepo == null ? (bankLinksRepo = new BankLinksRepository(this)) : bankLinksRepo;
@@ -41,7 +43,15 @@ public class EditBankLinkActivity extends AppCompatActivity {
         this.bankLinksRepo = bankLinksRepo;
     }
 
-    @Override
+    private LedgerAccountsLoader.Factory getAccountsLoaderFactory() {
+        return accountsLoaderFactory == null ?
+                (accountsLoaderFactory = new LedgerAccountsLoader.Factory()) : accountsLoaderFactory;
+    }
+
+    public void setAccountsLoaderFactory(LedgerAccountsLoader.Factory accountsLoaderFactory) {
+        this.accountsLoaderFactory = accountsLoaderFactory;
+    }
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_bank_link);
@@ -54,12 +64,9 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 new String[]{LedgerAccountsLoader.COLUMN_NAME},
                 new int[]{android.R.id.text1},
                 0);
-        LogUtil.d(this, "assigning adapter");
         ledgerAccountId.setAdapter(spinnerAdapter);
         LogUtil.d(this, "initializing loaders");
-//        getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoader());
-        long bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
-        getLoaderManager().initLoader(LEDGER_BANK_LINK_LOADER, null, createBankLinkLoader(bankLinkId));
+        getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoaderCallbacks());
     }
 
     @Override
@@ -77,16 +84,21 @@ public class EditBankLinkActivity extends AppCompatActivity {
     public void updateBankLink(View view) {
     }
 
-    private LoaderManager.LoaderCallbacks<Cursor> createAccountsLoader() {
+    private LoaderManager.LoaderCallbacks<Cursor> createAccountsLoaderCallbacks() {
         return new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new LedgerAccountsLoader(EditBankLinkActivity.this);
+                Log.d(TAG, "Creating accounts loader.");
+                return getAccountsLoaderFactory().createLoader(EditBankLinkActivity.this);
             }
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 spinnerAdapter.swapCursor(data);
+                BusUtils.post(EditBankLinkActivity.this, new AccountsLoaded());
+
+                long bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
+                getLoaderManager().initLoader(LEDGER_BANK_LINK_LOADER, null, createBankLinkLoader(bankLinkId));
             }
 
             @Override
@@ -127,6 +139,17 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 Log.d(TAG, "Bank link data id='" + data.id + "' loaded.");
                 PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
                 bankLinkFragment.setBankLinkData(data.getLinkData(PrivatBankLinkData.class));
+
+                Spinner accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
+                for (int i = 0; i < accountsSpinner.getCount(); i++) {
+                    Cursor account = (Cursor) accountsSpinner.getItemAtPosition(i);
+                    String accountId = account.getString(account.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
+                    if(Objects.equals(data.accountId, accountId)) {
+                        accountsSpinner.setSelection(i);
+                        break;
+                    }
+                }
+
                 BusUtils.post(EditBankLinkActivity.this, new BankLinkLoaded());
             }
 
@@ -138,5 +161,8 @@ public class EditBankLinkActivity extends AppCompatActivity {
     }
 
     public static class BankLinkLoaded {
+    }
+
+    public static class AccountsLoaded {
     }
 }

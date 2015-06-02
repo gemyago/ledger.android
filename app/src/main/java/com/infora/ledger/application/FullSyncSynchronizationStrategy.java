@@ -15,6 +15,7 @@ import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
@@ -34,7 +35,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         Log.i(TAG, "Starting full synchronization...");
 
         Log.d(TAG, "Retrieving pending transactions from the server...");
-        ArrayList<PendingTransactionDto> remoteTransactions = api.getPendingTransactions();
+        List<PendingTransactionDto> remoteTransactions = api.getPendingTransactions();
         HashMap<String, PendingTransactionDto> remoteTransactionsMap = new HashMap<>();
         for (PendingTransactionDto remoteTransaction : remoteTransactions) {
             remoteTransactionsMap.put(remoteTransaction.transactionId, remoteTransaction);

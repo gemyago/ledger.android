@@ -14,6 +14,7 @@ import com.infora.ledger.support.AccountManagerWrapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,7 +58,7 @@ public class ApiManualTest extends AndroidTestCase {
         adapter.authenticateApi(ledgerApi, account);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.01", "Comment for transaction 101", new Date());
-        ArrayList<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
+        List<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
         assertFalse("There should be some pending transactions for testing purposes", pendingTransactions.isEmpty());
         for (PendingTransactionDto pendingTransaction : pendingTransactions) {
             assertNotNull(pendingTransaction.transactionId);
@@ -68,7 +69,7 @@ public class ApiManualTest extends AndroidTestCase {
     
     public void testAdjustPendingTransaction() {
         adapter.authenticateApi(ledgerApi, account);
-        ArrayList<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
+        List<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto transaction : transactions) {
             float newAmount = Float.parseFloat(transaction.amount) + 1;
             ledgerApi.adjustPendingTransaction(

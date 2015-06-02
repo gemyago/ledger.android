@@ -16,7 +16,7 @@ import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jenya on 01.06.15.
@@ -56,8 +56,8 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
         if (ledgerApi == null) ledgerApi = createApi(getContext());
         LogUtil.d(this, "Loading ledger accounts...");
         final MatrixCursor cursor = new MatrixCursor(new String[]{COLUMN_ID, COLUMN_ACCOUNT_ID, COLUMN_NAME});
-        if(addSelectionPrompt) cursor.addRow(new Object[]{0, null, "Please select account..."});
-        ArrayList<LedgerAccountDto> accounts = ledgerApi.getAccounts();
+        if (addSelectionPrompt) cursor.addRow(new Object[]{0, null, "Please select account..."});
+        List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         int serialId = 0;
         for (LedgerAccountDto account : accounts) {
             cursor.addRow(new Object[]{++serialId, account.id, account.name});
@@ -79,5 +79,11 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
         Log.d(TAG, "Authenticating api");
         apiAdapter.authenticateApi(api, accounts[0]);
         return api;
+    }
+
+    public static class Factory {
+        public LedgerAccountsLoader createLoader(Context context) {
+            return new LedgerAccountsLoader(context);
+        }
     }
 }
