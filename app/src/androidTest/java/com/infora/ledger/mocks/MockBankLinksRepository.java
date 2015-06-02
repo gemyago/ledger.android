@@ -31,9 +31,16 @@ public class MockBankLinksRepository extends BankLinksRepository {
         return bankLink;
     }
 
+    public BankLink bankLinkToGetById;
+
     @Override
     public BankLink getById(long id) throws SQLException {
-        return super.getById(id);
+        if(bankLinkToGetById == null)
+            throw new AssertionError("BankLink was not assigned.");
+
+        if(bankLinkToGetById.id != id)
+            throw new AssertionError("Wrong BankLink id provided. Expected '" + bankLinkToGetById.id + "', was '" + id + "'.");
+        return bankLinkToGetById;
     }
 
     @Override

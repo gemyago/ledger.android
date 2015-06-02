@@ -28,6 +28,15 @@ public class PrivatBankLinkFragment extends Fragment {
         return new PrivatBankLinkData(card.getText().toString(), merchantId.getText().toString(), merchantPassword.getText().toString());
     }
 
+    public void setBankLinkData(PrivatBankLinkData linkData) {
+        EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) getView().findViewById(R.id.privat_bank_card_number);
+        merchantId.setText(linkData.merchantId);
+        merchantPassword.setText(linkData.password);
+        card.setText(linkData.card);
+    }
+
     public void clearLinkData() {
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);

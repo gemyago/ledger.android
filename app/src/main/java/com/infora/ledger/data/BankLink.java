@@ -33,6 +33,11 @@ public class BankLink {
     @DatabaseField(columnName = COLUMN_LINK_DATA)
     public String linkData;
 
+    public BankLink setId(int id) {
+        this.id = id;
+        return this;
+    }
+
     public BankLink setAccountId(String value) {
         accountId = value;
         return this;

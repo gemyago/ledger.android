@@ -5,7 +5,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -22,9 +20,7 @@ import android.widget.Toast;
 
 import com.infora.ledger.BanksContract.BankLinks;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
-import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
-import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 
@@ -34,7 +30,7 @@ import com.infora.ledger.support.EventHandler;
 public class BankLinksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = BankLinksActivity.class.getName();
     private static final int BANK_LINKS_LOADER_ID = 1;
-    public static final String BANK_LINK_ID_EXTR = "BANK_LINK_ID";
+    public static final String BANK_LINK_ID_EXTRA = "BANK_LINK_ID";
     private SimpleCursorAdapter bankLinksAdapter;
     private ListView lvBankLinks;
 
@@ -59,7 +55,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, "Editing bank link: " + id);
                 Intent intent = new Intent(BankLinksActivity.this, EditBankLinkActivity.class);
-                intent.putExtra(BANK_LINK_ID_EXTR, id);
+                intent.putExtra(BANK_LINK_ID_EXTRA, id);
                 startActivity(intent);
             }
         });

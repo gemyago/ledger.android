@@ -47,6 +47,20 @@ public class PrivatBankLinkFragmentTest extends ActivityInstrumentationTestCase2
         assertEquals("card100", linkData.card);
     }
 
+    public void testSetBankLinkData() {
+        PrivatBankLinkFragment fragment = startFragment();
+        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
+
+        PrivatBankLinkData linkData = new PrivatBankLinkData("card100", "merchant-100", "merchant-100-password");
+        fragment.setBankLinkData(linkData);
+
+        assertEquals("merchant-100", merchantId.getText().toString());
+        assertEquals("merchant-100-password", merchantPassword.getText().toString());
+        assertEquals("card100", card.getText().toString());
+    }
+
     public void testClearLinkData() {
         PrivatBankLinkFragment fragment = startFragment();
         EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);

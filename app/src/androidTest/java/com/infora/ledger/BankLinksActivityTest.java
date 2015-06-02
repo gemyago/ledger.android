@@ -78,7 +78,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         Intent intent = getStartedActivityIntent();
         assertNotNull(intent);
         assertEquals(EditBankLinkActivity.class.getName(), intent.getComponent().getClassName());
-        assertEquals(link2.id, intent.getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTR, 0));
+        assertEquals(link2.id, intent.getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0));
     }
 
     public void testDeleteBankLinks() throws SQLException {

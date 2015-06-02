@@ -13,4 +13,34 @@ public class PrivatBankLinkData {
         this.merchantId = merchantId;
         this.password = password;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PrivatBankLinkData that = (PrivatBankLinkData) o;
+
+        if (!card.equals(that.card)) return false;
+        if (!merchantId.equals(that.merchantId)) return false;
+        return password.equals(that.password);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = card.hashCode();
+        result = 31 * result + merchantId.hashCode();
+        result = 31 * result + password.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PrivatBankLinkData{" +
+                "card='" + card + '\'' +
+                ", merchantId='" + merchantId + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }
