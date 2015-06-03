@@ -7,9 +7,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import com.infora.ledger.api.LedgerAccountDto;
+import com.infora.ledger.application.commands.UpdateBankLinkCommand;
+import com.infora.ledger.application.events.BankLinkUpdated;
+import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
@@ -17,6 +22,7 @@ import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockBankLinksRepository;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.LogUtil;
 
 import java.util.Arrays;
@@ -106,6 +112,49 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         Cursor selectedItem = (Cursor) accountsSpinner.getSelectedItem();
         assertNotNull(selectedItem);
         assertEquals(selectedAccount.id, selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)));
+    }
+
+    public void testUpdateBankLink() {
+        getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
+        BarrierSubscriber<EditBankLinkActivity.AccountsLoaded> accountsBarrier = new BarrierSubscriber<>(EditBankLinkActivity.AccountsLoaded.class);
+        bus.register(accountsBarrier);
+        LogUtil.d(this, "Calling activity onStart");
+        getInstrumentation().callActivityOnStart(getActivity());
+        accountsBarrier.await();
+
+        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getActivity()
+                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+
+        PrivatBankLinkData newLinkData = new PrivatBankLinkData("new-card-100", "new-merchant-100", "new-password-100");
+        bankLinkFragment.setBankLinkData(newLinkData);
+        Spinner accountsSpinner = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
+        accountsSpinner.setSelection(2);
+
+        MockSubscriber<UpdateBankLinkCommand> commandSubscriber = new MockSubscriber<>();
+        bus.register(commandSubscriber);
+
+        getActivity().updateBankLink(null);
+
+        assertEquals(1, commandSubscriber.getEvents().size());
+        assertEquals("a-200", commandSubscriber.getEvent().accountId);
+        assertEquals(newLinkData, commandSubscriber.getEvent().bankLinkData);
+
+        Button updateButton = (Button) getActivity().findViewById(R.id.action_update_bank_link);
+        assertFalse(updateButton.isEnabled());
+    }
+
+    public void testBankLinkUpdated() {
+        Button updateButton = (Button) getActivity().findViewById(R.id.action_update_bank_link);
+        updateButton.setEnabled(false);
+        getActivity().onEventMainThread(new BankLinkUpdated(bankLink.id));
+        assertTrue(updateButton.isEnabled());
+    }
+
+    public void testUpdateBankLinkFailed() {
+        Button updateButton = (Button) getActivity().findViewById(R.id.action_update_bank_link);
+        updateButton.setEnabled(false);
+        getActivity().onEventMainThread(new UpdateBankLinkFailed(bankLink.id, new Exception()));
+        assertTrue(updateButton.isEnabled());
     }
 
     private LedgerAccountsLoader.Factory createAccountsLoaderFactory() {

@@ -10,9 +10,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.infora.ledger.application.commands.UpdateBankLinkCommand;
+import com.infora.ledger.application.events.BankLinkUpdated;
+import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.BankLinksRepository;
@@ -34,6 +39,10 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private SimpleCursorAdapter spinnerAdapter;
     private BankLinksRepository bankLinksRepo;
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
+    private PrivatBankLinkFragment bankLinkFragment;
+    private Button updateButton;
+    private Spinner accountsSpinner;
+    private long bankLinkId;
 
     public BankLinksRepository getBankLinksRepo() {
         return bankLinksRepo == null ? (bankLinksRepo = new BankLinksRepository(this)) : bankLinksRepo;
@@ -67,21 +76,43 @@ public class EditBankLinkActivity extends AppCompatActivity {
         ledgerAccountId.setAdapter(spinnerAdapter);
         LogUtil.d(this, "initializing loaders");
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoaderCallbacks());
+
+        bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
+        bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+        updateButton = (Button) findViewById(R.id.action_update_bank_link);
+        accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        BusUtils.register(this);
+        BusUtils.register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        BusUtils.unregister(this);
+        BusUtils.unregister(this);
     }
 
     public void updateBankLink(View view) {
+        Cursor selectedItem = (Cursor) accountsSpinner.getSelectedItem();
+        BusUtils.post(this, new UpdateBankLinkCommand(
+                (int) bankLinkId,
+                selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)),
+                bankLinkFragment.getBankLinkData()
+        ));
+        updateButton.setEnabled(false);
+    }
+
+    public void onEventMainThread(BankLinkUpdated event) {
+        updateButton.setEnabled(true);
+        Toast.makeText(this, "Bank link updated", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onEventMainThread(UpdateBankLinkFailed event) {
+        updateButton.setEnabled(true);
+        Toast.makeText(this, "Failure adding bank link: " + event.exception.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private LoaderManager.LoaderCallbacks<Cursor> createAccountsLoaderCallbacks() {
@@ -97,7 +128,6 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 spinnerAdapter.swapCursor(data);
                 BusUtils.post(EditBankLinkActivity.this, new AccountsLoaded());
 
-                long bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
                 getLoaderManager().initLoader(LEDGER_BANK_LINK_LOADER, null, createBankLinkLoader(bankLinkId));
             }
 
@@ -137,10 +167,8 @@ public class EditBankLinkActivity extends AppCompatActivity {
             @Override
             public void onLoadFinished(Loader<BankLink> loader, BankLink data) {
                 Log.d(TAG, "Bank link data id='" + data.id + "' loaded.");
-                PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
                 bankLinkFragment.setBankLinkData(data.getLinkData(PrivatBankLinkData.class));
 
-                Spinner accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
                 for (int i = 0; i < accountsSpinner.getCount(); i++) {
                     Cursor account = (Cursor) accountsSpinner.getItemAtPosition(i);
                     String accountId = account.getString(account.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
