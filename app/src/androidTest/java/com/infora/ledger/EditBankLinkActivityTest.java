@@ -137,6 +137,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
 
         assertEquals(1, commandSubscriber.getEvents().size());
         assertEquals("a-200", commandSubscriber.getEvent().accountId);
+        assertEquals("A 200", commandSubscriber.getEvent().accountName);
         assertEquals(newLinkData, commandSubscriber.getEvent().bankLinkData);
 
         Button updateButton = (Button) getActivity().findViewById(R.id.action_update_bank_link);

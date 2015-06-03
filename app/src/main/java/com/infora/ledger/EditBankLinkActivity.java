@@ -4,8 +4,6 @@ import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.CursorWindow;
-import android.database.CursorWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -100,8 +98,8 @@ public class EditBankLinkActivity extends AppCompatActivity {
         BusUtils.post(this, new UpdateBankLinkCommand(
                 (int) bankLinkId,
                 selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)),
-                bankLinkFragment.getBankLinkData()
-        ));
+                selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME)),
+                bankLinkFragment.getBankLinkData()));
         updateButton.setEnabled(false);
     }
 

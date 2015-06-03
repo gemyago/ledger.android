@@ -14,6 +14,7 @@ import android.util.Log;
 import com.infora.ledger.BanksContract;
 import com.infora.ledger.LedgerApplication;
 import com.infora.ledger.TransactionContract;
+import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
@@ -135,6 +136,9 @@ public class BanksContentProvider extends ContentProvider {
     }
 
     public void onEvent(BankLinksDeletedEvent event) {
+        notifyListChanged();
+    }
+    public void onEvent(BankLinkUpdated event) {
         notifyListChanged();
     }
 

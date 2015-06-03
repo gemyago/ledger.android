@@ -8,11 +8,13 @@ import com.infora.ledger.banks.PrivatBankLinkData;
 public class UpdateBankLinkCommand {
     public int id;
     public String accountId;
+    public String accountName;
     public PrivatBankLinkData bankLinkData;
 
-    public UpdateBankLinkCommand(int id, String accountId, PrivatBankLinkData bankLinkData) {
+    public UpdateBankLinkCommand(int id, String accountId, String accountName, PrivatBankLinkData bankLinkData) {
         this.id = id;
         this.accountId = accountId;
+        this.accountName = accountName;
         this.bankLinkData = bankLinkData;
     }
 }
