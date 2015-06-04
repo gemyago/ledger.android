@@ -121,8 +121,14 @@ public class BankLink {
         if (!accountName.equals(bankLink.accountName)) return false;
         if (!bic.equals(bankLink.bic)) return false;
         if (!linkData.equals(bankLink.linkData)) return false;
-        return !(lastSyncDate != null ? !lastSyncDate.equals(bankLink.lastSyncDate) : bankLink.lastSyncDate != null);
+        return datesEqual(lastSyncDate, bankLink.lastSyncDate);
 
+    }
+
+
+    private boolean datesEqual(Date left, Date right) {
+        return (left == null && right == null) ||
+                (left != null && right != null && LedgerDbHelper.toISO8601(left).equals(LedgerDbHelper.toISO8601(right)));
     }
 
     @Override
@@ -132,7 +138,7 @@ public class BankLink {
         result = 31 * result + accountName.hashCode();
         result = 31 * result + bic.hashCode();
         result = 31 * result + linkData.hashCode();
-        result = 31 * result + (lastSyncDate != null ? lastSyncDate.hashCode() : 0);
+//        result = 31 * result + (lastSyncDate != null ? lastSyncDate.hashCode() : 0);
         result = 31 * result + (isInProgress ? 1 : 0);
         result = 31 * result + (hasSucceed ? 1 : 0);
         return result;
@@ -146,7 +152,7 @@ public class BankLink {
                 ", accountName='" + accountName + '\'' +
                 ", bic='" + bic + '\'' +
                 ", linkData='" + linkData + '\'' +
-                ", lastSyncDate=" + (lastSyncDate == null ? null : LedgerDbHelper.toISO8601(lastSyncDate)) +
+                ", lastSyncDate='" + (lastSyncDate == null ? null : LedgerDbHelper.toISO8601(lastSyncDate)) + '\'' +
                 ", isInProgress=" + isInProgress +
                 ", hasSucceed=" + hasSucceed +
                 '}';
