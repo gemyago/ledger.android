@@ -138,7 +138,7 @@ public class BankLink {
         result = 31 * result + accountName.hashCode();
         result = 31 * result + bic.hashCode();
         result = 31 * result + linkData.hashCode();
-//        result = 31 * result + (lastSyncDate != null ? lastSyncDate.hashCode() : 0);
+        result = 31 * result + (lastSyncDate != null ? LedgerDbHelper.toISO8601(lastSyncDate).hashCode() : 0);
         result = 31 * result + (isInProgress ? 1 : 0);
         result = 31 * result + (hasSucceed ? 1 : 0);
         return result;
