@@ -24,7 +24,7 @@ public class PendingTransactionsRepositoryTest extends GenericDatabaseRepository
 
     @Override
     protected GenericDatabaseRepository<PendingTransaction> createRepository(RenamingDelegatingContext context) {
-        return new PendingTransactionsRepository(context);
+        return RepositoryFactory.create(PendingTransaction.class, context);
     }
 
     @Override

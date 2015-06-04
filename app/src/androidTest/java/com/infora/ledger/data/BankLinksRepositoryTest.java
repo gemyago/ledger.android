@@ -24,7 +24,7 @@ public class BankLinksRepositoryTest extends GenericDatabaseRepositoryTest<BankL
 
     @Override
     protected GenericDatabaseRepository<BankLink> createRepository(RenamingDelegatingContext context) {
-        return new BankLinksRepository(context);
+        return RepositoryFactory.create(BankLink.class, context);
     }
 
     @Override

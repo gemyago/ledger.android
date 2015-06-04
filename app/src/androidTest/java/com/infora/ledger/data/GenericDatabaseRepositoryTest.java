@@ -18,7 +18,7 @@ public abstract class GenericDatabaseRepositoryTest<TEntity> extends AndroidTest
 
     @Override
     public void setUp() throws Exception {
-        RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "-pending-transactions-repo-test");
+        RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "-generic-db-repo-test");
         DbUtils.deleteAllDatabases(context);
         dbHelper = new LedgerDbHelper(context);
         subject = createRepository(context);
