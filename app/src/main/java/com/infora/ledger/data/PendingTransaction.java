@@ -28,6 +28,7 @@ public class PendingTransaction {
         isPublished = cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_PUBLISHED)) == 1;
         isDeleted = cursor.getInt(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_IS_DELETED)) == 1;
         timestamp = LedgerDbHelper.parseISO8601(cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_TIMESTAMP)));
+        bic = cursor.getString(cursor.getColumnIndexOrThrow(TransactionContract.COLUMN_BIC));
     }
 
     public PendingTransaction(int id, String amount, String comment) {
