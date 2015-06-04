@@ -6,9 +6,14 @@ import com.google.gson.Gson;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Date;
+
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_ID;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_NAME;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_BIC;
+import static com.infora.ledger.BanksContract.BankLinks.COLUMN_HAS_SUCCEED;
+import static com.infora.ledger.BanksContract.BankLinks.COLUMN_IN_PROGRESS;
+import static com.infora.ledger.BanksContract.BankLinks.COLUMN_LAST_SYNC_DATE;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_LINK_DATA;
 import static com.infora.ledger.BanksContract.BankLinks.TABLE_NAME;
 import static com.infora.ledger.BanksContract.BankLinks._ID;
@@ -33,6 +38,15 @@ public class BankLink {
     @DatabaseField(columnName = COLUMN_LINK_DATA)
     public String linkData;
 
+    @DatabaseField(columnName = COLUMN_LAST_SYNC_DATE)
+    public Date lastSyncDate;
+
+    @DatabaseField(columnName = COLUMN_IN_PROGRESS)
+    public boolean isInProgress;
+
+    @DatabaseField(columnName = COLUMN_HAS_SUCCEED)
+    public boolean hasSucceed;
+
     public BankLink setId(int id) {
         this.id = id;
         return this;
@@ -55,6 +69,21 @@ public class BankLink {
 
     public BankLink setLinkDataValue(String value) {
         linkData = value;
+        return this;
+    }
+
+    public BankLink setLastSyncDate(Date value) {
+        lastSyncDate = value;
+        return this;
+    }
+
+    public BankLink setInProgress(Boolean value) {
+        isInProgress = value;
+        return this;
+    }
+
+    public BankLink setHasSucceed(Boolean value) {
+        hasSucceed = value;
         return this;
     }
 
@@ -86,10 +115,13 @@ public class BankLink {
         BankLink bankLink = (BankLink) o;
 
         if (id != bankLink.id) return false;
+        if (isInProgress != bankLink.isInProgress) return false;
+        if (hasSucceed != bankLink.hasSucceed) return false;
         if (!accountId.equals(bankLink.accountId)) return false;
         if (!accountName.equals(bankLink.accountName)) return false;
         if (!bic.equals(bankLink.bic)) return false;
-        return linkData.equals(bankLink.linkData);
+        if (!linkData.equals(bankLink.linkData)) return false;
+        return !(lastSyncDate != null ? !lastSyncDate.equals(bankLink.lastSyncDate) : bankLink.lastSyncDate != null);
 
     }
 
@@ -100,6 +132,9 @@ public class BankLink {
         result = 31 * result + accountName.hashCode();
         result = 31 * result + bic.hashCode();
         result = 31 * result + linkData.hashCode();
+        result = 31 * result + (lastSyncDate != null ? lastSyncDate.hashCode() : 0);
+        result = 31 * result + (isInProgress ? 1 : 0);
+        result = 31 * result + (hasSucceed ? 1 : 0);
         return result;
     }
 
@@ -111,6 +146,9 @@ public class BankLink {
                 ", accountName='" + accountName + '\'' +
                 ", bic='" + bic + '\'' +
                 ", linkData='" + linkData + '\'' +
+                ", lastSyncDate=" + (lastSyncDate == null ? null : LedgerDbHelper.toISO8601(lastSyncDate)) +
+                ", isInProgress=" + isInProgress +
+                ", hasSucceed=" + hasSucceed +
                 '}';
     }
 }
