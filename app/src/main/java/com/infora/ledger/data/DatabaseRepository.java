@@ -2,7 +2,6 @@ package com.infora.ledger.data;
 
 import android.content.Context;
 
-import com.infora.ledger.support.ObjectNotFoundException;
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -38,11 +37,7 @@ public class DatabaseRepository<TEntity extends DatabaseRepository.Entity> {
     public TEntity getById(long id) throws SQLException {
         ConnectionSource connectionSource = new AndroidConnectionSource(dbHelper);
         try {
-            Dao<TEntity, Long> dao = DaoManager.createDao(connectionSource, dataClass);
-            TEntity bankLink = dao.queryForId(id);
-            if (bankLink == null)
-                throw new ObjectNotFoundException("BankLink with id='" + id + "' not found.");
-            return bankLink;
+            return DaoTools.getById(dataClass, id, connectionSource);
         } finally {
             connectionSource.close();
         }

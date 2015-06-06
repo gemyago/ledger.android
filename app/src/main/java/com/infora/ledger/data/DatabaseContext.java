@@ -18,6 +18,10 @@ public class DatabaseContext {
         return new DatabaseRepository<>(classOfTEntity, context);
     }
 
+    public UnitOfWork newUnitOfWork() {
+        return new UnitOfWork(context);
+    }
+
     public static DatabaseContext getInstance(Context context) {
         return ((LedgerApplication) context.getApplicationContext()).getDatabaseContext();
     }
