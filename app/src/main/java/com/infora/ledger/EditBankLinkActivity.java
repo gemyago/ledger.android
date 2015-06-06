@@ -20,7 +20,7 @@ import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.LedgerAccountsLoader;
-import com.infora.ledger.data.RepositoryFactory;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 
@@ -44,7 +44,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private long bankLinkId;
 
     public DatabaseRepository<BankLink> getBankLinksRepo() {
-        return bankLinksRepo == null ? (bankLinksRepo = RepositoryFactory.create(BankLink.class, this)) : bankLinksRepo;
+        return bankLinksRepo == null ? (bankLinksRepo = DatabaseContext.getInstance(this).createRepository(BankLink.class)) : bankLinksRepo;
     }
 
     public void setBankLinksRepo(DatabaseRepository bankLinksRepo) {

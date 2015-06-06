@@ -7,6 +7,11 @@ import java.util.ArrayList;
  */
 public class MockSubscriber<TEvent> {
     private TEvent event;
+    private Class<TEvent> classOfEvent;
+
+    public MockSubscriber(Class<TEvent> classOfEvent) {
+        this.classOfEvent = classOfEvent;
+    }
 
     public TEvent getEvent() {
         return event;
@@ -15,6 +20,7 @@ public class MockSubscriber<TEvent> {
     private ArrayList<TEvent> events = new ArrayList<>();
 
     public void onEvent(TEvent event) {
+        if (event.getClass() != classOfEvent) return;
         events.add(event);
         this.event = event;
     }

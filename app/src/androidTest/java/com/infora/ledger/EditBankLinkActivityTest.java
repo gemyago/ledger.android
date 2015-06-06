@@ -128,7 +128,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         Spinner accountsSpinner = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
         accountsSpinner.setSelection(2);
 
-        MockSubscriber<UpdateBankLinkCommand> commandSubscriber = new MockSubscriber<>();
+        MockSubscriber<UpdateBankLinkCommand> commandSubscriber = new MockSubscriber<>(UpdateBankLinkCommand.class);
         bus.register(commandSubscriber);
 
         getActivity().updateBankLink(null);

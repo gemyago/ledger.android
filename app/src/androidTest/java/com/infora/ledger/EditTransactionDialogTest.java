@@ -61,7 +61,7 @@ public class EditTransactionDialogTest extends ActivityInstrumentationTestCase2<
         final EditText etAmount = (EditText) dialog.findViewById(R.id.amount);
         final EditText etComment = (EditText) dialog.findViewById(R.id.comment);
 
-        MockSubscriber<AdjustTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<AdjustTransactionCommand> subscriber = new MockSubscriber<>(AdjustTransactionCommand.class);
         bus.register(subscriber);
 
         getActivity().runOnUiThread(new Runnable() {
@@ -83,7 +83,7 @@ public class EditTransactionDialogTest extends ActivityInstrumentationTestCase2<
     public void testDoNotPostAdjustCommandIfNoChanges() {
         EditTransactionDialog subject = startFragment(new PendingTransaction(100, "100.01", "Comment 100.1"));
         final AlertDialog dialog = (AlertDialog) subject.getDialog();
-        MockSubscriber<AdjustTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<AdjustTransactionCommand> subscriber = new MockSubscriber<>(AdjustTransactionCommand.class);
         bus.register(subscriber);
         getActivity().runOnUiThread(new Runnable() {
             @Override

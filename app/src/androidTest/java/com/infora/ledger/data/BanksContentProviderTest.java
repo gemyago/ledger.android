@@ -30,7 +30,7 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         super.setUp();
         resolver = getMockContentResolver();
         dbHelper = new LedgerDbHelper(getMockContext());
-        repository = RepositoryFactory.create(BankLink.class, getMockContext());
+        repository = new DatabaseContext(getMockContext()).createRepository(BankLink.class);
         DbUtils.deleteAllDatabases(getMockContext());
     }
 

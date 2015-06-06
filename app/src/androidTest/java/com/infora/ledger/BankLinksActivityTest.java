@@ -8,7 +8,7 @@ import android.widget.ListView;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseRepository;
-import com.infora.ledger.data.RepositoryFactory;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
@@ -42,7 +42,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         startActivity(new Intent(), null, null);
         BusUtils.setBus(getActivity(), bus);
 
-        repo = RepositoryFactory.create(BankLink.class, getActivity());
+        repo = new DatabaseContext(getActivity()).createRepository(BankLink.class);
         DbUtils.deleteAllDatabases(getActivity());
     }
 
@@ -96,7 +96,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         bankLinksList.setItemChecked(0, true);
         bankLinksList.setItemChecked(2, true);
 
-        MockSubscriber<DeleteBankLinksCommand> deleteHandler = new MockSubscriber<>();
+        MockSubscriber<DeleteBankLinksCommand> deleteHandler = new MockSubscriber<>(DeleteBankLinksCommand.class);
         bus.register(deleteHandler);
         getActivity().findViewById(R.id.menu_delete).callOnClick();
         assertNotNull(deleteHandler.getEvent());

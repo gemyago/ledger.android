@@ -60,7 +60,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testRequestSyncOnStart() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
+        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>(ReportActivity.RequestSyncCommand.class);
         bus.register(mockSubscriber);
         getInstrumentation().callActivityOnStart(getActivity());
         assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
@@ -70,7 +70,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testRequestSyncOnSynchronizeAction() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>();
+        MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>(ReportActivity.RequestSyncCommand.class);
         bus.register(mockSubscriber);
         getActivity().onOptionsItemSelected(new MockMenuItem(R.id.action_synchronize));
         assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
@@ -80,7 +80,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testReportNewTransactionOnReportButtonClick() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
         EditText amount = (EditText) wnd.findViewById(R.id.amount);
@@ -101,7 +101,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testReportNewTransactionOnImeCommentEditorAction() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
         EditText amount = (EditText) wnd.findViewById(R.id.amount);
@@ -123,7 +123,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testReportNewTransactionEmptyAmount() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
         View reportButton = wnd.findViewById(R.id.report);
@@ -134,7 +134,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void testTransactionReportedEvent() {
         EventBus bus = new EventBus();
         BusUtils.setBus(getActivity(), bus);
-        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>();
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
         EditText amount = (EditText) wnd.findViewById(R.id.amount);
@@ -166,7 +166,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         transactionsList.setItemChecked(0, true);
         transactionsList.setItemChecked(2, true);
 
-        MockSubscriber<DeleteTransactionsCommand> deleteHandler = new MockSubscriber<>();
+        MockSubscriber<DeleteTransactionsCommand> deleteHandler = new MockSubscriber<>(DeleteTransactionsCommand.class);
         bus.register(deleteHandler);
         getActivity().findViewById(R.id.menu_delete).callOnClick();
         assertNotNull(deleteHandler.getEvent());

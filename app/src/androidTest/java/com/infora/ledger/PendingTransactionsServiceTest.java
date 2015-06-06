@@ -51,7 +51,7 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     }
 
     public void testReportPendingTransactionRaisesReportedEvent() {
-        MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>();
+        MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>(TransactionReportedEvent.class);
         bus.register(subscriber);
         provider.setInsertedUri(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 100));
         subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
@@ -76,7 +76,7 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     }
 
     public void testDeleteTransactions() {
-        MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>();
+        MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>(TransactionsDeletedEvent.class);
         bus.register(deletedSubscriber);
 
         DeleteTransactionsCommand command = new DeleteTransactionsCommand(3321L, 3322L, 3323L);

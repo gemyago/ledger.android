@@ -13,6 +13,7 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockBankLinkData;
+import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockSubscriber;
 
@@ -33,8 +34,10 @@ public class BankLinksServiceTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
+        MockDatabaseContext db = new MockDatabaseContext();
         repository = new MockDatabaseRepository(BankLink.class);
-        subject = new BankLinksService(bus, repository);
+        db.addMockRepo(BankLink.class, repository);
+        subject = new BankLinksService(bus, db);
     }
 
     public void testAddBankLinkCommand() {
@@ -44,7 +47,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         command.bic = "bank-100";
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
-        MockSubscriber<BankLinkAdded> subscriber = new MockSubscriber<>();
+        MockSubscriber<BankLinkAdded> subscriber = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(subscriber);
 
         subject.onEventBackgroundThread(command);
@@ -69,7 +72,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         command.bic = "bank-100";
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
-        MockSubscriber<AddBankLinkFailed> subscriber = new MockSubscriber<>();
+        MockSubscriber<AddBankLinkFailed> subscriber = new MockSubscriber<>(AddBankLinkFailed.class);
         bus.register(subscriber);
 
         SQLException saveFailure = new SQLException("Some failure");
@@ -88,7 +91,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
                 .setId(100)
                 .setAccountId("account-100").setAccountName("Account 100")
                 .setBic("bank-100").setLinkData(linkData);
-        MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>();
+        MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>(BankLinkUpdated.class);
         bus.register(updatedHandler);
         repository.entityToGetById = bankLink;
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
@@ -110,7 +113,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
                 .setId(100)
                 .setAccountId("account-100")
                 .setBic("bank-100").setLinkData(new PrivatBankLinkData("card-1", "merchant-1", "password-1"));
-        MockSubscriber<UpdateBankLinkFailed> updateFailedHandler = new MockSubscriber<>();
+        MockSubscriber<UpdateBankLinkFailed> updateFailedHandler = new MockSubscriber<>(UpdateBankLinkFailed.class);
         bus.register(updateFailedHandler);
         repository.saveException = new SQLException("sql exception");
         repository.entityToGetById = bankLink;
@@ -123,7 +126,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     }
 
     public void testDeleteBankLinksCommand() throws SQLException {
-        MockSubscriber<BankLinksDeletedEvent> subscriber = new MockSubscriber<>();
+        MockSubscriber<BankLinksDeletedEvent> subscriber = new MockSubscriber<>(BankLinksDeletedEvent.class);
         bus.register(subscriber);
         subject.onEventBackgroundThread(new DeleteBankLinksCommand(new long[]{1, 2, 443}));
         assertEquals(3, repository.deletedIds.length);

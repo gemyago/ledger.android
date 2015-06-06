@@ -10,7 +10,7 @@ import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.RepositoryFactory;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
@@ -27,6 +27,7 @@ public class LedgerApplication extends Application {
     private EventBus bus;
 
     private AccountManagerWrapper accountManager;
+    private DatabaseContext databaseContext;
 
     public AccountManagerWrapper getAccountManager() {
         return accountManager == null ? (accountManager = new AccountManagerWrapper(this)) : accountManager;
@@ -43,6 +44,10 @@ public class LedgerApplication extends Application {
         } else return bus;
     }
 
+    public DatabaseContext getDatabaseContext() {
+        return databaseContext == null ? (databaseContext = new DatabaseContext(this)) : databaseContext;
+    }
+
     public void setBus(EventBus bus) {
         this.bus = bus;
     }
@@ -56,7 +61,7 @@ public class LedgerApplication extends Application {
         PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);
 
-        BankLinksService bankLinksService = new BankLinksService(bus, RepositoryFactory.create(BankLink.class, this));
+        BankLinksService bankLinksService = new BankLinksService(bus, getDatabaseContext());
         bus.register(bankLinksService);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));

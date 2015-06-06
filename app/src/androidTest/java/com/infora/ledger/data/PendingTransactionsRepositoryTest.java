@@ -19,7 +19,7 @@ public class PendingTransactionsRepositoryTest extends DatabaseRepositoryTest<Pe
 
     @Override
     protected DatabaseRepository<PendingTransaction> createRepository(RenamingDelegatingContext context) {
-        return RepositoryFactory.create(PendingTransaction.class, context);
+        return new DatabaseContext(context).createRepository(PendingTransaction.class);
     }
 
     @Override

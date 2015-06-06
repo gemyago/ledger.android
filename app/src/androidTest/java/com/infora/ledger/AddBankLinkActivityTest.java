@@ -64,7 +64,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
 
         Button addButton = (Button) wnd.findViewById(R.id.action_add_bank_link);
 
-        MockSubscriber<AddBankLinkCommand> addHandler = new MockSubscriber<>();
+        MockSubscriber<AddBankLinkCommand> addHandler = new MockSubscriber<>(AddBankLinkCommand.class);
         bus.register(addHandler);
 
         getActivity().addBankLink(null);

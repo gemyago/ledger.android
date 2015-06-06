@@ -11,6 +11,7 @@ import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
 
 import java.sql.SQLException;
@@ -26,9 +27,9 @@ public class BankLinksService {
     private final EventBus bus;
     private DatabaseRepository<BankLink> repository;
 
-    public BankLinksService(EventBus bus, DatabaseRepository<BankLink> repository) {
+    public BankLinksService(EventBus bus, DatabaseContext db) {
         this.bus = bus;
-        this.repository = repository;
+        this.repository = db.createRepository(BankLink.class);
     }
 
     public void onEventBackgroundThread(AddBankLinkCommand command) {

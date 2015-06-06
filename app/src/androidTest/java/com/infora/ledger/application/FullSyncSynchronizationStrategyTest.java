@@ -81,7 +81,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", false, false, null, null).setId(3));
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
-        MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>();
+        MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
         bus.register(publishedSubscriber);
 
         subject.synchronize(api, resolver, null, syncResult);
@@ -127,7 +127,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", true, false, null, null).setId(3));
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
-        MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>();
+        MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
         bus.register(publishedSubscriber);
 
         subject.synchronize(api, resolver, null, syncResult);
@@ -163,7 +163,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
 
-        MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>();
+        MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
         bus.register(purgedSubscriber);
 
         subject.synchronize(api, resolver, null, syncResult);
