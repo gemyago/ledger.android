@@ -15,11 +15,11 @@ import java.util.List;
 /**
  * Created by jenya on 05.06.15.
  */
-public class GenericDatabaseRepository<TEntity> {
+public class DatabaseRepository<TEntity extends DatabaseRepository.Entity> {
     protected final LedgerDbHelper dbHelper;
     private Class<TEntity> dataClass;
 
-    public GenericDatabaseRepository(Class<TEntity> classOfEntity, Context context) {
+    public DatabaseRepository(Class<TEntity> classOfEntity, Context context) {
         this.dataClass = classOfEntity;
         dbHelper = new LedgerDbHelper(context);
     }
@@ -70,5 +70,9 @@ public class GenericDatabaseRepository<TEntity> {
         } finally {
             connectionSource.close();
         }
+    }
+
+    public interface Entity {
+        int getId();
     }
 }

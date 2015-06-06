@@ -11,7 +11,7 @@ import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.BankLinksRepository;
+import com.infora.ledger.data.DatabaseRepository;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -24,9 +24,9 @@ import de.greenrobot.event.EventBus;
 public class BankLinksService {
     private static final String TAG = BankLinksService.class.getName();
     private final EventBus bus;
-    private BankLinksRepository repository;
+    private DatabaseRepository<BankLink> repository;
 
-    public BankLinksService(EventBus bus, BankLinksRepository repository) {
+    public BankLinksService(EventBus bus, DatabaseRepository<BankLink> repository) {
         this.bus = bus;
         this.repository = repository;
     }

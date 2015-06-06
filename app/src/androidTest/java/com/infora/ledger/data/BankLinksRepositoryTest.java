@@ -9,12 +9,7 @@ import static com.infora.ledger.TestHelper.randomString;
 /**
  * Created by jenya on 30.05.15.
  */
-public class BankLinksRepositoryTest extends GenericDatabaseRepositoryTest<BankLink> {
-
-    @Override
-    protected int getId(BankLink rec1) {
-        return rec1.id;
-    }
+public class BankLinksRepositoryTest extends DatabaseRepositoryTest<BankLink> {
 
     @Override
     protected BankLink setId(BankLink rec, int id) {
@@ -23,7 +18,7 @@ public class BankLinksRepositoryTest extends GenericDatabaseRepositoryTest<BankL
     }
 
     @Override
-    protected GenericDatabaseRepository<BankLink> createRepository(RenamingDelegatingContext context) {
+    protected DatabaseRepository<BankLink> createRepository(RenamingDelegatingContext context) {
         return RepositoryFactory.create(BankLink.class, context);
     }
 

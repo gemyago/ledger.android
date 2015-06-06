@@ -9,7 +9,6 @@ import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.BanksContract;
 import com.infora.ledger.DbUtils;
-import com.infora.ledger.mocks.MockLedgerApplication;
 
 import java.sql.SQLException;
 
@@ -20,7 +19,7 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
 
     private MockContentResolver resolver;
     private LedgerDbHelper dbHelper;
-    private BankLinksRepository repository;
+    private DatabaseRepository<BankLink> repository;
 
     public BanksContentProviderTest() {
         super(BanksContentProvider.class, BanksContentProvider.AUTHORITY);
@@ -31,7 +30,7 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         super.setUp();
         resolver = getMockContentResolver();
         dbHelper = new LedgerDbHelper(getMockContext());
-        repository = new BankLinksRepository(getMockContext());
+        repository = RepositoryFactory.create(BankLink.class, getMockContext());
         DbUtils.deleteAllDatabases(getMockContext());
     }
 

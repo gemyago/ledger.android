@@ -13,7 +13,7 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockBankLinkData;
-import com.infora.ledger.mocks.MockBankLinksRepository;
+import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockSubscriber;
 
 import java.sql.SQLException;
@@ -26,14 +26,14 @@ import de.greenrobot.event.EventBus;
 public class BankLinksServiceTest extends AndroidTestCase {
 
     private BankLinksService subject;
-    private MockBankLinksRepository repository;
+    private MockDatabaseRepository repository;
     private EventBus bus;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
-        repository = new MockBankLinksRepository();
+        repository = new MockDatabaseRepository(BankLink.class);
         subject = new BankLinksService(bus, repository);
     }
 
@@ -49,8 +49,8 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
         subject.onEventBackgroundThread(command);
 
-        assertEquals(1, repository.savedBankLinks.size());
-        assertTrue(repository.savedBankLinks.contains(new BankLink()
+        assertEquals(1, repository.savedEntities.size());
+        assertTrue(repository.savedEntities.contains(new BankLink()
                         .setAccountId("account-100")
                         .setAccountName("Account 100")
                         .setBic("bank-100")
@@ -76,7 +76,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         repository.saveException = saveFailure;
         subject.onEventBackgroundThread(command);
 
-        assertEquals(0, repository.savedBankLinks.size());
+        assertEquals(0, repository.savedEntities.size());
 
         assertEquals(1, subscriber.getEvents().size());
         assertEquals(saveFailure, subscriber.getEvent().exception);
@@ -90,11 +90,11 @@ public class BankLinksServiceTest extends AndroidTestCase {
                 .setBic("bank-100").setLinkData(linkData);
         MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>();
         bus.register(updatedHandler);
-        repository.bankLinkToGetById = bankLink;
+        repository.entityToGetById = bankLink;
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
                 new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
-        assertEquals(1, repository.savedBankLinks.size());
-        assertTrue(repository.savedBankLinks.contains(bankLink));
+        assertEquals(1, repository.savedEntities.size());
+        assertTrue(repository.savedEntities.contains(bankLink));
         assertEquals("new-account-100", bankLink.accountId);
         assertEquals("New Account 100", bankLink.accountName);
         PrivatBankLinkData actualLinkData = bankLink.getLinkData(PrivatBankLinkData.class);
@@ -113,10 +113,10 @@ public class BankLinksServiceTest extends AndroidTestCase {
         MockSubscriber<UpdateBankLinkFailed> updateFailedHandler = new MockSubscriber<>();
         bus.register(updateFailedHandler);
         repository.saveException = new SQLException("sql exception");
-        repository.bankLinkToGetById = bankLink;
+        repository.entityToGetById = bankLink;
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
                 new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
-        assertEquals(0, repository.savedBankLinks.size());
+        assertEquals(0, repository.savedEntities.size());
         assertEquals(1, updateFailedHandler.getEvents().size());
         assertEquals(bankLink.id, updateFailedHandler.getEvents().get(0).id);
         assertEquals(repository.saveException, updateFailedHandler.getEvents().get(0).exception);

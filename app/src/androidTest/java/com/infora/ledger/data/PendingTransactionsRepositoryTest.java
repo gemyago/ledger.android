@@ -9,12 +9,7 @@ import static com.infora.ledger.TestHelper.randomString;
 /**
  * Created by jenya on 30.05.15.
  */
-public class PendingTransactionsRepositoryTest extends GenericDatabaseRepositoryTest<PendingTransaction> {
-
-    @Override
-    protected int getId(PendingTransaction rec1) {
-        return rec1.id;
-    }
+public class PendingTransactionsRepositoryTest extends DatabaseRepositoryTest<PendingTransaction> {
 
     @Override
     protected PendingTransaction setId(PendingTransaction rec, int id) {
@@ -23,7 +18,7 @@ public class PendingTransactionsRepositoryTest extends GenericDatabaseRepository
     }
 
     @Override
-    protected GenericDatabaseRepository<PendingTransaction> createRepository(RenamingDelegatingContext context) {
+    protected DatabaseRepository<PendingTransaction> createRepository(RenamingDelegatingContext context) {
         return RepositoryFactory.create(PendingTransaction.class, context);
     }
 

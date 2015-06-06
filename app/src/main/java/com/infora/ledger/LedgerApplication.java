@@ -9,7 +9,8 @@ import android.util.Log;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
-import com.infora.ledger.data.BankLinksRepository;
+import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.RepositoryFactory;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
@@ -39,8 +40,7 @@ public class LedgerApplication extends Application {
         if (bus == null) {
             Log.d(TAG, "Creating event bus.");
             return (bus = new EventBus());
-        }
-        else return bus;
+        } else return bus;
     }
 
     public void setBus(EventBus bus) {
@@ -56,7 +56,7 @@ public class LedgerApplication extends Application {
         PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);
 
-        BankLinksService bankLinksService = new BankLinksService(bus, new BankLinksRepository(this));
+        BankLinksService bankLinksService = new BankLinksService(bus, RepositoryFactory.create(BankLink.class, this));
         bus.register(bankLinksService);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));

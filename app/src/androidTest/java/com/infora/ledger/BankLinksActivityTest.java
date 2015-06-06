@@ -7,7 +7,8 @@ import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.BankLinksRepository;
+import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.RepositoryFactory;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
@@ -22,7 +23,7 @@ import de.greenrobot.event.EventBus;
 public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<BankLinksActivity> {
 
     private EventBus bus;
-    private BankLinksRepository repo;
+    private DatabaseRepository<BankLink> repo;
 
     public BankLinksActivityTest() {
         super(BankLinksActivity.class);
@@ -41,7 +42,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         startActivity(new Intent(), null, null);
         BusUtils.setBus(getActivity(), bus);
 
-        repo = new BankLinksRepository(getActivity());
+        repo = RepositoryFactory.create(BankLink.class, getActivity());
         DbUtils.deleteAllDatabases(getActivity());
     }
 

@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * Created by jenya on 05.06.15.
  */
-public abstract class GenericDatabaseRepositoryTest<TEntity> extends AndroidTestCase {
-    protected GenericDatabaseRepository<TEntity> subject;
+public abstract class DatabaseRepositoryTest<TEntity extends DatabaseRepository.Entity> extends AndroidTestCase {
+    protected DatabaseRepository<TEntity> subject;
     protected LedgerDbHelper dbHelper;
 
     @Override
@@ -29,8 +29,8 @@ public abstract class GenericDatabaseRepositoryTest<TEntity> extends AndroidTest
         TEntity rec1 = subject.save(buildRandomRecord());
         TEntity rec2 = subject.save(buildRandomRecord());
 
-        assertEquals(rec1, subject.getById(getId(rec1)));
-        assertEquals(rec2, subject.getById(getId(rec2)));
+        assertEquals(rec1, subject.getById(rec1.getId()));
+        assertEquals(rec2, subject.getById(rec2.getId()));
 
         boolean notFoundRaised = false;
         try {
@@ -46,20 +46,20 @@ public abstract class GenericDatabaseRepositoryTest<TEntity> extends AndroidTest
         TEntity rec2 = buildRandomRecord();
 
         subject.save(rec1);
-        assertFalse(getId(rec1) == 0);
+        assertFalse(rec1.getId() == 0);
         subject.save(rec2);
-        assertFalse(getId(rec2) == 0);
+        assertFalse(rec2.getId() == 0);
 
-        assertEquals(rec1, subject.getById(getId(rec1)));
-        assertEquals(rec2, subject.getById(getId(rec2)));
+        assertEquals(rec1, subject.getById(rec1.getId()));
+        assertEquals(rec2, subject.getById(rec2.getId()));
     }
 
     public void testSaveUpdateExisting() throws SQLException {
         TEntity rec1 = buildRandomRecord();
         subject.save(rec1);
-        rec1 = setId(buildRandomRecord(), getId(rec1));
+        rec1 = setId(buildRandomRecord(), rec1.getId());
         subject.save(rec1);
-        assertEquals(rec1, subject.getById(getId(rec1)));
+        assertEquals(rec1, subject.getById(rec1.getId()));
     }
 
     public void testGetAll() throws SQLException {
@@ -79,19 +79,17 @@ public abstract class GenericDatabaseRepositoryTest<TEntity> extends AndroidTest
         TEntity rec2 = subject.save(buildRandomRecord());
         TEntity rec3 = subject.save(buildRandomRecord());
 
-        subject.deleteAll(new long[]{getId(rec1), getId(rec3)});
+        subject.deleteAll(new long[]{rec1.getId(), rec3.getId()});
 
         List<TEntity> all = subject.getAll();
         assertEquals(1, all.size());
         assertTrue(all.contains(rec2));
     }
 
-    protected abstract int getId(TEntity rec1);
-
     protected abstract TEntity setId(TEntity rec, int id);
 
     protected abstract TEntity buildRandomRecord();
 
-    protected abstract GenericDatabaseRepository<TEntity> createRepository(RenamingDelegatingContext context);
+    protected abstract DatabaseRepository<TEntity> createRepository(RenamingDelegatingContext context);
 
 }

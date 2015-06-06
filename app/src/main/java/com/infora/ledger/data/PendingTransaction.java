@@ -23,7 +23,7 @@ import static com.infora.ledger.TransactionContract.TABLE_NAME;
  * Created by jenya on 01.03.15.
  */
 @DatabaseTable(tableName = TABLE_NAME)
-public class PendingTransaction {
+public class PendingTransaction implements DatabaseRepository.Entity {
     @DatabaseField(columnName = COLUMN_ID, generatedId = true)
     public int id;
 
@@ -79,6 +79,11 @@ public class PendingTransaction {
         this.isDeleted = isDeleted;
         this.timestamp = timestamp;
         this.bic = bic;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 
     public PendingTransaction setId(int id) {

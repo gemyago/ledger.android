@@ -18,8 +18,9 @@ import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.BankLinksRepository;
+import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.LedgerAccountsLoader;
+import com.infora.ledger.data.RepositoryFactory;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 
@@ -35,18 +36,18 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private static final int LEDGER_BANK_LINK_LOADER = 2;
 
     private SimpleCursorAdapter spinnerAdapter;
-    private BankLinksRepository bankLinksRepo;
+    private DatabaseRepository<BankLink> bankLinksRepo;
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private PrivatBankLinkFragment bankLinkFragment;
     private Button updateButton;
     private Spinner accountsSpinner;
     private long bankLinkId;
 
-    public BankLinksRepository getBankLinksRepo() {
-        return bankLinksRepo == null ? (bankLinksRepo = new BankLinksRepository(this)) : bankLinksRepo;
+    public DatabaseRepository<BankLink> getBankLinksRepo() {
+        return bankLinksRepo == null ? (bankLinksRepo = RepositoryFactory.create(BankLink.class, this)) : bankLinksRepo;
     }
 
-    public void setBankLinksRepo(BankLinksRepository bankLinksRepo) {
+    public void setBankLinksRepo(DatabaseRepository bankLinksRepo) {
         this.bankLinksRepo = bankLinksRepo;
     }
 
@@ -170,7 +171,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 for (int i = 0; i < accountsSpinner.getCount(); i++) {
                     Cursor account = (Cursor) accountsSpinner.getItemAtPosition(i);
                     String accountId = account.getString(account.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
-                    if(Objects.equals(data.accountId, accountId)) {
+                    if (Objects.equals(data.accountId, accountId)) {
                         accountsSpinner.setSelection(i);
                         break;
                     }

@@ -5,9 +5,7 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Spinner;
 
@@ -19,7 +17,7 @@ import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.BarrierSubscriber;
-import com.infora.ledger.mocks.MockBankLinksRepository;
+import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
@@ -35,7 +33,7 @@ import de.greenrobot.event.EventBus;
 public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<EditBankLinkActivity> {
 
     private EventBus bus;
-    private MockBankLinksRepository mockBankLinksRepo;
+    private MockDatabaseRepository mockBankLinksRepo;
     private BankLink bankLink;
     private LedgerAccountDto selectedAccount;
 
@@ -76,8 +74,8 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 .setBic("BANK-100")
                 .setAccountId(selectedAccount.id)
                 .setLinkData(new PrivatBankLinkData("card-100", "marchant-100", "password-100"));
-        mockBankLinksRepo = new MockBankLinksRepository();
-        mockBankLinksRepo.bankLinkToGetById = bankLink;
+        mockBankLinksRepo = new MockDatabaseRepository(BankLink.class);
+        mockBankLinksRepo.entityToGetById = bankLink;
         Intent intent = new Intent();
         intent.putExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, (long) bankLink.id);
         startActivity(intent, null, null);
