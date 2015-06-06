@@ -14,7 +14,7 @@ public class DatabaseContext {
         this.context = context;
     }
 
-    public <TEntity extends DatabaseRepository.Entity> DatabaseRepository<TEntity> createRepository(Class<TEntity> classOfTEntity) {
+    public <TEntity extends Entity> DatabaseRepository<TEntity> createRepository(Class<TEntity> classOfTEntity) {
         return new DatabaseRepository<>(classOfTEntity, context);
     }
 

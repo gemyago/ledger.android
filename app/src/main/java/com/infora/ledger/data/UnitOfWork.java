@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 public class UnitOfWork {
     private final HashMap<Class, Map<Integer, Object>> entitiesMap;
     private final LedgerDbHelper dbHelper;
-    private final ArrayList<DatabaseRepository.Entity> newEntities;
+    private final ArrayList<Entity> newEntities;
 
     public UnitOfWork(Context context) {
         dbHelper = new LedgerDbHelper(context);
@@ -27,7 +27,7 @@ public class UnitOfWork {
         newEntities = new ArrayList<>();
     }
 
-    public <TEntity extends DatabaseRepository.Entity> TEntity getById(Class<TEntity> classOfEntity, int id) throws SQLException {
+    public <TEntity extends Entity> TEntity getById(Class<TEntity> classOfEntity, int id) throws SQLException {
         if (entitiesMap.containsKey(classOfEntity) && entitiesMap.get(classOfEntity).containsKey(id)) {
             return (TEntity) entitiesMap.get(classOfEntity).get(id);
         }
@@ -42,11 +42,11 @@ public class UnitOfWork {
         }
     }
 
-    public <TEntity extends DatabaseRepository.Entity> void addNew(TEntity entity) {
+    public <TEntity extends Entity> void addNew(TEntity entity) {
         newEntities.add(entity);
     }
 
-    public <TEntity extends DatabaseRepository.Entity> void attach(TEntity entity) {
+    public <TEntity extends Entity> void attach(TEntity entity) {
         ensureEntitiesMap(entity.getClass()).put(entity.getId(), entity);
     }
 
@@ -58,7 +58,7 @@ public class UnitOfWork {
             TransactionManager.callInTransaction(connectionSource, new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    for (DatabaseRepository.Entity newEntity : newEntities) {
+                    for (Entity newEntity : newEntities) {
                         DaoManager.createDao(conSrc, (Class) newEntity.getClass()).create(newEntity);
                     }
                     for (Map<Integer, Object> entities : entitiesMap.values()) {
@@ -74,7 +74,7 @@ public class UnitOfWork {
         }
     }
 
-    private <TEntity extends DatabaseRepository.Entity> Map<Integer, Object> ensureEntitiesMap(Class<TEntity> classOfEntity) {
+    private <TEntity extends Entity> Map<Integer, Object> ensureEntitiesMap(Class<TEntity> classOfEntity) {
         if (!entitiesMap.containsKey(classOfEntity))
             entitiesMap.put(classOfEntity, new HashMap<Integer, Object>());
         return entitiesMap.get(classOfEntity);

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by jenya on 05.06.15.
  */
-public abstract class DatabaseRepositoryTest<TEntity extends DatabaseRepository.Entity> extends AndroidTestCase {
+public abstract class DatabaseRepositoryTest<TEntity extends Entity> extends AndroidTestCase {
     protected DatabaseRepository<TEntity> subject;
     protected LedgerDbHelper dbHelper;
 

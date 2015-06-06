@@ -1,6 +1,7 @@
 package com.infora.ledger.mocks;
 
 import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.Entity;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by jenya on 31.05.15.
  */
-public class MockDatabaseRepository<TEntity extends DatabaseRepository.Entity> extends DatabaseRepository<TEntity> {
+public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepository<TEntity> {
 
     public final ArrayList<TEntity> savedEntities;
     public long[] deletedIds;

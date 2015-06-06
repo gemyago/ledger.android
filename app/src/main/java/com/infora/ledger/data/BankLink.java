@@ -22,7 +22,7 @@ import static com.infora.ledger.BanksContract.BankLinks._ID;
  * Created by jenya on 30.05.15.
  */
 @DatabaseTable(tableName = TABLE_NAME)
-public class BankLink implements DatabaseRepository.Entity {
+public class BankLink implements Entity {
     @DatabaseField(columnName = _ID, generatedId = true)
     public int id;
 

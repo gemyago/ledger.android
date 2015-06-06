@@ -80,7 +80,7 @@ public class UnitOfWorkTest extends AndroidTestCase {
     }
 
     @DatabaseTable(tableName = "employees")
-    public static class Employee implements DatabaseRepository.Entity {
+    public static class Employee implements Entity {
         @DatabaseField(generatedId = true)
         public int id;
 

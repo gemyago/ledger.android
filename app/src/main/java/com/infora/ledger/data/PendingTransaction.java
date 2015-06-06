@@ -23,7 +23,7 @@ import static com.infora.ledger.TransactionContract.TABLE_NAME;
  * Created by jenya on 01.03.15.
  */
 @DatabaseTable(tableName = TABLE_NAME)
-public class PendingTransaction implements DatabaseRepository.Entity {
+public class PendingTransaction implements Entity {
     @DatabaseField(columnName = COLUMN_ID, generatedId = true)
     public int id;
 

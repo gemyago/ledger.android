@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by jenya on 05.06.15.
  */
-public class DatabaseRepository<TEntity extends DatabaseRepository.Entity> {
+public class DatabaseRepository<TEntity extends Entity> {
     protected final LedgerDbHelper dbHelper;
     private Class<TEntity> dataClass;
 
@@ -67,7 +67,4 @@ public class DatabaseRepository<TEntity extends DatabaseRepository.Entity> {
         }
     }
 
-    public interface Entity {
-        int getId();
-    }
 }
