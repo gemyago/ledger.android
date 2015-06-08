@@ -2,6 +2,8 @@ package com.infora.ledger.application;
 
 import android.util.Log;
 
+import com.infora.ledger.application.banks.FetchStrategiesFactory;
+import com.infora.ledger.application.banks.FetchStrategy;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
@@ -13,6 +15,8 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.UnitOfWork;
+import com.infora.ledger.support.SystemDate;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -25,11 +29,23 @@ import de.greenrobot.event.EventBus;
 public class BankLinksService {
     private static final String TAG = BankLinksService.class.getName();
     private final EventBus bus;
+    private DatabaseContext db;
     private DatabaseRepository<BankLink> repository;
+
+    private FetchStrategiesFactory fetchStrategies;
 
     public BankLinksService(EventBus bus, DatabaseContext db) {
         this.bus = bus;
+        this.db = db;
         this.repository = db.createRepository(BankLink.class);
+    }
+
+    public FetchStrategiesFactory getFetchStrategies() {
+        return fetchStrategies == null ? (fetchStrategies = FetchStrategiesFactory.createDefault()) : fetchStrategies;
+    }
+
+    public void setFetchStrategies(FetchStrategiesFactory fetchStrategies) {
+        this.fetchStrategies = fetchStrategies;
     }
 
     public void onEventBackgroundThread(AddBankLinkCommand command) {
@@ -68,5 +84,10 @@ public class BankLinksService {
         repository.deleteAll(command.ids);
         Log.d(TAG, "Bank links deleted. Posting deleted event...");
         bus.post(new BankLinksDeletedEvent(command.ids));
+    }
+
+    public void fetchBankTransactions(BankLink bankLink) {
+        FetchStrategy fetchStrategy = getFetchStrategies().getStrategy(bankLink.bic);
+        fetchStrategy.fetchBankTransactions(db, bankLink);
     }
 }
