@@ -102,23 +102,7 @@ public class BanksContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        final int match = sUriMatcher.match(uri);
-        LedgerDbHelper dbHelper = new LedgerDbHelper(getContext());
-        switch (match) {
-            case BANKS_BANK_LINKS:
-                String bic = values.getAsString(BanksContract.BankLinks.COLUMN_BIC);
-                LogUtil.d(this, "Inserting new bank_link for bank='" + bic + "'");
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                try {
-                    long id = db.insert(BanksContract.BankLinks.TABLE_NAME, null, values);
-                    notifyListChanged();
-                    return ContentUris.withAppendedId(uri, id);
-                } finally {
-                    db.close();
-                }
-            default:
-                throw newInvalidUrlException(uri);
-        }
+        throw new RuntimeException("Insert operation is not supported");
     }
 
     @Override

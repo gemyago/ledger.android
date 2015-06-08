@@ -101,6 +101,7 @@ public class BankLink implements Entity {
         accountName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_NAME));
         bic = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BIC));
         linkData = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
+        lastSyncDate = LedgerDbHelper.parseISO8601(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_SYNC_DATE)));
     }
 
     public <T> T getLinkData(Class<T> classOfT) {

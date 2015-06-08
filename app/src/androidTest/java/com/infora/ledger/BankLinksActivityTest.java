@@ -14,6 +14,7 @@ import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 
@@ -47,9 +48,9 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testBankLinksLoaded() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy"));
-        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
-        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy"));
+        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy").setLastSyncDate(new Date()));
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
@@ -65,8 +66,8 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testEditBankLink() throws SQLException {
-        repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy"));
-        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
+        repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy").setLastSyncDate(new Date()));
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
@@ -83,9 +84,9 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testDeleteBankLinks() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy"));
-        repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy"));
-        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy"));
+        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy").setLastSyncDate(new Date()));
+        repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy").setLastSyncDate(new Date()));
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);

@@ -87,7 +87,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         BanksContract.BankLinks.COLUMN_ACCOUNT_NAME + " NVARCHAR(256) NOT NULL," +
                         BanksContract.BankLinks.COLUMN_BIC + " NVARCHAR(50) NOT NULL," +
                         BanksContract.BankLinks.COLUMN_LINK_DATA + " TEXT NOT NULL," +
-                        BanksContract.BankLinks.COLUMN_LAST_SYNC_DATE + " NVARCHAR(50) NULL," +
+                        BanksContract.BankLinks.COLUMN_LAST_SYNC_DATE + " NVARCHAR(50) NOT NULL," +
                         BanksContract.BankLinks.COLUMN_IN_PROGRESS + " INTEGER NOT NULL DEFAULT(0)," +
                         BanksContract.BankLinks.COLUMN_HAS_SUCCEED + " INTEGER NOT NULL DEFAULT(0)" +
                         " )"

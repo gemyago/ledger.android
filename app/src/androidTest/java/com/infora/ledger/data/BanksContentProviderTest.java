@@ -11,6 +11,7 @@ import com.infora.ledger.BanksContract;
 import com.infora.ledger.DbUtils;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Created by jenya on 30.05.15.
@@ -41,28 +42,10 @@ public class BanksContentProviderTest extends ProviderTestCase2<BanksContentProv
         assertEquals(BanksContentProvider.BANK_LINKS_ITEM_TYPE, resolver.getType(itemUrl));
     }
 
-    public void testInsertNewBankLink() throws SQLException {
-        ContentValues values = new ContentValues();
-        values.put(BanksContract.BankLinks.COLUMN_ACCOUNT_ID, "account-100");
-        values.put(BanksContract.BankLinks.COLUMN_ACCOUNT_NAME, "Account 100");
-        values.put(BanksContract.BankLinks.COLUMN_BIC, "BANK-100");
-        values.put(BanksContract.BankLinks.COLUMN_LINK_DATA, "account-data-100");
-        Uri newUri = resolver.insert(BanksContract.BankLinks.CONTENT_URI, values);
-        long id = ContentUris.parseId(newUri);
-        assertFalse(id == 0);
-        assertEquals(BanksContract.BankLinks.CONTENT_URI + "/" + id, newUri.toString());
-
-        BankLink bankLink = DbUtils.getBankLinkById(dbHelper, id);
-        assertEquals("account-100", bankLink.accountId);
-        assertEquals("Account 100", bankLink.accountName);
-        assertEquals("BANK-100", bankLink.bic);
-        assertEquals("account-data-100", bankLink.linkData);
-    }
-
     public void testQueryBankLinks() throws SQLException {
-        BankLink link1 = new BankLink().setAccountId("a-1").setAccountName("A 1").setBic("BANK-1").setLinkDataValue("link-data-1");
-        BankLink link2 = new BankLink().setAccountId("a-2").setAccountName("A 2").setBic("BANK-2").setLinkDataValue("link-data-2");
-        BankLink link3 = new BankLink().setAccountId("a-3").setAccountName("A 3").setBic("BANK-3").setLinkDataValue("link-data-3");
+        BankLink link1 = new BankLink().setAccountId("a-1").setAccountName("A 1").setBic("BANK-1").setLinkDataValue("link-data-1").setLastSyncDate(new Date());
+        BankLink link2 = new BankLink().setAccountId("a-2").setAccountName("A 2").setBic("BANK-2").setLinkDataValue("link-data-2").setLastSyncDate(new Date());
+        BankLink link3 = new BankLink().setAccountId("a-3").setAccountName("A 3").setBic("BANK-3").setLinkDataValue("link-data-3").setLastSyncDate(new Date());
         repository.save(link1);
         repository.save(link2);
         repository.save(link3);

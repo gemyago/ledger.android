@@ -17,7 +17,7 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
 
     @Override
     public void fetchBankTransactions(DatabaseContext db, BankLink bankLink) {
-        
+
     }
 
     private boolean isToday(Date date) {
