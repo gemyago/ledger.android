@@ -20,6 +20,7 @@ import com.infora.ledger.support.SystemDate;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import de.greenrobot.event.EventBus;
 
@@ -50,10 +51,16 @@ public class BankLinksService {
 
     public void onEventBackgroundThread(AddBankLinkCommand command) {
         Log.d(TAG, "Inserting new bank link for bank: " + command.bic + ", account: " + command.accountName);
+
+        Calendar lastSyncDate = Calendar.getInstance();
+        lastSyncDate.setTime(command.initialFetchDate);
+        lastSyncDate.add(Calendar.DAY_OF_MONTH, -1);
+
         BankLink bankLink = new BankLink()
                 .setAccountId(command.accountId)
                 .setAccountName(command.accountName)
                 .setBic(command.bic)
+                .setLastSyncDate(lastSyncDate.getTime())
                 .setLinkData(command.linkData);
         try {
             repository.save(bankLink);

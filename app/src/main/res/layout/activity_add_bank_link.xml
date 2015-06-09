@@ -20,6 +20,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></fragment>
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Fetch transactions starting from" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/initial_fetch_date"
+        android:clickable="true"
+        android:onClick="changeInitialFetchDate"/>
+
     <Button android:id="@+id/action_add_bank_link"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"

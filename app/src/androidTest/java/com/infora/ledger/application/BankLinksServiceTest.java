@@ -18,6 +18,8 @@ import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockSubscriber;
 
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 
@@ -45,6 +47,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         command.accountId = "account-100";
         command.accountName = "Account 100";
         command.bic = "bank-100";
+        command.initialFetchDate = new Date();
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
         MockSubscriber<BankLinkAdded> subscriber = new MockSubscriber<>(BankLinkAdded.class);
@@ -52,11 +55,16 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
         subject.onEventBackgroundThread(command);
 
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(command.initialFetchDate);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+
         assertEquals(1, repository.savedEntities.size());
         assertTrue(repository.savedEntities.contains(new BankLink()
                         .setAccountId("account-100")
                         .setAccountName("Account 100")
                         .setBic("bank-100")
+                        .setLastSyncDate(cal.getTime())
                         .setLinkData(command.linkData)
         ));
 
@@ -70,6 +78,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         command.accountId = "account-100";
         command.accountName = "Account 100";
         command.bic = "bank-100";
+        command.initialFetchDate = new Date();
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
         MockSubscriber<AddBankLinkFailed> subscriber = new MockSubscriber<>(AddBankLinkFailed.class);

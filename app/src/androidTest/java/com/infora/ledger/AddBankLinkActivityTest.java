@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
@@ -20,6 +21,12 @@ import com.infora.ledger.banks.PrivatBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.support.SystemDate;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 
@@ -50,6 +57,12 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         startActivity(new Intent(), null, null);
     }
 
+    public void testInitialFetchDateIsSetToNow() {
+        SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date now = new Date();
+        assertEquals(dateOnlyFormat.format(now), dateOnlyFormat.format(getActivity().getInitialFetchDate()));
+    }
+
     public void testAddBankLink() {
         Window wnd = getActivity().getWindow();
         Spinner ledgerAccountId = (Spinner) wnd.findViewById(R.id.ledger_account_id);
@@ -72,6 +85,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         assertEquals(1, addHandler.getEvents().size());
         AddBankLinkCommand cmd = addHandler.getEvent();
         assertEquals(PrivatBankTransaction.PRIVATBANK_BIC, cmd.bic);
+        assertEquals(getActivity().getInitialFetchDate(), cmd.initialFetchDate);
         assertEquals("a-2", cmd.accountId);
         assertEquals("Account 2", cmd.accountName);
         PrivatBankLinkData linkData = (PrivatBankLinkData) cmd.linkData;
@@ -116,6 +130,21 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         assertTrue(addButton.isEnabled());
     }
 
+    public void testChangeInitialFetchDate() {
+        SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH, -5);
+
+        getActivity().onEventMainThread(new AddBankLinkActivity.ChangeInitialFetchDate(
+                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)
+        ));
+
+        assertEquals(dateOnlyFormat.format(c.getTime()), dateOnlyFormat.format(getActivity().getInitialFetchDate()));
+
+        TextView initialFetchDate = (TextView) getActivity().findViewById(R.id.initial_fetch_date);
+        assertEquals(DateFormat.getDateInstance().format(c.getTime()), initialFetchDate.getText().toString());
+    }
+
     private void populateLedgerAccounts(Spinner spinner, LedgerAccountDto... dtos) {
         SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_spinner_item,
@@ -130,9 +159,9 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
                 LedgerAccountsLoader.COLUMN_NAME,
         });
         int id = 0;
-        cursor.addRow(new Object[]{id++, null , null});
+        cursor.addRow(new Object[]{id++, null, null});
         for (LedgerAccountDto dto : dtos) {
-            cursor.addRow(new Object[]{id++, dto.id , dto.name});
+            cursor.addRow(new Object[]{id++, dto.id, dto.name});
         }
         spinnerAdapter.swapCursor(cursor);
         spinner.setAdapter(spinnerAdapter);
