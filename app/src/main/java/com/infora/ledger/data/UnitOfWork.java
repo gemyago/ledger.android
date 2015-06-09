@@ -46,8 +46,9 @@ public class UnitOfWork {
         newEntities.add(entity);
     }
 
-    public <TEntity extends Entity> void attach(TEntity entity) {
+    public <TEntity extends Entity> UnitOfWork attach(TEntity entity) {
         ensureEntitiesMap(entity.getClass()).put(entity.getId(), entity);
+        return this;
     }
 
     public void commit() throws SQLException {

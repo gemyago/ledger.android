@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.infora.ledger.LedgerApplication;
 
+import java.util.Stack;
+
 /**
  * Created by jenya on 05.06.15.
  */
@@ -24,5 +26,9 @@ public class DatabaseContext {
 
     public static DatabaseContext getInstance(Context context) {
         return ((LedgerApplication) context.getApplicationContext()).getDatabaseContext();
+    }
+
+    public TransactionsReadModel getTransactionsReadModel() {
+        return new TransactionsReadModel();
     }
 }

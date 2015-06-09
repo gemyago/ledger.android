@@ -8,8 +8,9 @@ import java.util.Date;
 public class SystemDate {
     private static Date date;
 
-    public static void setNow(Date date) {
+    public static Date setNow(Date date) {
         SystemDate.date = date;
+        return date;
     }
 
     public static Date now() {

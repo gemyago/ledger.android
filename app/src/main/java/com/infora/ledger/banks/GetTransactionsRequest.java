@@ -82,4 +82,47 @@ public class GetTransactionsRequest {
                 .startTag(null, "prop").attribute(null, "name", "card").attribute(null, "value", card).endTag(null, "prop")
                 .endTag(null, "payment");
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GetTransactionsRequest that = (GetTransactionsRequest) o;
+
+        if (signatureBuilder != null ? !signatureBuilder.equals(that.signatureBuilder) : that.signatureBuilder != null)
+            return false;
+        if (card != null ? !card.equals(that.card) : that.card != null) return false;
+        if (merchantId != null ? !merchantId.equals(that.merchantId) : that.merchantId != null)
+            return false;
+        if (password != null ? !password.equals(that.password) : that.password != null)
+            return false;
+        if (startDate != null ? !startDate.equals(that.startDate) : that.startDate != null)
+            return false;
+        return !(endDate != null ? !endDate.equals(that.endDate) : that.endDate != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = signatureBuilder != null ? signatureBuilder.hashCode() : 0;
+        result = 31 * result + (card != null ? card.hashCode() : 0);
+        result = 31 * result + (merchantId != null ? merchantId.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (startDate != null ? startDate.hashCode() : 0);
+        result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "GetTransactionsRequest{" +
+                "signatureBuilder=" + signatureBuilder +
+                ", card='" + card + '\'' +
+                ", merchantId='" + merchantId + '\'' +
+                ", password='" + password + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
+    }
 }

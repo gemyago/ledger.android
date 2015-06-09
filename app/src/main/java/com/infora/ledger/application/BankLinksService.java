@@ -2,6 +2,7 @@ package com.infora.ledger.application;
 
 import android.util.Log;
 
+import com.infora.ledger.application.banks.FetchException;
 import com.infora.ledger.application.banks.FetchStrategiesFactory;
 import com.infora.ledger.application.banks.FetchStrategy;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
@@ -96,7 +97,7 @@ public class BankLinksService {
         bus.post(new BankLinksDeletedEvent(command.ids));
     }
 
-    public void fetchBankTransactions(BankLink bankLink) {
+    public void fetchBankTransactions(BankLink bankLink) throws FetchException {
         FetchStrategy fetchStrategy = getFetchStrategies().getStrategy(bankLink.bic);
         fetchStrategy.fetchBankTransactions(db, bankLink);
     }

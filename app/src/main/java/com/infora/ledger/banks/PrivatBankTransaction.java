@@ -1,6 +1,8 @@
 package com.infora.ledger.banks;
 
 import com.infora.ledger.TransactionContract;
+import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.PendingTransaction;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,6 +30,49 @@ public class PrivatBankTransaction {
     public String terminal;
     public String description;
 
+    public PrivatBankTransaction() {
+    }
+
+    public PrivatBankTransaction setCard(String card) {
+        this.card = card;
+        return this;
+    }
+
+    public PrivatBankTransaction setTrandate(String trandate) {
+        this.trandate = trandate;
+        return this;
+    }
+
+    public PrivatBankTransaction setTrantime(String trantime) {
+        this.trantime = trantime;
+        return this;
+    }
+
+    public PrivatBankTransaction setAmount(String amount) {
+        this.amount = amount;
+        return this;
+    }
+
+    public PrivatBankTransaction setCardamount(String cardamount) {
+        this.cardamount = cardamount;
+        return this;
+    }
+
+    public PrivatBankTransaction setRest(String rest) {
+        this.rest = rest;
+        return this;
+    }
+
+    public PrivatBankTransaction setTerminal(String terminal) {
+        this.terminal = terminal;
+        return this;
+    }
+
+    public PrivatBankTransaction setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
     public Date getDate() {
         try {
             return DATE_FORMAT.parse(trandate + " " + trantime);
@@ -48,6 +93,16 @@ public class PrivatBankTransaction {
 
     public String getTransactionId() {
         return PRIVATBANK_BIC + card + trandate.replace("-", "") + trantime.replace(":", "") + getAmount().replace(".", "P");
+    }
+
+    public PendingTransaction toPendingTransaction(BankLink bankLink) {
+        return new PendingTransaction()
+                .setAccountId(bankLink.accountId)
+                .setTransactionId(getTransactionId())
+                .setAmount(getAmount())
+                .setComment(terminal + " " + description)
+                .setTimestamp(getDate())
+                .setBic(bankLink.bic);
     }
 
     @Override
