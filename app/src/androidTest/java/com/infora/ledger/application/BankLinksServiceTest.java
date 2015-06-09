@@ -58,6 +58,9 @@ public class BankLinksServiceTest extends AndroidTestCase {
         Calendar cal = Calendar.getInstance();
         cal.setTime(command.initialFetchDate);
         cal.add(Calendar.DAY_OF_MONTH, -1);
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
 
         assertEquals(1, repository.savedEntities.size());
         assertTrue(repository.savedEntities.contains(new BankLink()
