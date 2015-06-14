@@ -7,11 +7,14 @@ import com.infora.ledger.application.banks.FetchStrategiesFactory;
 import com.infora.ledger.application.banks.FetchStrategy;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankTransactionsFetched;
+import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
@@ -95,6 +98,22 @@ public class BankLinksService {
         repository.deleteAll(command.ids);
         Log.d(TAG, "Bank links deleted. Posting deleted event...");
         bus.post(new BankLinksDeletedEvent(command.ids));
+    }
+
+    public void onEventBackgroundThread(FetchBankTransactionsCommand command) {
+        Log.d(TAG, "Handling fetch bank transactions command. BankLink id=" + command.bankLinkId);
+        try {
+            BankLink bankLink = repository.getById(command.bankLinkId);
+            fetchBankTransactions(bankLink);
+            Log.e(TAG, "Bank transactions fetched. Posting success event.");
+            bus.post(new BankTransactionsFetched(command.bankLinkId));
+        } catch (SQLException e) {
+            Log.e(TAG, "Failed to fetch bank transactions. Posting failure event.", e);
+            bus.post(new FetchBankTransactionsFailed(command.bankLinkId, e));
+        } catch (FetchException e) {
+            Log.e(TAG, "Failed to fetch bank transactions. Posting failure event.", e);
+            bus.post(new FetchBankTransactionsFailed(command.bankLinkId, e));
+        }
     }
 
     public void fetchBankTransactions(BankLink bankLink) throws FetchException {

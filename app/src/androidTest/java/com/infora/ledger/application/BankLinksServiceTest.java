@@ -2,13 +2,17 @@ package com.infora.ledger.application;
 
 import android.test.AndroidTestCase;
 
+import com.infora.ledger.application.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankTransactionsFetched;
+import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
@@ -31,12 +35,13 @@ public class BankLinksServiceTest extends AndroidTestCase {
     private BankLinksService subject;
     private MockDatabaseRepository repository;
     private EventBus bus;
+    private MockDatabaseContext db;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
-        MockDatabaseContext db = new MockDatabaseContext();
+        db = new MockDatabaseContext();
         repository = new MockDatabaseRepository(BankLink.class);
         db.addMockRepo(BankLink.class, repository);
         subject = new BankLinksService(bus, db);
@@ -153,5 +158,45 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals(1, deletedEvent.ids[0]);
         assertEquals(2, deletedEvent.ids[1]);
         assertEquals(443, deletedEvent.ids[2]);
+    }
+
+    public void testFetchBankTransactionsCommand() {
+        final BankLink bankLink = new BankLink().setId(100);
+        repository.entityToGetById = bankLink;
+        final boolean[] fetchPerformed = {false};
+        subject = new BankLinksService(bus, db) {
+            @Override
+            public void fetchBankTransactions(BankLink bl) throws FetchException {
+                assertSame(bankLink, bl);
+                fetchPerformed[0] = true;
+            }
+        };
+        MockSubscriber<BankTransactionsFetched> fetchedSubscriber = new MockSubscriber<>(BankTransactionsFetched.class);
+        bus.register(fetchedSubscriber);
+        subject.onEventBackgroundThread(new FetchBankTransactionsCommand(bankLink.id));
+        assertTrue(fetchPerformed[0]);
+        assertEquals(1, fetchedSubscriber.getEvents().size());
+        assertEquals(bankLink.id, fetchedSubscriber.getEvent().bankLinkId);
+    }
+
+    public void testFetchBankTransactionsCommandFailed() {
+        final BankLink bankLink = new BankLink().setId(100);
+        repository.entityToGetById = bankLink;
+        final FetchException fetchFailed = new FetchException(new Exception("fetch failed"));
+        subject = new BankLinksService(bus, db) {
+            @Override
+            public void fetchBankTransactions(BankLink bl) throws FetchException {
+                throw fetchFailed;
+            }
+        };
+        MockSubscriber<BankTransactionsFetched> fetchedSubscriber = new MockSubscriber<>(BankTransactionsFetched.class);
+        MockSubscriber<FetchBankTransactionsFailed> fetchFailedHandler = new MockSubscriber<>(FetchBankTransactionsFailed.class);
+        bus.register(fetchedSubscriber);
+        bus.register(fetchFailedHandler);
+        subject.onEventBackgroundThread(new FetchBankTransactionsCommand(bankLink.id));
+        assertEquals(0, fetchedSubscriber.getEvents().size());
+        assertEquals(1, fetchFailedHandler.getEvents().size());
+        assertEquals(bankLink.id, fetchFailedHandler.getEvent().bankLinkId);
+        assertEquals(fetchFailed, fetchFailedHandler.getEvent().error);
     }
 }

@@ -8,6 +8,6 @@ import java.util.List;
  */
 public class TransactionsReadModel {
     public List<PendingTransaction> getTransactionsFetchedFromBank(String bic, Date from, Date to) {
-        return null;
+        throw new RuntimeException("Not implemented");
     }
 }
