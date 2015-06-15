@@ -20,7 +20,11 @@ import android.widget.Toast;
 
 import com.infora.ledger.BanksContract.BankLinks;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankTransactionsFetched;
+import com.infora.ledger.application.events.FetchBankTransactionsFailed;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 
@@ -82,6 +86,17 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         int removedLength = event.ids.length;
         String message = getResources().getQuantityString(R.plurals.bank_links_removed, removedLength, removedLength);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public void onEventMainThread(BankTransactionsFetched event) {
+        Log.d(TAG, "Handling fetch success event. BankLinkId: " + event.bankLink.id);
+        BankLink bankLink = event.bankLink;
+        Toast.makeText(this, bankLink.bic + "(" + bankLink.accountName + ") transactions fetched.", Toast.LENGTH_LONG).show();
+    }
+
+    public void onEventMainThread(FetchBankTransactionsFailed event) {
+        Log.d(TAG, "Handling fetch failure event. BankLinkId: " + event.bankLinkId);
+        Toast.makeText(this, "Failed to fetch transactions: " + event.error.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -146,11 +161,18 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            long[] checkedItemIds = lvBankLinks.getCheckedItemIds();
             switch (item.getItemId()) {
                 case R.id.menu_delete:
-                    long[] checkedItemIds = lvBankLinks.getCheckedItemIds();
                     BusUtils.post(BankLinksActivity.this, new DeleteBankLinksCommand(checkedItemIds));
                     mode.finish();
+                    break;
+                case R.id.menu_fetch_bank_transactions:
+                    mode.finish();
+                    for (int i = 0; i < checkedItemIds.length; i++) {
+                        long checkedItemId = checkedItemIds[i];
+                        BusUtils.post(BankLinksActivity.this, new FetchBankTransactionsCommand((int) checkedItemId));
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException("Action item " + item.getTitle() + " is not supported.");
@@ -174,5 +196,6 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         }
     }
 
-    public static class BankLinksLoaded {}
+    public static class BankLinksLoaded {
+    }
 }

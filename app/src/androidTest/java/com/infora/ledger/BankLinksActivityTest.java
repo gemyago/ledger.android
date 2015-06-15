@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
+import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.DatabaseContext;
@@ -106,5 +107,28 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         assertEquals(2, deletedIds.length);
         assertEquals(link1.id, deletedIds[0]);
         assertEquals(link3.id, deletedIds[1]);
+    }
+
+    public void testFetchTransactions() throws SQLException {
+        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy").setLastSyncDate(new Date()));
+        repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkData("dummy").setLastSyncDate(new Date()));
+
+        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        ListView bankLinksList = (ListView) getActivity().findViewById(R.id.bank_links_list);
+        bankLinksList.setItemChecked(0, true);
+        bankLinksList.setItemChecked(2, true);
+
+        MockSubscriber<FetchBankTransactionsCommand> fetchHandler = new MockSubscriber<>(FetchBankTransactionsCommand.class);
+        bus.register(fetchHandler);
+        getActivity().findViewById(R.id.menu_fetch_bank_transactions).callOnClick();
+
+        assertEquals(2, fetchHandler.getEvents().size());
+        assertEquals(link1.id, fetchHandler.getEvents().get(0).bankLinkId);
+        assertEquals(link3.id, fetchHandler.getEvents().get(1).bankLinkId);
     }
 }

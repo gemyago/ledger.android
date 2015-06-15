@@ -1,12 +1,14 @@
 package com.infora.ledger.application.events;
 
+import com.infora.ledger.data.BankLink;
+
 /**
  * Created by jenya on 14.06.15.
  */
 public class BankTransactionsFetched {
-    public final int bankLinkId;
+    public final BankLink bankLink;
 
-    public BankTransactionsFetched(int bankLinkId) {
-        this.bankLinkId = bankLinkId;
+    public BankTransactionsFetched(BankLink bankLink) {
+        this.bankLink = bankLink;
     }
 }

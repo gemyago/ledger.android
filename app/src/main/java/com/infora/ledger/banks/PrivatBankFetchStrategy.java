@@ -26,7 +26,7 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
     private PrivatBankApi api;
 
     public PrivatBankApi getApi() {
-        return api;
+        return api == null ? (api = new PrivatBankApi()) : api;
     }
 
     public void setApi(PrivatBankApi api) {

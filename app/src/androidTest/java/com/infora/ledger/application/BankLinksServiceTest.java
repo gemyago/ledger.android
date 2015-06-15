@@ -176,7 +176,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         subject.onEventBackgroundThread(new FetchBankTransactionsCommand(bankLink.id));
         assertTrue(fetchPerformed[0]);
         assertEquals(1, fetchedSubscriber.getEvents().size());
-        assertEquals(bankLink.id, fetchedSubscriber.getEvent().bankLinkId);
+        assertEquals(bankLink, fetchedSubscriber.getEvent().bankLink);
     }
 
     public void testFetchBankTransactionsCommandFailed() {

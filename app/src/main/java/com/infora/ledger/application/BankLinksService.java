@@ -106,11 +106,8 @@ public class BankLinksService {
             BankLink bankLink = repository.getById(command.bankLinkId);
             fetchBankTransactions(bankLink);
             Log.e(TAG, "Bank transactions fetched. Posting success event.");
-            bus.post(new BankTransactionsFetched(command.bankLinkId));
-        } catch (SQLException e) {
-            Log.e(TAG, "Failed to fetch bank transactions. Posting failure event.", e);
-            bus.post(new FetchBankTransactionsFailed(command.bankLinkId, e));
-        } catch (FetchException e) {
+            bus.post(new BankTransactionsFetched(bankLink));
+        } catch (Exception e) {
             Log.e(TAG, "Failed to fetch bank transactions. Posting failure event.", e);
             bus.post(new FetchBankTransactionsFailed(command.bankLinkId, e));
         }

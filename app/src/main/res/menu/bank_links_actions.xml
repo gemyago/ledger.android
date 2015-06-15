@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/menu_fetch_bank_transactions"
+        android:title="Fetch transactions" />
+    <item
+        app:showAsAction="ifRoom"
         android:id="@+id/menu_delete"
         android:title="@string/menu_delete" />
 </menu>
