@@ -17,6 +17,10 @@ public class MockTransactionsReadModel extends TransactionsReadModel {
     public ArrayList<PendingTransaction> transactionsFetchedFromBank = new ArrayList<>();
     public GetTransactionsFetchedFromBankParams expectedTransactionsFetchedFromBankParams;
 
+    public MockTransactionsReadModel() {
+        super(null);
+    }
+
     @Override
     public List<PendingTransaction> getTransactionsFetchedFromBank(String bic, Date from, Date to) {
         GetTransactionsFetchedFromBankParams actual = new GetTransactionsFetchedFromBankParams(bic, from, to);

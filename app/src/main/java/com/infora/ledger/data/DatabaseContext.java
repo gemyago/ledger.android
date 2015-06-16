@@ -29,6 +29,6 @@ public class DatabaseContext {
     }
 
     public TransactionsReadModel getTransactionsReadModel() {
-        return new TransactionsReadModel();
+        return new TransactionsReadModel(context);
     }
 }

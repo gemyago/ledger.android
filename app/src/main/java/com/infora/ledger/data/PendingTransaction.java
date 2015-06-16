@@ -5,6 +5,7 @@ import android.database.Cursor;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 import static com.infora.ledger.TransactionContract.COLUMN_ACCOUNT_ID;
@@ -129,6 +130,10 @@ public class PendingTransaction implements Entity {
     public PendingTransaction setBic(String bic) {
         this.bic = bic;
         return this;
+    }
+
+    public PendingTransaction save(DatabaseRepository<PendingTransaction> repository) throws SQLException {
+        return repository.save(this);
     }
 
     @Override

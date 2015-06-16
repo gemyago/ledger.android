@@ -78,8 +78,14 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         uow = db.newUnitOfWork();
         uow.attach(bankLink);
 
-        List<PendingTransaction> alreadyFetchedTransactions = db.getTransactionsReadModel()
-                .getTransactionsFetchedFromBank(bankLink.bic, startDate, endDate);
+        List<PendingTransaction> alreadyFetchedTransactions;
+        try {
+            alreadyFetchedTransactions = db.getTransactionsReadModel()
+                    .getTransactionsFetchedFromBank(bankLink.bic, startDate, endDate);
+        } catch (SQLException e) {
+            Log.e(TAG, "Failed to get recently fetched transactions.", e);
+            throw new FetchException(e);
+        }
         HashSet<String> alreadyFetchedIds = new HashSet<>();
         for (PendingTransaction alreadyFetchedTransaction : alreadyFetchedTransactions) {
             alreadyFetchedIds.add(alreadyFetchedTransaction.transactionId);
