@@ -1,5 +1,6 @@
 package com.infora.ledger.banks;
 
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -14,16 +15,22 @@ import java.util.List;
  * Created by jenya on 24.05.15.
  */
 public class PrivatBankResponseParser {
+    private static final String TAG = PrivatBankResponseParser.class.getName();
+
     public List<PrivatBankTransaction> parseTransactions(String body) throws PrivatBankException {
         XmlPullParser parser = Xml.newPullParser();
         try {
             parser.setInput(new StringReader(body));
             parser.nextTag();
+            if(parser.getName().equals("error")) {
+                throw new PrivatBankException(parser.nextText());
+            }
             parser.require(XmlPullParser.START_TAG, null, "response");
 
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("data"))
+                if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("data")) {
                     break;
+                }
                 continue;
             }
             parser.require(XmlPullParser.START_TAG, null, "data");
@@ -60,6 +67,8 @@ public class PrivatBankResponseParser {
             }
             return result;
         } catch (XmlPullParserException e) {
+            Log.e(TAG, "Failed to parse response", e);
+            Log.d(TAG, "Response body: \r\n" + body);
             throw new PrivatBankException(e);
         } catch (IOException e) {
             throw new PrivatBankException(e);

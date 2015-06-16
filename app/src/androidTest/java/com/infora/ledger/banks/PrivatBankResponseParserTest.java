@@ -95,6 +95,18 @@ public class PrivatBankResponseParserTest extends TestCase {
     }
 
     public void testParseTransactionsWithError() throws Exception {
+        String body ="<error>For input string: \"test\"</error>";
+        boolean isRaised = false;
+        try {
+            subject.parseTransactions(body);
+        } catch (PrivatBankException ex) {
+            isRaised = true;
+            assertEquals("For input string: \"test\"", ex.getMessage());
+        }
+        assertTrue(isRaised);
+    }
+
+    public void testParseTransactionsWithDataError() throws Exception {
         String body ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<response version=\"1.0\">" +
                 "   <merchant>" +
