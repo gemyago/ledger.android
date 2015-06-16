@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <sync-adapter
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentAuthority="com.infora.ledger.provider"
+    android:contentAuthority="com.infora.ledger.transactions-provider"
     android:accountType="ledger.infora-soft.com"
     android:userVisible="true"
     android:supportsUploading="true"
