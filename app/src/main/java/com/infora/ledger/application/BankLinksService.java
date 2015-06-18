@@ -20,6 +20,7 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.UnitOfWork;
+import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
 import java.sql.SQLException;
@@ -85,6 +86,11 @@ public class BankLinksService {
             bankLink.accountId = command.accountId;
             bankLink.accountName = command.accountName;
             bankLink.setLinkData(command.bankLinkData);
+            if (command.fetchStartingFrom != null) {
+                Log.d(TAG, "Fetch starting from assigned to: " + command.fetchStartingFrom + ". Setting lastSyncDate to previous day.");
+                //Transactions are fetched from lastSyncDate + 1.day so setting it to the previous day
+                bankLink.lastSyncDate = Dates.addDays(command.fetchStartingFrom, -1);
+            }
             repository.save(bankLink);
             bus.post(new BankLinkUpdated(command.id));
         } catch (SQLException e) {

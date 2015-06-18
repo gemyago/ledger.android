@@ -2,6 +2,7 @@ package com.infora.ledger.application;
 
 import android.test.AndroidTestCase;
 
+import com.infora.ledger.TestHelper;
 import com.infora.ledger.application.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
@@ -20,6 +21,7 @@ import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
 import java.util.Calendar;
@@ -36,6 +38,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     private MockDatabaseRepository repository;
     private EventBus bus;
     private MockDatabaseContext db;
+    private Date fetchFromDate;
 
     @Override
     public void setUp() throws Exception {
@@ -104,16 +107,18 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
     public void testUpdateBankLinkCommand() {
         PrivatBankLinkData linkData = new PrivatBankLinkData("card-1", "merchant-1", "password-1");
+        Date initialLastSyncDate = TestHelper.randomDate();
         BankLink bankLink = new BankLink()
                 .setId(100)
                 .setAccountId("account-100").setAccountName("Account 100")
-                .setBic("bank-100").setLinkData(linkData);
+                .setBic("bank-100").setLinkData(linkData).setLastSyncDate(initialLastSyncDate);
         MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>(BankLinkUpdated.class);
         bus.register(updatedHandler);
         repository.entityToGetById = bankLink;
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
                 new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
         assertEquals(1, repository.savedEntities.size());
+        assertEquals(initialLastSyncDate, bankLink.lastSyncDate);
         assertTrue(repository.savedEntities.contains(bankLink));
         assertEquals("new-account-100", bankLink.accountId);
         assertEquals("New Account 100", bankLink.accountName);
@@ -123,6 +128,23 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals("new-password-1", actualLinkData.password);
         assertEquals(1, updatedHandler.getEvents().size());
         assertEquals(bankLink.id, updatedHandler.getEvents().get(0).id);
+    }
+
+    public void testUpdateBankLinkCommandWithFetchFromDate() {
+        PrivatBankLinkData linkData = new PrivatBankLinkData("card-1", "merchant-1", "password-1");
+        Date initialLastSyncDate = TestHelper.randomDate();
+        BankLink bankLink = new BankLink()
+                .setId(100)
+                .setAccountId("account-100").setAccountName("Account 100")
+                .setBic("bank-100").setLinkData(linkData).setLastSyncDate(initialLastSyncDate);
+        MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>(BankLinkUpdated.class);
+        bus.register(updatedHandler);
+        repository.entityToGetById = bankLink;
+        fetchFromDate = TestHelper.randomDate();
+        subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, bankLink.accountId, bankLink.accountName, linkData)
+                .setFetchFromDate(fetchFromDate));
+        assertEquals(1, repository.savedEntities.size());
+        assertEquals(Dates.addDays(fetchFromDate, -1), bankLink.lastSyncDate);
     }
 
     public void testUpdateBankLinkCommandFailed() {
