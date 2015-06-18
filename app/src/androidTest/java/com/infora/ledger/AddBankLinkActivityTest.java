@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
-import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +20,7 @@ import com.infora.ledger.banks.PrivatBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.support.SystemDate;
+import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -135,7 +134,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DAY_OF_MONTH, -5);
 
-        getActivity().onEventMainThread(new AddBankLinkActivity.ChangeInitialFetchDate(
+        getActivity().onEventMainThread(new DatePickerFragment.DateChanged(
                 c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)
         ));
 
