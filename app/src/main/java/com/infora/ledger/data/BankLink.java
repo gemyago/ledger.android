@@ -3,6 +3,7 @@ package com.infora.ledger.data;
 import android.database.Cursor;
 
 import com.google.gson.Gson;
+import com.infora.ledger.support.Dates;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -127,15 +128,10 @@ public class BankLink implements Entity {
         if (!accountName.equals(bankLink.accountName)) return false;
         if (!bic.equals(bankLink.bic)) return false;
         if (!linkData.equals(bankLink.linkData)) return false;
-        return datesEqual(lastSyncDate, bankLink.lastSyncDate);
+        return Dates.areEqual(lastSyncDate, bankLink.lastSyncDate);
 
     }
 
-
-    private boolean datesEqual(Date left, Date right) {
-        return (left == null && right == null) ||
-                (left != null && right != null && LedgerDbHelper.toISO8601(left).equals(LedgerDbHelper.toISO8601(right)));
-    }
 
     @Override
     public int hashCode() {

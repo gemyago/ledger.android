@@ -21,9 +21,12 @@ import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.DatePickerFragment;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 
@@ -134,12 +137,34 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         getActivity().updateBankLink(null);
 
         assertEquals(1, commandSubscriber.getEvents().size());
-        assertEquals("a-200", commandSubscriber.getEvent().accountId);
-        assertEquals("A 200", commandSubscriber.getEvent().accountName);
-        assertEquals(newLinkData, commandSubscriber.getEvent().bankLinkData);
+        UpdateBankLinkCommand command = commandSubscriber.getEvent();
+        assertEquals("a-200", command.accountId);
+        assertEquals("A 200", command.accountName);
+        assertEquals(newLinkData, command.bankLinkData);
+        assertNull(command.fetchStartingFrom);
 
         Button updateButton = (Button) getActivity().findViewById(R.id.action_update_bank_link);
         assertFalse(updateButton.isEnabled());
+    }
+
+    public void testUpdateBankLinkWithChangedFetchFromDate() {
+        getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
+        BarrierSubscriber<EditBankLinkActivity.AccountsLoaded> accountsBarrier = new BarrierSubscriber<>(EditBankLinkActivity.AccountsLoaded.class);
+        bus.register(accountsBarrier);
+        LogUtil.d(this, "Calling activity onStart");
+        getInstrumentation().callActivityOnStart(getActivity());
+        accountsBarrier.await();
+
+        MockSubscriber<UpdateBankLinkCommand> commandSubscriber = new MockSubscriber<>(UpdateBankLinkCommand.class);
+        bus.register(commandSubscriber);
+        Date fetchFrom = Dates.startOfDay(TestHelper.randomDate());
+        getActivity().onEvent(new DatePickerFragment.DateChanged(fetchFrom));
+
+        getActivity().updateBankLink(null);
+
+        assertEquals(1, commandSubscriber.getEvents().size());
+        UpdateBankLinkCommand command = commandSubscriber.getEvent();
+        assertTrue(Dates.areEqual(fetchFrom, command.fetchStartingFrom));
     }
 
     public void testBankLinkUpdated() {

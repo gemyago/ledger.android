@@ -1,5 +1,7 @@
 package com.infora.ledger.support;
 
+import com.infora.ledger.data.LedgerDbHelper;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -41,5 +43,10 @@ public class Dates {
         Calendar cal = Calendar.getInstance();
         cal.setTime(original);
         return cal;
+    }
+
+    public static boolean areEqual(Date left, Date right) {
+        return (left == null && right == null) ||
+                (left != null && right != null && LedgerDbHelper.toISO8601(left).equals(LedgerDbHelper.toISO8601(right)));
     }
 }

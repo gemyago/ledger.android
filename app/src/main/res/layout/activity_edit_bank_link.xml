@@ -20,6 +20,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></fragment>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:text="Change date to fetch from"
+        android:onClick="changeFetchStartingFromDate"/>
+
     <Button android:id="@+id/action_update_bank_link"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"

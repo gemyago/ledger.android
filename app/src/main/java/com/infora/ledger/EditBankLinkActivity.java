@@ -23,8 +23,12 @@ import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.DatePickerFragment;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -42,6 +46,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private Button updateButton;
     private Spinner accountsSpinner;
     private long bankLinkId;
+    private Date fetchStartingFrom;
 
     public DatabaseRepository<BankLink> getBankLinksRepo() {
         return bankLinksRepo == null ? (bankLinksRepo = DatabaseContext.getInstance(this).createRepository(BankLink.class)) : bankLinksRepo;
@@ -96,13 +101,22 @@ public class EditBankLinkActivity extends AppCompatActivity {
 
     public void updateBankLink(View view) {
         Cursor selectedItem = (Cursor) accountsSpinner.getSelectedItem();
-        BusUtils.post(this, new UpdateBankLinkCommand(
+        UpdateBankLinkCommand command = new UpdateBankLinkCommand(
                 (int) bankLinkId,
                 selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)),
                 selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME)),
-                bankLinkFragment.getBankLinkData()));
+                bankLinkFragment.getBankLinkData());
+        if(fetchStartingFrom != null) command.setFetchFromDate(fetchStartingFrom);
+        BusUtils.post(this, command);
         updateButton.setEnabled(false);
     }
+
+    public void changeFetchStartingFromDate(View view) {
+        Log.d(TAG, "Showing date picker to change fetch starting from date");
+        DatePickerFragment fragment = new DatePickerFragment().setArguments(fetchStartingFrom == null ? new Date() : fetchStartingFrom);
+        fragment.show(getSupportFragmentManager(), "change-fetch-starting-from");
+    }
+
 
     public void onEventMainThread(BankLinkUpdated event) {
         updateButton.setEnabled(true);
@@ -112,6 +126,15 @@ public class EditBankLinkActivity extends AppCompatActivity {
     public void onEventMainThread(UpdateBankLinkFailed event) {
         updateButton.setEnabled(true);
         Toast.makeText(this, "Failure adding bank link: " + event.exception.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
+
+    public void onEvent(DatePickerFragment.DateChanged event) {
+        Calendar c = Calendar.getInstance();
+        c.set(event.year, event.month, event.day, 0, 0, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        fetchStartingFrom = c.getTime();
+        Log.d(TAG, "Date to fetch starting from assigned to: " + fetchStartingFrom);
     }
 
     private LoaderManager.LoaderCallbacks<Cursor> createAccountsLoaderCallbacks() {
