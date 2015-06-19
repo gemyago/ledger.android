@@ -65,14 +65,14 @@ public class MockLedgerApi implements LedgerApi {
     }
 
     @Override
-    public Void reportPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("comment") String comment, @Field("date") Date date) {
-        reportedTransactions.add(new ReportPendingTransactionArgs(transactionId, amount, comment, date));
+    public Void reportPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("date") Date date, @Field("comment") String comment, @Field("accountId") String accountId) {
+        reportedTransactions.add(new ReportPendingTransactionArgs(transactionId, amount, date, comment, accountId));
         return null;
     }
 
     @Override
-    public Void adjustPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("comment") String comment) {
-        adjustTransactions.add(new AdjustPendingTransactionArgs(transactionId, amount, comment));
+    public Void adjustPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("comment") String comment, @Field("accountId") String accountId) {
+        adjustTransactions.add(new AdjustPendingTransactionArgs(transactionId, amount, comment, accountId));
         return null;
     }
 
@@ -99,13 +99,16 @@ public class MockLedgerApi implements LedgerApi {
         public final String transactionId;
         public final String amount;
         public final String comment;
+        public final String accountId;
 
         public AdjustPendingTransactionArgs(String transactionId,
                                             String amount,
-                                            String comment) {
+                                            String comment,
+                                            String accountId) {
             this.transactionId = transactionId;
             this.amount = amount;
             this.comment = comment;
+            this.accountId = accountId;
         }
     }
 
@@ -113,12 +116,14 @@ public class MockLedgerApi implements LedgerApi {
         private final String transactionId;
         private final String amount;
         private final String comment;
+        public final String accountId;
         private final Date date;
 
-        private ReportPendingTransactionArgs(String transactionId, String amount, String comment, Date date) {
+        private ReportPendingTransactionArgs(String transactionId, String amount, Date date, String comment, String accountId) {
             this.transactionId = transactionId;
             this.amount = amount;
             this.comment = comment;
+            this.accountId = accountId;
             this.date = date;
         }
 

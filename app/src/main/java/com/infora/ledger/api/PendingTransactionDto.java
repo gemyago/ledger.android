@@ -13,6 +13,8 @@ public class PendingTransactionDto {
     public String amount;
     @SerializedName("comment")
     public String comment;
+    @SerializedName("account_id")
+    public String account_id;
 
     public PendingTransactionDto() {
     }
@@ -24,7 +26,7 @@ public class PendingTransactionDto {
     }
 
     public PendingTransaction toTransaction() {
-        return new PendingTransaction(transactionId, amount, comment, false, false, null, null);
+        return new PendingTransaction(transactionId, amount, comment, false, false, null, null).setAccountId(account_id);
     }
 
 }

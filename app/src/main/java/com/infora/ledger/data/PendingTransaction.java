@@ -58,6 +58,7 @@ public class PendingTransaction implements Entity {
     public PendingTransaction(Cursor cursor) {
         id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
         transactionId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID));
+        accountId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID));
         amount = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT));
         comment = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_COMMENT));
         isPublished = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_PUBLISHED)) == 1;

@@ -74,11 +74,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", false, false, null, null).setId(1));
+        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", false, false, null, null).setId(1).setAccountId("account-1"));
         matrixCursor.addRow(t1);
         Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", false, false, null, null).setId(2));
         matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", false, false, null, null).setId(3));
+        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", false, false, null, null).setId(3).setAccountId("account-3"));
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
@@ -96,6 +96,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(t1[2], reported1.getTransactionId());
         assertEquals(t1[3], reported1.getAmount());
         assertEquals(t1[4], reported1.getComment());
+        assertEquals("account-1", reported1.accountId);
         assertEquals(LedgerDbHelper.parseISO8601((String) t1[7]), reported1.getDate());
 
         MockLedgerApi.ReportPendingTransactionArgs reported2 = api.getReportedTransactions().get(1);
@@ -108,6 +109,7 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(t3[2], reported3.getTransactionId());
         assertEquals(t3[3], reported3.getAmount());
         assertEquals(t3[4], reported3.getComment());
+        assertEquals("account-3", reported3.accountId);
         assertEquals(LedgerDbHelper.parseISO8601((String) t3[7]), reported3.getDate());
 
         assertEquals(3, publishedSubscriber.getEvents().size());
@@ -196,11 +198,11 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
 
 
         MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100.01", "t 100.01", true, false, null, null).setId(1));
+        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100.01", "t 100.01", true, false, null, null).setId(1).setAccountId("account-1"));
         matrixCursor.addRow(t1);
         Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(1));
         matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1));
+        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1).setAccountId("account-3"));
         matrixCursor.addRow(t3);
         provider.setQueryResult(matrixCursor);
 
@@ -218,10 +220,12 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals("t-1", adjustedT1.transactionId);
         assertEquals("100.01", adjustedT1.amount);
         assertEquals("t 100.01", adjustedT1.comment);
+        assertEquals("account-1", adjustedT1.accountId);
 
         MockLedgerApi.AdjustPendingTransactionArgs adjustedT3 = api.getAdjustTransactions().get(1);
         assertEquals("t-3", adjustedT3.transactionId);
         assertEquals("103.03", adjustedT3.amount);
         assertEquals("t 103.03", adjustedT3.comment);
+        assertEquals("account-3", adjustedT3.accountId);
     }
 }

@@ -31,15 +31,17 @@ public interface LedgerApi {
     Void reportPendingTransaction(
             @Field("id") String transactionId,
             @Field("amount") String amount,
+            @Field("date") Date date,
             @Field("comment") String comment,
-            @Field("date") Date date);
+            @Field("account_id") String accountId);
 
     @FormUrlEncoded
     @PUT("/pending-transactions/{id}")
     Void adjustPendingTransaction(
             @Path("id") String transactionId,
             @Field("amount") String amount,
-            @Field("comment") String comment);
+            @Field("comment") String comment,
+            @Field("account_id") String accountId);
 
     @DELETE("/pending-transactions/{id}")
     Void rejectPendingTransaction(@Path("id") String transactionId);

@@ -55,7 +55,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
                     PendingTransactionDto remoteTransaction = remoteTransactionsMap.get(lt.transactionId);
                     if (!Objects.equals(remoteTransaction.amount, lt.amount) ||
                             !remoteTransaction.comment.equals(lt.comment)) {
-                        api.adjustPendingTransaction(lt.transactionId, lt.amount, lt.comment);
+                        api.adjustPendingTransaction(lt.transactionId, lt.amount, lt.comment, lt.accountId);
                     }
                 }
             } else {
@@ -64,7 +64,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
                     toPurgeIds.add(lt.id);
                 } else {
                     Log.d(TAG, "Publishing pending transaction: " + lt.transactionId);
-                    api.reportPendingTransaction(lt.transactionId, lt.amount, lt.comment, lt.timestamp);
+                    api.reportPendingTransaction(lt.transactionId, lt.amount, lt.timestamp, lt.comment, lt.accountId);
                     bus.post(new MarkTransactionAsPublishedCommand(lt.id));
                 }
             }

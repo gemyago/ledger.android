@@ -6,13 +6,12 @@ import android.accounts.OperationCanceledException;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.api.ApiAdapter;
-import com.infora.ledger.api.AuthenticityToken;
+import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.support.AccountManagerWrapper;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -51,31 +50,69 @@ public class ApiManualTest extends AndroidTestCase {
 
     public void testReportPendingTransaction() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
         adapter.authenticateApi(ledgerApi, account);
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
+        List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
+        LedgerAccountDto accountDto = accounts.get(0);
+        String transactionId = UUID.randomUUID().toString();
+        Date date = new Date();
+        ledgerApi.reportPendingTransaction(transactionId, "100.00", date, "Comment for transaction 100", accountDto.id);
+        List<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
+        for (PendingTransactionDto pendingTransaction : pendingTransactions) {
+            if (pendingTransaction.transactionId == transactionId) {
+                assertEquals("100.00", pendingTransaction.amount);
+                assertEquals("Comment for transaction 100", pendingTransaction.comment);
+                assertEquals(accountDto.id, pendingTransaction.account_id);
+                assertEquals(accounts.get(0).id, pendingTransaction.account_id);
+                break;
+            }
+        }
     }
 
     public void testGetPendingTransactions() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
         adapter.authenticateApi(ledgerApi, account);
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", "Comment for transaction 100", new Date());
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.01", "Comment for transaction 101", new Date());
+        List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
+        String t1id = UUID.randomUUID().toString();
+        String t2id = UUID.randomUUID().toString();
+        ledgerApi.reportPendingTransaction(t1id, "100.00", new Date(), "Comment for transaction 100", accounts.get(0).id);
+        ledgerApi.reportPendingTransaction(t2id, "100.01", new Date(), "Comment for transaction 101", accounts.get(1).id);
         List<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
         assertFalse("There should be some pending transactions for testing purposes", pendingTransactions.isEmpty());
         for (PendingTransactionDto pendingTransaction : pendingTransactions) {
             assertNotNull(pendingTransaction.transactionId);
             assertNotNull(pendingTransaction.amount);
             assertNotNull(pendingTransaction.comment);
+            if (pendingTransaction.transactionId == t1id) {
+                assertEquals(accounts.get(0).id, pendingTransaction.account_id);
+            }
+            if (pendingTransaction.transactionId == t2id) {
+                assertEquals(accounts.get(1).id, pendingTransaction.account_id);
+            }
         }
     }
     
     public void testAdjustPendingTransaction() {
         adapter.authenticateApi(ledgerApi, account);
+        List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         List<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto transaction : transactions) {
             float newAmount = Float.parseFloat(transaction.amount) + 1;
             ledgerApi.adjustPendingTransaction(
                     transaction.transactionId,
                     String.valueOf(newAmount),
-                    "Comment " + newAmount);
+                    "Comment " + newAmount,
+                    accounts.get(0).id);
         }
+    }
+
+    public void testRejectPendingTransactions() {
+        adapter.authenticateApi(ledgerApi, account);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
+
+        List<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
+        for (PendingTransactionDto transaction : transactions) {
+            ledgerApi.rejectPendingTransaction(transaction.transactionId);
+        }
+        assertEquals(0, ledgerApi.getPendingTransactions().size());
     }
 }
