@@ -34,12 +34,6 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         Uri itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions");
         assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_LIST_TYPE, resolver.getType(itemsUrl));
 
-        itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/reported-by-user");
-        assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_LIST_TYPE, resolver.getType(itemsUrl));
-
-        itemsUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/recent-fetched-from-bank/bic-1");
-        assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_ITEM_TYPE, resolver.getType(itemsUrl));
-
         Uri itemUrl = Uri.parse("content://" + PendingTransactionsContentProvider.AUTHORITY + "/pending-transactions/10");
         assertEquals(PendingTransactionsContentProvider.PENDING_TRANSACTIONS_ITEM_TYPE, resolver.getType(itemUrl));
     }
@@ -105,58 +99,6 @@ public class PendingTransactionsContentProviderTest extends ProviderTestCase2<Pe
         assertEquals("102.00", t102.amount);
         assertEquals("Transaction 102", t102.comment);
         assertEquals(true, t101.isPublished);
-    }
-
-    public void testQueryReportedByUser() {
-        DbUtils.insertPendingTransaction(dbHelper, "100", "100.00", "Transaction 100");
-        DbUtils.insertPendingTransaction(dbHelper, "101", "101.00", "Transaction 101");
-        DbUtils.insertPendingTransaction(dbHelper, "102", "102.00", "Transaction 102");
-        DbUtils.insertPendingTransaction(dbHelper, "103", "103.00", "Transaction 103", "bic-1");
-
-        Cursor results = resolver.query(TransactionContract.CONTENT_URI_REPORTED_BY_USER,
-                TransactionContract.ASSIGNABLE_COLUMNS, null, null, TransactionContract.COLUMN_AMOUNT);
-
-        assertEquals(3, results.getCount());
-        results.moveToFirst();
-        assertEquals("100", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
-
-        results.moveToNext();
-        assertEquals("101", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
-
-        results.moveToNext();
-        assertEquals("102", results.getString(results.getColumnIndexOrThrow(TransactionContract.COLUMN_TRANSACTION_ID)));
-    }
-
-    public void testQueryFetchedFromBankByBic() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR, 4);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("100", "100.00", "Transaction 100", false, false, cal.getTime(), "bic-1"));
-        cal.add(Calendar.HOUR, 3);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("101", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-1"));
-        cal.add(Calendar.HOUR, 2);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("102", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-1"));
-
-        Calendar.getInstance();
-        cal.add(Calendar.HOUR, 4);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("200", "100.00", "Transaction 100", false, false, cal.getTime(), "bic-2"));
-        cal.add(Calendar.HOUR, 3);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("201", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-2"));
-        cal.add(Calendar.HOUR, 2);
-        DbUtils.insertPendingTransaction(dbHelper, new PendingTransaction("202", "101.00", "Transaction 101", false, false, cal.getTime(), "bic-2"));
-
-        Cursor results = resolver.query(LedgerContentUris.withAppendedString(TransactionContract.CONTENT_URI_FETCHED_FROM_BANK, "/bic-1"),
-                TransactionContract.ALL_COLUMNS, null, null, null);
-        assertEquals(1, results.getCount());
-        results.moveToFirst();
-        PendingTransaction tran102 = new PendingTransaction(results);
-        assertEquals("102", tran102.transactionId);
-
-        results = resolver.query(LedgerContentUris.withAppendedString(TransactionContract.CONTENT_URI_FETCHED_FROM_BANK, "/bic-2"),
-                TransactionContract.ALL_COLUMNS, null, null, null);
-        assertEquals(1, results.getCount());
-        results.moveToFirst();
-        PendingTransaction tran202 = new PendingTransaction(results);
-        assertEquals("202", tran202.transactionId);
     }
 
     public void testQuerySkipDeleted() {
