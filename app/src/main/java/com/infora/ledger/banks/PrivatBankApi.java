@@ -14,7 +14,7 @@ import java.util.List;
  * Created by jenya on 23.05.15.
  */
 public class PrivatBankApi {
-    private static final String API_URL = "https://api.privatbank.ua/p24api/rest_fiz";
+    private static final String API_URL = "http://pbanua2x-api.infora-soft.com/p24api/rest_fiz";
     private final OkHttpClient client;
     private final PrivatBankResponseParser responseParser;
     private MediaType XML = MediaType.parse("application/xml");
