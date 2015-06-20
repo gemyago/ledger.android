@@ -9,8 +9,10 @@ import com.infora.ledger.mocks.GetTransactionsFetchedFromBankParams;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockPrivatBankApi;
 import com.infora.ledger.mocks.MockUnitOfWork;
+import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -50,9 +52,6 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         dateFrom.setTime(bankLink.lastSyncDate);
         dateFrom.add(Calendar.DAY_OF_MONTH, 1);
 
-
-        mockDb.mockTransactionsReadModel.expectedTransactionsFetchedFromBankParams =
-                new GetTransactionsFetchedFromBankParams(bankLink.bic, dateFrom.getTime(), now);
         mockApi.expectedGetTransactionsRequest = new GetTransactionsRequest(
                 linkData.card, linkData.merchantId, linkData.password, dateFrom.getTime(), now);
     }
@@ -93,22 +92,12 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         hook2.assertCommitted();
     }
 
-    public void testFetchTransactionsIfLastFetchDateWasToday() throws FetchException {
-        final Date now = TestHelper.randomDate();
+    public void testFetchTransactionsIfLastFetchDateWasToday() throws Exception {
+        final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
         SystemDate.setNow(now);
         bankLink.lastSyncDate = now;
 
-        Calendar startOfDayCal = Calendar.getInstance();
-        startOfDayCal.setTime(now);
-        startOfDayCal.set(Calendar.HOUR, 0);
-        startOfDayCal.set(Calendar.MINUTE, 0);
-        startOfDayCal.set(Calendar.SECOND, 0);
-        Date startOfDay = startOfDayCal.getTime();
-
-        mockDb.mockTransactionsReadModel.expectedTransactionsFetchedFromBankParams.from = startOfDay;
-        mockDb.mockTransactionsReadModel.expectedTransactionsFetchedFromBankParams.to = now;
-
-        mockApi.expectedGetTransactionsRequest.startDate = startOfDay;
+        mockApi.expectedGetTransactionsRequest.startDate = Dates.startOfDay(now);
         mockApi.expectedGetTransactionsRequest.endDate = now;
         final PrivatBankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
@@ -119,7 +108,7 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
                 .setDescription("description-1");
         final PrivatBankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
-                .setTrandate("2015-05-24")
+                .setTrandate("2015-05-23")
                 .setTrantime("21:56:24")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
@@ -142,23 +131,16 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
     }
 
     public void testFetchTransactionsFromNextDateAfterLastTillNow() throws FetchException {
-        final Date now = TestHelper.randomDate();
+        final Date now = Dates.set(new Date(), 2015, 4, 30, 2, 1, 30);
         SystemDate.setNow(now);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
-        cal.add(Calendar.DAY_OF_MONTH, -11);
-        bankLink.lastSyncDate = cal.getTime();
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date dateFrom = cal.getTime();
-
-        mockDb.mockTransactionsReadModel.expectedTransactionsFetchedFromBankParams.from = dateFrom;
-        mockDb.mockTransactionsReadModel.expectedTransactionsFetchedFromBankParams.to = now;
+        bankLink.lastSyncDate = Dates.addDays(now, -11);
+        Date dateFrom = Dates.addDays(now, -10);
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
         final PrivatBankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
-                .setTrandate("2015-05-23")
+                .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
@@ -166,7 +148,7 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         final PrivatBankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
-                .setTrantime("21:56:24")
+                .setTrantime("21:56:23")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
@@ -190,24 +172,29 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         hook2.assertCommitted();
     }
 
-    public void testFetchTransactionsSkipExisting() throws FetchException {
+    public void testFetchTransactionsSkipTransactionsFetchedEarlierToday() throws FetchException {
         final PrivatBankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
-                .setTrantime("21:56:23")
+                .setTrantime("12:45:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
         final PrivatBankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
-                .setTrandate("2015-05-24")
-                .setTrantime("21:56:24")
+                .setTrandate("2015-05-23")
+                .setTrantime("14:56:24")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
 
-        mockDb.mockTransactionsReadModel.transactionsFetchedFromBank.add(t1.toPendingTransaction(bankLink));
-        mockDb.mockTransactionsReadModel.transactionsFetchedFromBank.add(t2.toPendingTransaction(bankLink));
+        Date now = Dates.set(new Date(), 2015, 04, 23, 14, 58, 23);
+        SystemDate.setNow(now);
+
+        bankLink.lastSyncDate = Dates.addMinutes(now, -1);
+
+        mockApi.expectedGetTransactionsRequest.startDate = Dates.startOfDay(bankLink.lastSyncDate);
+        mockApi.expectedGetTransactionsRequest.endDate = now;
 
         mockApi.privatBankTransactions.add(t1);
         mockApi.privatBankTransactions.add(t2);

@@ -8,13 +8,13 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.UnitOfWork;
+import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -50,10 +50,10 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class);
         Date lastSyncDate = bankLink.lastSyncDate;
         Date startDate;
-        Date endDate = SystemDate.now();
-        if (isSameDay(lastSyncDate, endDate)) { //New transactions can appear today so fetching today again
-            Log.d(TAG, "Last sync date was '" + lastSyncDate + "' and now is '" + endDate + "'. Today's transactions will be fetched again.");
-            startDate = startOfDay(endDate);
+        Date now = SystemDate.now();
+        if (isSameDay(lastSyncDate, now)) { //New transactions can appear today so fetching today again
+            Log.d(TAG, "Last sync date was '" + lastSyncDate + "' and now is '" + now + "'. Today's transactions will be fetched again.");
+            startDate = Dates.startOfDay(now);
         } else {
             Calendar startDateCal = Calendar.getInstance();
             startDateCal.setTime(lastSyncDate);
@@ -61,7 +61,7 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             startDate = startDateCal.getTime();
         }
 
-        GetTransactionsRequest apiRequest = new GetTransactionsRequest(linkData.card, linkData.merchantId, linkData.password, startDate, endDate);
+        GetTransactionsRequest apiRequest = new GetTransactionsRequest(linkData.card, linkData.merchantId, linkData.password, startDate, now);
         List<PrivatBankTransaction> bankTransactions;
         try {
             Log.d(TAG, "Fetching pb transactions using api. Date from: " + apiRequest.startDate + ", Date to: " + apiRequest.endDate);
@@ -78,27 +78,14 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         uow = db.newUnitOfWork();
         uow.attach(bankLink);
 
-        List<PendingTransaction> alreadyFetchedTransactions;
-        try {
-            alreadyFetchedTransactions = db.getTransactionsReadModel()
-                    .getTransactionsFetchedFromBank(bankLink.bic, startDate, endDate);
-        } catch (SQLException e) {
-            Log.e(TAG, "Failed to get recently fetched transactions.", e);
-            throw new FetchException(e);
-        }
-        HashSet<String> alreadyFetchedIds = new HashSet<>();
-        for (PendingTransaction alreadyFetchedTransaction : alreadyFetchedTransactions) {
-            alreadyFetchedIds.add(alreadyFetchedTransaction.transactionId);
-        }
-
         Log.d(TAG, "Adding new transactions...");
         for (PrivatBankTransaction bankTransaction : bankTransactions) {
             PendingTransaction newTransaction = bankTransaction.toPendingTransaction(bankLink);
-            if (alreadyFetchedIds.contains(newTransaction.transactionId)) {
-                Log.d(TAG, "The transaction transaction_id='" + newTransaction.transactionId + "' has already been fetched.");
-                continue;
+            if (newTransaction.timestamp.compareTo(bankLink.lastSyncDate) > 0) {
+                uow.addNew(newTransaction);
+            } else {
+                Log.d(TAG, "Transaction timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "' has already been fetched since it's timestamp is less than last sync date.");
             }
-            uow.addNew(newTransaction);
         }
 
         Log.d(TAG, "Marking bank link as not in progress and succeeded.");
@@ -111,15 +98,6 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             Log.e(TAG, "Failed to commit fetch result", e);
             throw new FetchException(e);
         }
-    }
-
-    private Date startOfDay(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        return cal.getTime();
     }
 
     private boolean isSameDay(Date date1, Date date2) {
