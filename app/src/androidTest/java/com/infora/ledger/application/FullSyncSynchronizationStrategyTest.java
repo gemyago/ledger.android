@@ -189,6 +189,36 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-3"));
     }
 
+    public void testSynchronizePurgeNotPublishedButLocallyRemoved() {
+        api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
+
+        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
+        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", false, true, null, null).setId(1));
+        matrixCursor.addRow(t1);
+        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", false, true, null, null).setId(2));
+        matrixCursor.addRow(t2);
+        provider.setQueryResult(matrixCursor);
+
+        MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
+        bus.register(purgedSubscriber);
+
+        subject.synchronize(api, resolver, null, syncResult);
+
+        assertNull(provider.getInsertArgs());
+        assertNull(provider.getDeleteArgs());
+        assertNull(provider.getUpdateArgs());
+
+        assertEquals(0, api.getReportedTransactions().size());
+
+        assertEquals(1, purgedSubscriber.getEvents().size());
+        long[] removedIds = purgedSubscriber.getEvent().getIds();
+        assertEquals(2, removedIds.length);
+        assertEquals(1, removedIds[0]);
+        assertEquals(2, removedIds[1]);
+
+        assertEquals(0, api.getRejectedPendingTrasnsactions().size());
+    }
+
     public void testSynchronizeUpdateChanged() {
         ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
         remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));

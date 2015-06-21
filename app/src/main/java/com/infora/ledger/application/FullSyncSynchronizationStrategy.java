@@ -62,6 +62,9 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
                 if (lt.isPublished) {
                     Log.d(TAG, "Pending transaction '" + lt.transactionId + "' was approved or rejected. Marking for purge.");
                     toPurgeIds.add(lt.id);
+                } else if(lt.isDeleted) {
+                    Log.d(TAG, "Pending transaction '" + lt.transactionId + "' was deleted prior to publishing. Marking for purge.");
+                    toPurgeIds.add(lt.id);
                 } else {
                     Log.d(TAG, "Publishing pending transaction: " + lt.transactionId);
                     api.reportPendingTransaction(lt.transactionId, lt.amount, lt.timestamp, lt.comment, lt.accountId);
