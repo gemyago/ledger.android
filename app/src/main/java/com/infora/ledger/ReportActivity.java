@@ -187,6 +187,8 @@ public class ReportActivity extends ActionBarActivity {
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
         if(doNotCallRequestSync) {
             Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
         } else {
