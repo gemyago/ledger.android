@@ -41,8 +41,8 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
             remoteTransactionsMap.put(remoteTransaction.transactionId, remoteTransaction);
         }
 
-        Log.d(TAG, "Querying locally reported transactions");
         Cursor localTransactions = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
+        Log.d(TAG, "Loaded " + localTransactions.getCount() + " locally reported transactions.");
         ArrayList<Integer> toPurgeIds = new ArrayList<>();
         while (localTransactions.moveToNext()) {
             PendingTransaction lt = new PendingTransaction(localTransactions);

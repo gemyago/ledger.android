@@ -84,7 +84,7 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             if (newTransaction.timestamp.compareTo(bankLink.lastSyncDate) > 0) {
                 uow.addNew(newTransaction);
             } else {
-                Log.d(TAG, "Transaction timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "' has already been fetched since it's timestamp is less than last sync date.");
+                Log.d(TAG, "Transaction ignored. Timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "'. It's timestamp is less than last sync date.");
             }
         }
 
