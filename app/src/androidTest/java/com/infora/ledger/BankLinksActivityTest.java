@@ -1,16 +1,20 @@
 package com.infora.ledger;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.test.RenamingDelegatingContext;
 import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.BanksContentProvider;
 import com.infora.ledger.data.DatabaseContext;
+import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.BarrierSubscriber;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
@@ -41,6 +45,22 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
+        final RenamingDelegatingContext renamingContext = new RenamingDelegatingContext(
+                getInstrumentation().getTargetContext(), "bank-links-activity-test") {
+            MockLedgerApplication mockLedgerApplication;
+
+            @Override
+            public Context getApplicationContext() {
+                if (mockLedgerApplication == null)
+                    mockLedgerApplication = new MockLedgerApplication(this, bus);
+                return mockLedgerApplication;
+            }
+        };
+        MockLedgerApplication app = (MockLedgerApplication) renamingContext.getApplicationContext();
+        app.withMockContentProvider(BanksContentProvider.AUTHORITY, new BanksContentProvider());
+        setApplication(app);
+        setActivityContext(renamingContext);
+
         startActivity(new Intent(), null, null);
         BusUtils.setBus(getActivity(), bus);
 
