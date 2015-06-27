@@ -14,7 +14,9 @@ import com.infora.ledger.data.BanksContentProvider;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.BarrierSubscriber;
+import com.infora.ledger.mocks.MockActionMode;
 import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
 
@@ -120,7 +122,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
 
         MockSubscriber<DeleteBankLinksCommand> deleteHandler = new MockSubscriber<>(DeleteBankLinksCommand.class);
         bus.register(deleteHandler);
-        getActivity().findViewById(R.id.menu_delete).callOnClick();
+        getActivity().bankLinksChoiceListener.onActionItemClicked(new MockActionMode(), new MockMenuItem(R.id.menu_delete));
         assertNotNull(deleteHandler.getEvent());
 
         long[] deletedIds = deleteHandler.getEvent().ids;

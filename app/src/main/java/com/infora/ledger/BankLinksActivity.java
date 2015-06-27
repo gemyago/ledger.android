@@ -37,6 +37,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     public static final String BANK_LINK_ID_EXTRA = "BANK_LINK_ID";
     private SimpleCursorAdapter bankLinksAdapter;
     private ListView lvBankLinks;
+    ListView.MultiChoiceModeListener bankLinksChoiceListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +54,8 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         lvBankLinks.setAdapter(bankLinksAdapter);
         lvBankLinks.setEmptyView(findViewById(android.R.id.empty));
         lvBankLinks.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        lvBankLinks.setMultiChoiceModeListener(new BankLinksChoiceListener());
+        bankLinksChoiceListener = new BankLinksChoiceListener();
+        lvBankLinks.setMultiChoiceModeListener(bankLinksChoiceListener);
         lvBankLinks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
