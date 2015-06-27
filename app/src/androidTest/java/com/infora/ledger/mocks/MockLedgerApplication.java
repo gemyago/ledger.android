@@ -1,7 +1,9 @@
 package com.infora.ledger.mocks;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ProviderInfo;
 import android.test.mock.MockContentResolver;
 
 import com.infora.ledger.LedgerApplication;
@@ -26,11 +28,16 @@ public class MockLedgerApplication extends LedgerApplication {
         return this;
     }
 
-
-
     @Override
     public ContentResolver getContentResolver() {
         if(mockContentResolver != null) return mockContentResolver;
         return super.getContentResolver();
+    }
+
+    public MockLedgerApplication withMockContentProvider(String authority, ContentProvider provider) {
+        if(mockContentResolver == null) mockContentResolver = new MockContentResolver();
+        provider.attachInfo(getBaseContext(), new ProviderInfo());
+        mockContentResolver.addProvider(authority, provider);
+        return this;
     }
 }
