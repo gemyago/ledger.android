@@ -135,6 +135,10 @@ public class ReportActivity extends ActionBarActivity {
             BusUtils.post(this, cmd);
             return true;
         }
+        if (id == R.id.action_bank_links) {
+            startActivity(new Intent(this, BankLinksActivity.class));
+            return true;
+        }
 
 
         return super.onOptionsItemSelected(item);
@@ -189,7 +193,7 @@ public class ReportActivity extends ActionBarActivity {
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
-        if(doNotCallRequestSync) {
+        if (doNotCallRequestSync) {
             Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
         } else {
             ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
@@ -270,5 +274,6 @@ public class ReportActivity extends ActionBarActivity {
         public boolean isManual = false;
     }
 
-    public static class TransactionsLoaded {}
+    public static class TransactionsLoaded {
+    }
 }

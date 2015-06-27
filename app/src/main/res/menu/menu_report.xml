@@ -5,4 +5,6 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_synchronize" android:title="@string/action_synchronize"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_bank_links" android:title="@string/action_bank_links"
+        android:orderInCategory="100" app:showAsAction="never" />
 </menu>
