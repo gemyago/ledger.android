@@ -20,16 +20,4 @@ public class MockTransactionsReadModel extends TransactionsReadModel {
     public MockTransactionsReadModel() {
         super(null);
     }
-
-    @Override
-    public List<PendingTransaction> getTransactionsFetchedFromBank(String bic, Date from, Date to) {
-        GetTransactionsFetchedFromBankParams actual = new GetTransactionsFetchedFromBankParams(bic, from, to);
-        if (expectedTransactionsFetchedFromBankParams == null) {
-            throw new AssertionError("Params expectation not assigned");
-        }
-        if (!actual.equals(expectedTransactionsFetchedFromBankParams)) {
-            throw new ComparisonFailure("Wrong params", expectedTransactionsFetchedFromBankParams.toString(), actual.toString());
-        }
-        return transactionsFetchedFromBank;
-    }
 }

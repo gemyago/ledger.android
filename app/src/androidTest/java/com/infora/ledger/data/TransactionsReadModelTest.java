@@ -4,8 +4,6 @@ import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
 import com.infora.ledger.DbUtils;
-import com.infora.ledger.TestHelper;
-import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -28,44 +26,36 @@ public class TransactionsReadModelTest extends AndroidTestCase {
         super.setUp();
     }
 
-    public void testGetTransactionsFetchedFromBank() throws Exception {
-        insertSeedTransactions();
-        Date startDate = Dates.startOfDay(TestHelper.randomDate());
-        Date endDate = Dates.addDays(startDate, 10);
-        new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-90").setTimestamp(Dates.addDays(startDate, -2)).save(repo);
-        new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-91").setTimestamp(Dates.addDays(startDate, -1)).save(repo);
-        PendingTransaction t100 = new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-100").setTimestamp(startDate).save(repo);
-        PendingTransaction t101 = new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-101").setTimestamp(Dates.addHours(startDate, 5)).save(repo);
-        PendingTransaction t102 = new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-102").setTimestamp(endDate).save(repo);
-        PendingTransaction t103 = new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-103").setTimestamp(Dates.addHours(endDate, 1)).save(repo);
-        PendingTransaction t104 = new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-104").setTimestamp(Dates.addHours(endDate, 23)).save(repo);
-        new PendingTransaction().setAmount("100")
-                .setBic("bic-1").setTransactionId("t-201").setTimestamp(Dates.addDays(endDate, 1)).save(repo);
+    public void testGetTransactions() throws SQLException {
+        PendingTransaction t1 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-1").setTimestamp(new Date()).save(repo);
+        PendingTransaction t2 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-2").setTimestamp(new Date()).save(repo);
+        new PendingTransaction().setAmount("100").setIsDeleted(true)
+                .setBic("bic-1").setTransactionId("t-3").setTimestamp(new Date()).save(repo);
+        PendingTransaction t4 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-4").setTimestamp(new Date()).save(repo);
 
-        List<PendingTransaction> pendingTransactions = subject.getTransactionsFetchedFromBank("bic-1", startDate, endDate);
-        assertEquals(5, pendingTransactions.size());
-        assertTrue(pendingTransactions.contains(t100));
-        assertTrue(pendingTransactions.contains(t101));
-        assertTrue(pendingTransactions.contains(t102));
-        assertTrue(pendingTransactions.contains(t103));
-        assertTrue(pendingTransactions.contains(t104));
+        List<PendingTransaction> transactions = subject.getTransactions();
+        assertEquals(3, transactions.size());
+        assertTrue(transactions.contains(t1));
+        assertTrue(transactions.contains(t2));
+        assertTrue(transactions.contains(t4));
     }
 
-    private void insertSeedTransactions() throws SQLException {
-        new PendingTransaction().setAmount("100")
-                .setBic("seed-bic-1").setTransactionId("seed-t1").setTimestamp(TestHelper.randomDate()).save(repo);
-        new PendingTransaction().setAmount("100")
-                .setBic("seed-bic-2").setTransactionId("seed-t2").setTimestamp(TestHelper.randomDate()).save(repo);
-        new PendingTransaction().setAmount("100")
-                .setBic("seed-bic-3").setTransactionId("seed-t3").setTimestamp(TestHelper.randomDate()).save(repo);
-        new PendingTransaction().setAmount("100")
-                .setTransactionId("seed-t4").setTimestamp(TestHelper.randomDate()).save(repo);
+    public void testIsTransactionExists() throws SQLException {
+        PendingTransaction t1 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-1").setTimestamp(new Date()).save(repo);
+        PendingTransaction t2 = new PendingTransaction().setAmount("100")
+                .setIsDeleted(true)
+                .setBic("bic-1").setTransactionId("t-2").setTimestamp(new Date()).save(repo);
+
+        assertTrue(subject.isTransactionExists(t1.transactionId));
+        assertTrue(subject.isTransactionExists(t2.transactionId));
+
+        repo.deleteAll(new long[]{t1.id, t2.id});
+
+        assertFalse(subject.isTransactionExists(t1.transactionId));
+        assertFalse(subject.isTransactionExists(t2.transactionId));
     }
 }

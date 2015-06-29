@@ -27,23 +27,31 @@ public class TransactionsReadModel {
     }
 
     /**
-     * Gets transactions fetched from bank for specified bic and dates range
+     * Returns actual (not deleted) transactions
      *
-     * @param bic  - bic to get transactions for
-     * @param from - date from inclusive. Note: time portion is ignored.
-     * @param to   - date to inclusive. Note: time portion is ignored.
      * @return
      */
-    public List<PendingTransaction> getTransactionsFetchedFromBank(String bic, Date from, Date to) throws SQLException {
+    public List<PendingTransaction> getTransactions() throws SQLException {
         ConnectionSource connectionSource = new AndroidConnectionSource(dbHelper);
         try {
             Dao<PendingTransaction, Long> dao = DaoManager.createDao(connectionSource, PendingTransaction.class);
             QueryBuilder<PendingTransaction, Long> builder = dao.queryBuilder();
-            builder.where().between(TransactionContract.COLUMN_TIMESTAMP, Dates.startOfDay(from), Dates.endOfDay(to));
+            builder.where().eq(TransactionContract.COLUMN_IS_DELETED, false);
+            builder.orderBy(TransactionContract.COLUMN_TIMESTAMP, false);
             return builder.query();
         } finally {
             connectionSource.close();
         }
+    }
 
+    public boolean isTransactionExists(String transactionId) throws SQLException {
+        ConnectionSource connectionSource = new AndroidConnectionSource(dbHelper);
+        try {
+            Dao<PendingTransaction, Long> dao = DaoManager.createDao(connectionSource, PendingTransaction.class);
+            QueryBuilder<PendingTransaction, Long> builder = dao.queryBuilder();
+            return builder.where().eq(TransactionContract.COLUMN_TRANSACTION_ID, transactionId).countOf() > 0;
+        } finally {
+            connectionSource.close();
+        }
     }
 }
