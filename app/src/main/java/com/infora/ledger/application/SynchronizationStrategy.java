@@ -6,9 +6,11 @@ import android.os.Bundle;
 
 import com.infora.ledger.api.LedgerApi;
 
+import java.sql.SQLException;
+
 /**
  * Created by jenya on 25.03.15.
  */
 public interface SynchronizationStrategy {
-    void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult);
+    void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) throws SQLException;
 }

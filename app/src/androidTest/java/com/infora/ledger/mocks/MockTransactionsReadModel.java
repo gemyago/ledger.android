@@ -3,10 +3,8 @@ package com.infora.ledger.mocks;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
 
-import junit.framework.ComparisonFailure;
-
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,10 +12,33 @@ import java.util.List;
  */
 public class MockTransactionsReadModel extends TransactionsReadModel {
 
-    public ArrayList<PendingTransaction> transactionsFetchedFromBank = new ArrayList<>();
-    public GetTransactionsFetchedFromBankParams expectedTransactionsFetchedFromBankParams;
+    private final ArrayList<PendingTransaction> transactions;
 
     public MockTransactionsReadModel() {
         super(null);
+        transactions = new ArrayList<>();
+    }
+
+    public PendingTransaction inject(PendingTransaction transaction) {
+        transactions.add(transaction);
+        return transaction;
+    }
+
+    public MockTransactionsReadModel injectAnd(PendingTransaction transaction) {
+        inject(transaction);
+        return this;
+    }
+
+    @Override
+    public List<PendingTransaction> getTransactions() throws SQLException {
+        return transactions;
+    }
+
+    @Override
+    public boolean isTransactionExists(String transactionId) throws SQLException {
+        for (PendingTransaction transaction : transactions) {
+            if(transaction.transactionId == transactionId) return true;
+        }
+        return false;
     }
 }

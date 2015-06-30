@@ -4,6 +4,7 @@ import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.data.PendingTransaction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -113,9 +114,9 @@ public class MockLedgerApi implements LedgerApi {
     }
 
     public static class ReportPendingTransactionArgs {
-        private final String transactionId;
-        private final String amount;
-        private final String comment;
+        public final String transactionId;
+        public final String amount;
+        public final String comment;
         public final String accountId;
         private final Date date;
 
@@ -141,6 +142,15 @@ public class MockLedgerApi implements LedgerApi {
 
         public Date getDate() {
             return date;
+        }
+
+        public PendingTransaction toTransaction() {
+            return new PendingTransaction()
+                    .setTransactionId(transactionId)
+                    .setAmount(amount)
+                    .setTimestamp(date)
+                    .setComment(comment)
+                    .setAccountId(accountId);
         }
     }
 }

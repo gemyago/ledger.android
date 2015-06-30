@@ -5,14 +5,12 @@ import android.test.AndroidTestCase;
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.application.banks.FetchException;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.mocks.GetTransactionsFetchedFromBankParams;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockPrivatBankApi;
 import com.infora.ledger.mocks.MockUnitOfWork;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 

@@ -21,10 +21,12 @@ import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.ApiAuthenticator;
 import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import retrofit.RetrofitError;
 
@@ -48,16 +50,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         onInit(context);
     }
 
-    public SynchronizationStrategy getSyncStrategy() {
-        return syncStrategy;
-    }
-
     public void setSyncStrategy(SynchronizationStrategy syncStrategy) {
         this.syncStrategy = syncStrategy;
-    }
-
-    public ApiAdapter getApiAdapter() {
-        return apiAdapter;
     }
 
     public void setApiAdapter(ApiAdapter apiAdapter) {
@@ -68,7 +62,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         Log.d(TAG, "Initializing sync adapter...");
         resolver = context.getContentResolver();
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
-        syncStrategy = new FullSyncSynchronizationStrategy(app.getBus());
+        syncStrategy = new FullSyncSynchronizationStrategy(app.getBus(), new TransactionsReadModel(context));
         SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
         String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         Log.d(TAG, "Using ledger host: " + ledgerHost);
@@ -88,9 +82,13 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         }
         try {
             syncStrategy.synchronize(api, resolver, extras, syncResult);
-        } catch (RetrofitError error) {
+        } catch (RetrofitError e) {
             syncResult.stats.numIoExceptions++;
-            Log.e(TAG, "Synchronization aborted due to some network error.", error);
+            Log.e(TAG, "Synchronization aborted due to some network error.", e);
+            return;
+        } catch (SQLException e) {
+            syncResult.stats.numIoExceptions++;
+            Log.e(TAG, "Synchronization aborted due to some unhandled SQL error.", e);
             return;
         }
         Log.i(TAG, "Synchronization completed.");

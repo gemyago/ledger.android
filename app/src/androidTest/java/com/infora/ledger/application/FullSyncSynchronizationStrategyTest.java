@@ -1,48 +1,39 @@
 package com.infora.ledger.application;
 
 import android.content.SyncResult;
-import android.database.MatrixCursor;
-import android.test.ProviderTestCase2;
-import android.test.mock.MockContentResolver;
+import android.test.AndroidTestCase;
 
-import com.infora.ledger.DbUtils;
-import com.infora.ledger.data.PendingTransaction;
-import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
-import com.infora.ledger.application.commands.PurgeTransactionsCommand;
-import com.infora.ledger.data.LedgerDbHelper;
+import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.MockLedgerApi;
-import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.MockTransactionsReadModel;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 25.03.15.
  */
-public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockPendingTransactionsContentProvider> {
+public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
 
-    private MockPendingTransactionsContentProvider provider;
-    private MockContentResolver resolver;
+    private MockTransactionsReadModel readModel;
     private FullSyncSynchronizationStrategy subject;
     private MockLedgerApi api;
     private EventBus bus;
     private SyncResult syncResult;
 
-    public FullSyncSynchronizationStrategyTest() {
-        super(MockPendingTransactionsContentProvider.class, TransactionContract.AUTHORITY);
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        resolver = getMockContentResolver();
-        provider = getProvider();
         bus = new EventBus();
-        subject = new FullSyncSynchronizationStrategy(bus);
+        readModel = new MockTransactionsReadModel();
+        subject = new FullSyncSynchronizationStrategy(bus, readModel);
         api = new MockLedgerApi();
         syncResult = new SyncResult();
     }
@@ -53,64 +44,34 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
-
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
         for (PendingTransactionDto dto : remoteTransactions) {
-            matrixCursor.addRow(DbUtils.toArray(dto.toTransaction()));
+            readModel.inject(dto.toTransaction());
         }
-        provider.setQueryResult(matrixCursor);
-
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
-        assertNotNull("The provider was not queried", provider.getQueryArgs());
-        assertEquals(TransactionContract.CONTENT_URI, provider.getQueryArgs().uri);
+        subject.synchronize(api, null, null, syncResult);
         assertEquals(0, api.getReportedTransactions().size());
     }
 
-    public void testSynchronizeReportNew() {
+    public void testSynchronizeReportNew() throws SQLException {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", false, false, null, null).setId(1).setAccountId("account-1"));
-        matrixCursor.addRow(t1);
-        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", false, false, null, null).setId(2));
-        matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", false, false, null, null).setId(3).setAccountId("account-3"));
-        matrixCursor.addRow(t3);
-        provider.setQueryResult(matrixCursor);
+        PendingTransaction t1 = readModel.inject(new PendingTransaction("t-1", "100", "t 100", false, false, new Date(), null).setId(1).setAccountId("account-1"));
+        PendingTransaction t2 = readModel.inject(new PendingTransaction("t-2", "101", "t 101", false, false, new Date(), null).setId(2));
+        PendingTransaction t3 = readModel.inject(new PendingTransaction("t-3", "103", "t 103", false, false, new Date(), null).setId(3).setAccountId("account-3"));
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
         bus.register(publishedSubscriber);
 
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
+        subject.synchronize(api, null, null, syncResult);
 
         assertEquals(3, api.getReportedTransactions().size());
 
-        MockLedgerApi.ReportPendingTransactionArgs reported1 = api.getReportedTransactions().get(0);
-        assertEquals(t1[2], reported1.getTransactionId());
-        assertEquals(t1[3], reported1.getAmount());
-        assertEquals(t1[4], reported1.getComment());
-        assertEquals("account-1", reported1.accountId);
-        assertEquals(LedgerDbHelper.parseISO8601((String) t1[7]), reported1.getDate());
+        PendingTransaction reported1 = api.getReportedTransactions().get(0).toTransaction().setId(t1.id);
+        assertEquals(t1, reported1);
 
-        MockLedgerApi.ReportPendingTransactionArgs reported2 = api.getReportedTransactions().get(1);
-        assertEquals(t2[2], reported2.getTransactionId());
-        assertEquals(t2[3], reported2.getAmount());
-        assertEquals(t2[4], reported2.getComment());
-        assertEquals(LedgerDbHelper.parseISO8601((String) t2[7]), reported2.getDate());
+        PendingTransaction reported2 = api.getReportedTransactions().get(1).toTransaction().setId(t2.id);
+        assertEquals(t2, reported2);
 
-        MockLedgerApi.ReportPendingTransactionArgs reported3 = api.getReportedTransactions().get(2);
-        assertEquals(t3[2], reported3.getTransactionId());
-        assertEquals(t3[3], reported3.getAmount());
-        assertEquals(t3[4], reported3.getComment());
-        assertEquals("account-3", reported3.accountId);
-        assertEquals(LedgerDbHelper.parseISO8601((String) t3[7]), reported3.getDate());
+        PendingTransaction reported3 = api.getReportedTransactions().get(2).toTransaction().setId(t3.id);
+        assertEquals(t3, reported3);
 
         assertEquals(3, publishedSubscriber.getEvents().size());
         assertEquals(1, publishedSubscriber.getEvents().get(0).getId());
@@ -118,70 +79,16 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals(3, publishedSubscriber.getEvents().get(2).getId());
     }
 
-    public void testSynchronizePurgePublished() {
-        api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
-
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", true, false, null, null).setId(1));
-        matrixCursor.addRow(t1);
-        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(2));
-        matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", true, false, null, null).setId(3));
-        matrixCursor.addRow(t3);
-        provider.setQueryResult(matrixCursor);
-        MockSubscriber<PurgeTransactionsCommand> publishedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
-        bus.register(publishedSubscriber);
-
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
-
-        assertEquals(0, api.getReportedTransactions().size());
-
-        assertEquals(1, publishedSubscriber.getEvents().size());
-        long[] removedIds = publishedSubscriber.getEvent().getIds();
-        assertEquals(3, removedIds.length);
-        assertEquals(1, removedIds[0]);
-        assertEquals(2, removedIds[1]);
-        assertEquals(3, removedIds[2]);
-    }
-
-    public void testSynchronizeRemoveAndPurgeLocallyRemoved() {
+    public void testSynchronizeRemoveLocallyRemoved() throws SQLException {
         ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
         remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));
         remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
 
-
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", true, true, null, null).setId(1));
-        matrixCursor.addRow(t1);
-        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", true, true, null, null).setId(2));
-        matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103", "t 103", true, true, null, null).setId(3));
-        matrixCursor.addRow(t3);
-        provider.setQueryResult(matrixCursor);
-
-        MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
-        bus.register(purgedSubscriber);
-
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
+        subject.synchronize(api, null, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
-
-        assertEquals(1, purgedSubscriber.getEvents().size());
-        long[] removedIds = purgedSubscriber.getEvent().getIds();
-        assertEquals(3, removedIds.length);
-        assertEquals(1, removedIds[0]);
-        assertEquals(2, removedIds[1]);
-        assertEquals(3, removedIds[2]);
 
         assertEquals(3, api.getRejectedPendingTrasnsactions().size());
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-1"));
@@ -189,58 +96,18 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-3"));
     }
 
-    public void testSynchronizePurgeNotPublishedButLocallyRemoved() {
-        api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
-
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100", "t 100", false, true, null, null).setId(1));
-        matrixCursor.addRow(t1);
-        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", false, true, null, null).setId(2));
-        matrixCursor.addRow(t2);
-        provider.setQueryResult(matrixCursor);
-
-        MockSubscriber<PurgeTransactionsCommand> purgedSubscriber = new MockSubscriber<>(PurgeTransactionsCommand.class);
-        bus.register(purgedSubscriber);
-
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
-
-        assertEquals(0, api.getReportedTransactions().size());
-
-        assertEquals(1, purgedSubscriber.getEvents().size());
-        long[] removedIds = purgedSubscriber.getEvent().getIds();
-        assertEquals(2, removedIds.length);
-        assertEquals(1, removedIds[0]);
-        assertEquals(2, removedIds[1]);
-
-        assertEquals(0, api.getRejectedPendingTrasnsactions().size());
-    }
-
-    public void testSynchronizeUpdateChanged() {
+    public void testSynchronizeUpdateChanged() throws SQLException {
         ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
         remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));
         remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
         remoteTransactions.add(new PendingTransactionDto("t-3", "103", "t 103"));
         api.setPendingTransactions(remoteTransactions);
 
+        readModel.injectAnd(new PendingTransaction("t-1", "100.01", "t 100.01", true, false, null, null).setId(1).setAccountId("account-1"))
+                .injectAnd(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(1))
+                .inject(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1).setAccountId("account-3"));
 
-        MatrixCursor matrixCursor = new MatrixCursor(TransactionContract.ALL_COLUMNS);
-        Object[] t1 = DbUtils.toArray(new PendingTransaction("t-1", "100.01", "t 100.01", true, false, null, null).setId(1).setAccountId("account-1"));
-        matrixCursor.addRow(t1);
-        Object[] t2 = DbUtils.toArray(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(1));
-        matrixCursor.addRow(t2);
-        Object[] t3 = DbUtils.toArray(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1).setAccountId("account-3"));
-        matrixCursor.addRow(t3);
-        provider.setQueryResult(matrixCursor);
-
-        subject.synchronize(api, resolver, null, syncResult);
-
-        assertNull(provider.getInsertArgs());
-        assertNull(provider.getDeleteArgs());
-        assertNull(provider.getUpdateArgs());
+        subject.synchronize(api, null, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
         assertEquals(2, api.getAdjustTransactions().size());
@@ -257,5 +124,23 @@ public class FullSyncSynchronizationStrategyTest extends ProviderTestCase2<MockP
         assertEquals("103.03", adjustedT3.amount);
         assertEquals("t 103.03", adjustedT3.comment);
         assertEquals("account-3", adjustedT3.accountId);
+    }
+
+    public void testSynchronizeDeleteApproved() throws SQLException {
+        api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
+        readModel.inject(new PendingTransaction().setId(100).setTransactionId("t-100").setIsPublished(true));
+        readModel.inject(new PendingTransaction().setId(101).setTransactionId("t-101").setIsPublished(true));
+        readModel.inject(new PendingTransaction().setId(102).setTransactionId("t-102").setIsPublished(true));
+
+        MockSubscriber<DeleteTransactionsCommand> deleteSubscriber = new MockSubscriber<>(DeleteTransactionsCommand.class);
+        bus.register(deleteSubscriber);
+
+        subject.synchronize(api, null, null, syncResult);
+
+        assertEquals(1, deleteSubscriber.getEvents().size());
+        assertEquals(3, deleteSubscriber.getEvent().getIds().length);
+        assertEquals(100, deleteSubscriber.getEvent().getIds()[0]);
+        assertEquals(101, deleteSubscriber.getEvent().getIds()[1]);
+        assertEquals(102, deleteSubscriber.getEvent().getIds()[2]);
     }
 }

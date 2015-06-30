@@ -2,17 +2,17 @@ package com.infora.ledger.application;
 
 import android.content.ContentResolver;
 import android.content.SyncResult;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.infora.ledger.data.PendingTransaction;
-import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
-import com.infora.ledger.application.commands.PurgeTransactionsCommand;
+import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.data.TransactionsReadModel;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +26,14 @@ import de.greenrobot.event.EventBus;
 public class FullSyncSynchronizationStrategy implements SynchronizationStrategy {
     private static final String TAG = FullSyncSynchronizationStrategy.class.getName();
     private final EventBus bus;
+    private TransactionsReadModel readModel;
 
-    public FullSyncSynchronizationStrategy(EventBus bus) {
+    public FullSyncSynchronizationStrategy(EventBus bus, TransactionsReadModel readModel) {
         this.bus = bus;
+        this.readModel = readModel;
     }
 
-    public void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
+    public void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) throws SQLException {
         Log.i(TAG, "Starting full synchronization...");
 
         Log.d(TAG, "Retrieving pending transactions from the server...");
@@ -41,45 +43,45 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
             remoteTransactionsMap.put(remoteTransaction.transactionId, remoteTransaction);
         }
 
-        Cursor localTransactions = resolver.query(TransactionContract.CONTENT_URI, null, null, null, null);
-        Log.d(TAG, "Loaded " + localTransactions.getCount() + " locally reported transactions.");
-        ArrayList<Integer> toPurgeIds = new ArrayList<>();
-        while (localTransactions.moveToNext()) {
-            PendingTransaction lt = new PendingTransaction(localTransactions);
-            if (remoteTransactionsMap.containsKey(lt.transactionId)) {
-                if (lt.isDeleted) {
-                    Log.d(TAG, "Local transaction '" + lt.transactionId + "' was marked as removed. Rejecting and marking for purge.");
-                    api.rejectPendingTransaction(lt.transactionId);
-                    toPurgeIds.add(lt.id);
+        ArrayList<Integer> toDeleteIds = new ArrayList<>();
+        List<PendingTransaction> localTransactions = readModel.getTransactions();
+        HashMap<String, PendingTransaction> localTransMap = new HashMap<>();
+        Log.d(TAG, "Loaded " + localTransactions.size() + " locally reported transactions.");
+        for (PendingTransaction localTran : localTransactions) {
+            localTransMap.put(localTran.transactionId, localTran);
+            if (remoteTransactionsMap.containsKey(localTran.transactionId)) {
+                PendingTransactionDto remoteTran = remoteTransactionsMap.get(localTran.transactionId);
+                if (!Objects.equals(remoteTran.amount, localTran.amount) ||
+                        !remoteTran.comment.equals(localTran.comment)) {
+                    Log.d(TAG, "Local transaction id='" + localTran.id + "' has been changed. Adjusting remote.");
+                    api.adjustPendingTransaction(localTran.transactionId, localTran.amount, localTran.comment, localTran.accountId);
                 } else {
-                    PendingTransactionDto remoteTransaction = remoteTransactionsMap.get(lt.transactionId);
-                    if (!Objects.equals(remoteTransaction.amount, lt.amount) ||
-                            !remoteTransaction.comment.equals(lt.comment)) {
-                        api.adjustPendingTransaction(lt.transactionId, lt.amount, lt.comment, lt.accountId);
-                    }
+                    Log.d(TAG, "Transaction id='" + localTran.id + "' has not be changed. Skipping.");
                 }
+            } else if(localTran.isPublished) {
+                Log.d(TAG, "Local transaction id='" + localTran.id + "' was approved or rejected. Marking for deletion.");
+                toDeleteIds.add(localTran.id);
             } else {
-                if (lt.isPublished) {
-                    Log.d(TAG, "Pending transaction '" + lt.transactionId + "' was approved or rejected. Marking for purge.");
-                    toPurgeIds.add(lt.id);
-                } else if(lt.isDeleted) {
-                    Log.d(TAG, "Pending transaction '" + lt.transactionId + "' was deleted prior to publishing. Marking for purge.");
-                    toPurgeIds.add(lt.id);
-                } else {
-                    Log.d(TAG, "Publishing pending transaction: " + lt.transactionId);
-                    api.reportPendingTransaction(lt.transactionId, lt.amount, lt.timestamp, lt.comment, lt.accountId);
-                    bus.post(new MarkTransactionAsPublishedCommand(lt.id));
-                }
+                Log.d(TAG, "Publishing pending transaction: " + localTran.transactionId);
+                api.reportPendingTransaction(localTran.transactionId, localTran.amount, localTran.timestamp, localTran.comment, localTran.accountId);
+                bus.post(new MarkTransactionAsPublishedCommand(localTran.id));
             }
         }
 
-        if (!toPurgeIds.isEmpty()) {
-            long[] ids = new long[toPurgeIds.size()];
-            for (int i = 0; i < toPurgeIds.size(); i++) {
-                ids[i] = toPurgeIds.get(i);
+        for (PendingTransactionDto remoteTran : remoteTransactionsMap.values()) {
+            if (!localTransMap.containsKey(remoteTran.transactionId)) {
+                Log.d(TAG, "Local transaction '" + remoteTran.transactionId + "' removed. Rejecting remote.");
+                api.rejectPendingTransaction(remoteTran.transactionId);
             }
-            Log.d(TAG, "Posting command to purge required transactions...");
-            bus.post(new PurgeTransactionsCommand(ids));
+        }
+
+        if (!toDeleteIds.isEmpty()) {
+            long[] ids = new long[toDeleteIds.size()];
+            for (int i = 0; i < toDeleteIds.size(); i++) {
+                ids[i] = toDeleteIds.get(i);
+            }
+            Log.d(TAG, "Posting command to delete '" + toDeleteIds.size() + "' transactions marked for deletion...");
+            bus.post(new DeleteTransactionsCommand(ids));
         }
     }
 }
