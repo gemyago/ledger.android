@@ -49,6 +49,8 @@ public class MockDatabaseContext extends DatabaseContext {
 
     @Override
     public UnitOfWork newUnitOfWork() {
+        if(unitOfWorkHooks.size() == 0)
+            throw new AssertionError("No mock unit of work configured.");
         MockUnitOfWork uow = new MockUnitOfWork(unitOfWorkHooks.pop());
         mockUnitsOfWork.add(uow);
         return uow;

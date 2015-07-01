@@ -81,10 +81,11 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         Log.d(TAG, "Adding new transactions...");
         for (PrivatBankTransaction bankTransaction : bankTransactions) {
             PendingTransaction newTransaction = bankTransaction.toPendingTransaction(bankLink);
-            if (newTransaction.timestamp.compareTo(bankLink.lastSyncDate) > 0) {
-                uow.addNew(newTransaction);
+            Log.d(TAG, "Checking if transaction '" + newTransaction.transactionId + "' exists.");
+            if (isTransactionExists(db, newTransaction)) {
+                Log.d(TAG, "Transaction ignored since it has been already fetched. Timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "'.");
             } else {
-                Log.d(TAG, "Transaction ignored. Timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "'. It's timestamp is less than last sync date.");
+                uow.addNew(newTransaction);
             }
         }
 
@@ -96,6 +97,14 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             uow.commit();
         } catch (SQLException e) {
             Log.e(TAG, "Failed to commit fetch result", e);
+            throw new FetchException(e);
+        }
+    }
+
+    private boolean isTransactionExists(DatabaseContext db, PendingTransaction newTransaction) throws FetchException {
+        try {
+            return db.getTransactionsReadModel().isTransactionExists(newTransaction.transactionId);
+        } catch (SQLException e) {
             throw new FetchException(e);
         }
     }

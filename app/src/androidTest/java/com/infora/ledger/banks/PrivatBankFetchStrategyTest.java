@@ -5,6 +5,7 @@ import android.test.AndroidTestCase;
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.application.banks.FetchException;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.Entity;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockPrivatBankApi;
 import com.infora.ledger.mocks.MockUnitOfWork;
@@ -170,44 +171,41 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         hook2.assertCommitted();
     }
 
-    public void testFetchTransactionsSkipTransactionsFetchedEarlierToday() throws FetchException {
+    public void testIgnoreExistingTransactions() throws FetchException {
+        final Date now = Dates.set(new Date(), 2015, 4, 30, 2, 1, 30);
+        SystemDate.setNow(now);
+        bankLink.lastSyncDate = Dates.addDays(now, -11);
+        Date dateFrom = Dates.addDays(now, -10);
+
+        mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
+        mockApi.expectedGetTransactionsRequest.endDate = now;
         final PrivatBankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
-                .setTrandate("2015-05-23")
-                .setTrantime("12:45:23")
+                .setTrandate("2015-05-20")
+                .setTrantime("21:56:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
         final PrivatBankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
-                .setTrandate("2015-05-23")
-                .setTrantime("14:56:24")
+                .setTrandate("2015-05-24")
+                .setTrantime("21:56:23")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
 
-        Date now = Dates.set(new Date(), 2015, 04, 23, 14, 58, 23);
-        SystemDate.setNow(now);
-
-        bankLink.lastSyncDate = Dates.addMinutes(now, -1);
-
-        mockApi.expectedGetTransactionsRequest.startDate = Dates.startOfDay(bankLink.lastSyncDate);
-        mockApi.expectedGetTransactionsRequest.endDate = now;
-
         mockApi.privatBankTransactions.add(t1);
         mockApi.privatBankTransactions.add(t2);
 
+        mockDb.mockTransactionsReadModel.injectAnd(t1.toPendingTransaction(bankLink))
+                .injectAnd(t2.toPendingTransaction(bankLink));
         mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
-        MockUnitOfWork.Hook hook2 = new MockUnitOfWork.Hook() {
+        mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
             @Override
-            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
-                MockUnitOfWork.Commit commit = mockUnitOfWork.commits.get(0);
-                assertEquals(0, commit.addedEntities.size());
+            public <TEntity extends Entity> void onAddNew(TEntity entity) {
+                fail("It is not expected that new entities are added. Got: " + entity);
             }
-        };
-        mockDb.addUnitOfWorkHook(hook2);
+        });
         subject.fetchBankTransactions(mockDb, bankLink);
-        hook2.assertCommitted();
     }
-
 }

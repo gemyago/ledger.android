@@ -6,6 +6,7 @@ import com.infora.ledger.data.TransactionsReadModel;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by jenya on 09.06.15.
@@ -37,7 +38,7 @@ public class MockTransactionsReadModel extends TransactionsReadModel {
     @Override
     public boolean isTransactionExists(String transactionId) throws SQLException {
         for (PendingTransaction transaction : transactions) {
-            if(transaction.transactionId == transactionId) return true;
+            if(Objects.equals(transaction.transactionId, transactionId)) return true;
         }
         return false;
     }
