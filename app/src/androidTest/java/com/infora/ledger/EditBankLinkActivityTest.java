@@ -16,6 +16,7 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
+import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockLedgerApi;
@@ -149,22 +150,23 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
 
     public void testUpdateBankLinkWithChangedFetchFromDate() {
         getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
-        BarrierSubscriber<EditBankLinkActivity.AccountsLoaded> accountsBarrier = new BarrierSubscriber<>(EditBankLinkActivity.AccountsLoaded.class);
-        bus.register(accountsBarrier);
+        BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> bankLinkBarrier = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
+        bus.register(bankLinkBarrier);
         LogUtil.d(this, "Calling activity onStart");
         getInstrumentation().callActivityOnStart(getActivity());
-        accountsBarrier.await();
+        bankLinkBarrier.await();
 
         MockSubscriber<UpdateBankLinkCommand> commandSubscriber = new MockSubscriber<>(UpdateBankLinkCommand.class);
         bus.register(commandSubscriber);
         Date fetchFrom = Dates.startOfDay(TestHelper.randomDate());
+        LogUtil.d(this, "Raising DateChanged event to assign fetchFrom to: " + fetchFrom);
         getActivity().onEvent(new DatePickerFragment.DateChanged(fetchFrom));
 
         getActivity().updateBankLink(null);
 
         assertEquals(1, commandSubscriber.getEvents().size());
         UpdateBankLinkCommand command = commandSubscriber.getEvent();
-        assertTrue(Dates.areEqual(fetchFrom, command.fetchStartingFrom));
+        assertEquals(LedgerDbHelper.toISO8601(fetchFrom), LedgerDbHelper.toISO8601(command.fetchStartingFrom));
     }
 
     public void testBankLinkUpdated() {
