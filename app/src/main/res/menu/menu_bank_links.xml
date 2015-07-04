@@ -1,6 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".ReportActivity">
-    <item android:id="@+id/action_add_bank_link" android:title="@string/action_add_bank_link"
-        android:orderInCategory="100" app:showAsAction="ifRoom" />
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ReportActivity">
+    <item
+        android:id="@+id/action_fetch_all_bank_links"
+        android:orderInCategory="100"
+        android:title="@string/action_fetch_transactions"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_add_bank_link"
+        android:orderInCategory="100"
+        android:title="@string/action_add_bank_link"
+        app:showAsAction="ifRoom" />
 </menu>

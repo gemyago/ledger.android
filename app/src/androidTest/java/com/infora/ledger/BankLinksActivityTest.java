@@ -153,4 +153,22 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         assertEquals(link1.id, fetchHandler.getEvents().get(0).bankLinkId);
         assertEquals(link3.id, fetchHandler.getEvents().get(1).bankLinkId);
     }
+
+    public void testFetchAllTransactions() throws SQLException {
+        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkData("dummy").setLastSyncDate(new Date()));
+        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkData("dummy").setLastSyncDate(new Date()));
+
+        BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        MockSubscriber<FetchBankTransactionsCommand> fetchHandler = new MockSubscriber<>(FetchBankTransactionsCommand.class);
+        bus.register(fetchHandler);
+        getActivity().onOptionsItemSelected(new MockMenuItem(R.id.action_fetch_all_bank_links));
+
+        assertEquals(2, fetchHandler.getEvents().size());
+        assertEquals(link1.id, fetchHandler.getEvents().get(0).bankLinkId);
+        assertEquals(link2.id, fetchHandler.getEvents().get(1).bankLinkId);
+    }
 }

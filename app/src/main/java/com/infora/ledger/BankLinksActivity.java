@@ -117,6 +117,13 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
             return true;
         }
 
+        if (id == R.id.action_fetch_all_bank_links) {
+            for (int i = 0; i < bankLinksAdapter.getCount(); i++) {
+                 BusUtils.post(this, new FetchBankTransactionsCommand((int) bankLinksAdapter.getItemId(i)));
+            }
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
