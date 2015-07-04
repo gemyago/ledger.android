@@ -1,41 +1,36 @@
 package com.infora.ledger;
 
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.test.ActivityInstrumentationTestCase2;
+import android.content.Intent;
+import android.test.ActivityUnitTestCase;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.PrivatBankLinkData;
+import com.infora.ledger.mocks.DummyPrivatBankLinkActivity;
 
 /**
  * Created by jenya on 01.06.15.
  */
-public class PrivatBankLinkFragmentTest extends ActivityInstrumentationTestCase2<AddBankLinkActivity> {
+public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyPrivatBankLinkActivity> {
+
     public PrivatBankLinkFragmentTest() {
-        super(AddBankLinkActivity.class);
+        super(DummyPrivatBankLinkActivity.class);
     }
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
+        startActivity(new Intent(), null, null);
     }
 
-    private PrivatBankLinkFragment startFragment() {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        PrivatBankLinkFragment fragment = new PrivatBankLinkFragment();
-        transaction.add(fragment, "tag");
-        transaction.commit();
-        getInstrumentation().waitForIdleSync();
-        return fragment;
+    private PrivatBankLinkFragment getFragment() {
+        return (PrivatBankLinkFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
     }
 
     public void testGetBankLinkData() {
-        PrivatBankLinkFragment fragment = startFragment();
-        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
+        PrivatBankLinkFragment fragment = getFragment();
+        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
 
         merchantId.setText("merchant-100");
         merchantPassword.setText("merchant-100-password");
@@ -48,10 +43,10 @@ public class PrivatBankLinkFragmentTest extends ActivityInstrumentationTestCase2
     }
 
     public void testSetBankLinkData() {
-        PrivatBankLinkFragment fragment = startFragment();
-        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
+        PrivatBankLinkFragment fragment = getFragment();
+        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
 
         PrivatBankLinkData linkData = new PrivatBankLinkData("card100", "merchant-100", "merchant-100-password");
         fragment.setBankLinkData(linkData);
@@ -62,10 +57,10 @@ public class PrivatBankLinkFragmentTest extends ActivityInstrumentationTestCase2
     }
 
     public void testClearLinkData() {
-        PrivatBankLinkFragment fragment = startFragment();
-        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
+        PrivatBankLinkFragment fragment = getFragment();
+        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
 
         merchantId.setText("merchant-100");
         merchantPassword.setText("merchant-100-password");
