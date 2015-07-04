@@ -36,11 +36,22 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
     private SimpleCursorAdapter spinnerAdapter;
 
+    private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private Date initialFetchDate;
     private Spinner ledgerAccountId;
     private PrivatBankLinkFragment bankLinkFragment;
     private Button addButton;
     private TextView initialFetchDateText;
+
+    private LedgerAccountsLoader.Factory getAccountsLoaderFactory() {
+        return accountsLoaderFactory == null ?
+                (accountsLoaderFactory = new LedgerAccountsLoader.Factory()) : accountsLoaderFactory;
+    }
+
+    public void setAccountsLoaderFactory(LedgerAccountsLoader.Factory accountsLoaderFactory) {
+        this.accountsLoaderFactory = accountsLoaderFactory;
+    }
+
 
     public Date getInitialFetchDate() {
         return initialFetchDate;
@@ -137,7 +148,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         LogUtil.d(this, "Creating loader");
-        return new LedgerAccountsLoader(this).withSelectionPrompt();
+        return getAccountsLoaderFactory().createLoader(this).withSelectionPrompt();
     }
 
     @Override

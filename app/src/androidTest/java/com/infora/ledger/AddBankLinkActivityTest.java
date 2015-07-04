@@ -1,9 +1,11 @@
 package com.infora.ledger;
 
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
+import android.os.Bundle;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,12 +20,15 @@ import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.PrivatBankLinkData;
 import com.infora.ledger.banks.PrivatBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
+import com.infora.ledger.mocks.MockLedgerAccountsLoader;
+import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -50,6 +55,20 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
     public void setUp() throws Exception {
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
+
+        Instrumentation instrumentation = new Instrumentation() {
+            @Override
+            public void callActivityOnCreate(Activity activity, Bundle icicle) {
+                ((AddBankLinkActivity)activity).setAccountsLoaderFactory(createAccountsLoaderFactory());
+                super.callActivityOnCreate(activity, icicle);
+            }
+
+            @Override
+            public Context getTargetContext() {
+                return baseContext;
+            }
+        };
+        injectInstrumentation(instrumentation);
         bus = new EventBus();
         final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
         setActivityContext(app);
@@ -142,6 +161,15 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
 
         TextView initialFetchDate = (TextView) getActivity().findViewById(R.id.initial_fetch_date);
         assertEquals(DateFormat.getDateInstance().format(c.getTime()), initialFetchDate.getText().toString());
+    }
+
+    private LedgerAccountsLoader.Factory createAccountsLoaderFactory() {
+        return new LedgerAccountsLoader.Factory() {
+            @Override
+            public LedgerAccountsLoader createLoader(Context context) {
+                return new MockLedgerAccountsLoader();
+            }
+        };
     }
 
     private void populateLedgerAccounts(Spinner spinner, LedgerAccountDto... dtos) {
