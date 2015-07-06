@@ -2,10 +2,10 @@ package com.infora.ledger.banks;
 
 import android.test.AndroidTestCase;
 
-import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.LogUtil;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class PrivatBankApiManualTest extends AndroidTestCase {
 
-    private PrivatBankApi api;
+    private BankApi api;
 
     @Override
     protected void runTest() throws Throwable {
@@ -40,16 +40,16 @@ public class PrivatBankApiManualTest extends AndroidTestCase {
         Date now = calendar.getTime();
         calendar.add(Calendar.DATE, -3);
         Date yesterday = calendar.getTime();
-
+        final PrivatBankLinkData linkData = new PrivatBankLinkData("TODO (do not commit)",
+                "TODO (do not commit)",
+                "TODO (do not commit)");
         GetTransactionsRequest request = new GetTransactionsRequest(
-                "TODO (do not commit)",
-                "TODO (do not commit)",
-                "TODO (do not commit)",
+                new BankLink().setLinkData(linkData),
                 yesterday,
                 now);
-        List<PrivatBankTransaction> transactions = api.getTransactions(request);
+        List<BankTransaction> transactions = api.getTransactions(request);
         LogUtil.d(this, "Fetched transactions " + transactions.size());
-        for (PrivatBankTransaction transaction : transactions) {
+        for (BankTransaction transaction : transactions) {
             LogUtil.d(this, transaction.toString());
         }
     }

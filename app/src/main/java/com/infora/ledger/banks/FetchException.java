@@ -1,4 +1,4 @@
-package com.infora.ledger.application.banks;
+package com.infora.ledger.banks;
 
 /**
  * Created by jenya on 10.06.15.

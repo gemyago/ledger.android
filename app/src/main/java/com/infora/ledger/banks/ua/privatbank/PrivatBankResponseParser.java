@@ -3,6 +3,8 @@ package com.infora.ledger.banks.ua.privatbank;
 import android.util.Log;
 import android.util.Xml;
 
+import com.infora.ledger.banks.BankTransaction;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

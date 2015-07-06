@@ -3,7 +3,7 @@ package com.infora.ledger.application;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
-import com.infora.ledger.application.banks.FetchException;
+import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;

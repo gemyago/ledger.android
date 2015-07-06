@@ -2,8 +2,10 @@ package com.infora.ledger.banks;
 
 import android.util.Xml;
 
-import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestBuilder;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestSignatureBuilder;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.LogUtil;
 
 import junit.framework.TestCase;
@@ -19,14 +21,20 @@ import java.util.GregorianCalendar;
 /**
  * Created by jenya on 23.05.15.
  */
-public class GetTransactionsRequestTest extends TestCase {
+public class PrivatBankRequestBuilderTest extends TestCase {
 
-    public void testToXml() throws Exception {
+    public void testBuild() throws Exception {
         Date startDate = new GregorianCalendar(2010, 7, 1).getTime();
         Date endDate = new GregorianCalendar(2010, 8, 1).getTime();
-        final GetTransactionsRequest request = new GetTransactionsRequest("card-100", "merchant-110", "password-110", startDate, endDate);
+        final PrivatBankRequestBuilder builder = new PrivatBankRequestBuilder();
 
-        request.setSignatureBuilder(new PrivatBankRequestSignatureBuilder() {
+        final PrivatBankLinkData linkData = new PrivatBankLinkData("card-100", "merchant-110", "password-110");
+        final BankLink bankLink = new BankLink()
+                .setBic("pb")
+                .setLinkData(linkData);
+        final GetTransactionsRequest request = new GetTransactionsRequest(bankLink, startDate, endDate);
+
+        builder.setSignatureBuilder(new PrivatBankRequestSignatureBuilder() {
             @Override
             public String build(String data, String password) {
                 assertEquals("<oper>cmt</oper>" +
@@ -38,12 +46,12 @@ public class GetTransactionsRequestTest extends TestCase {
                                 "<prop name=\"card\" value=\"card-100\" />" +
                                 "</payment>",
                         data);
-                assertEquals(request.password, password);
+                assertEquals(linkData.password, password);
                 return "request-signature-33920";
             }
         });
 
-        String xml = request.toXml();
+        String xml = builder.build(request);
 
         LogUtil.d(this, "xml = " + xml);
 
@@ -58,7 +66,7 @@ public class GetTransactionsRequestTest extends TestCase {
         assertNextStartTag(parser, "merchant");
 
 //        <id>merchant-110</id>
-        assertNextTagWithText(parser, "id", request.merchantId);
+        assertNextTagWithText(parser, "id", linkData.merchantId);
 
 //        <signature>request-signature-33920</signature>
         assertNextTagWithText(parser, "signature", "request-signature-33920");
@@ -83,7 +91,7 @@ public class GetTransactionsRequestTest extends TestCase {
 //        <prop name="ed" value="01.09.2010" />
         assertNextProp(parser, "ed", "01.09.2010");
 //        <prop name = "card" value="5168742060221193" />
-        assertNextProp(parser, "card", request.card);
+        assertNextProp(parser, "card", linkData.card);
 //        </payment>
         assertNextEndTag(parser, "payment");
 
