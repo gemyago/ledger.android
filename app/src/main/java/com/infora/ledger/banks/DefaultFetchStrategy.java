@@ -22,9 +22,9 @@ import java.util.List;
 public class DefaultFetchStrategy implements FetchStrategy {
     private static final String TAG = DefaultFetchStrategy.class.getName();
 
-    private final BankApi<BankTransaction> api;
+    private final BankApi api;
 
-    public DefaultFetchStrategy(BankApi<BankTransaction> api) {
+    public DefaultFetchStrategy(BankApi api) {
         this.api = api;
     }
 
