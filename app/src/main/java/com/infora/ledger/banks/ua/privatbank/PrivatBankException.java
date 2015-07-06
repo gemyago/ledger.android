@@ -1,9 +1,11 @@
 package com.infora.ledger.banks.ua.privatbank;
 
+import com.infora.ledger.banks.FetchException;
+
 /**
  * Created by jenya on 24.05.15.
  */
-public class PrivatBankException extends Exception {
+public class PrivatBankException extends FetchException {
     public PrivatBankException() {
     }
 

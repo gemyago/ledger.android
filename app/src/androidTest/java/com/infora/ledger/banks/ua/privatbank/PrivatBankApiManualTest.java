@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.BankTransaction;
+import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
@@ -38,7 +39,7 @@ public class PrivatBankApiManualTest extends AndroidTestCase {
         api = new PrivatBankApi();
     }
 
-    public void testGetTransactions() throws IOException, PrivatBankException {
+    public void testGetTransactions() throws IOException, FetchException {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
         calendar.add(Calendar.DATE, -3);
