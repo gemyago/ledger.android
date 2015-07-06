@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 /**
  * Created by jenya on 23.05.15.

@@ -1,6 +1,7 @@
 package com.infora.ledger.banks;
 
 import com.infora.ledger.TransactionContract;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
 

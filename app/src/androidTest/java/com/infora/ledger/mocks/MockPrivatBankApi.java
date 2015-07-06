@@ -1,9 +1,9 @@
 package com.infora.ledger.mocks;
 
-import com.infora.ledger.banks.GetTransactionsRequest;
-import com.infora.ledger.banks.PrivatBankApi;
-import com.infora.ledger.banks.PrivatBankException;
-import com.infora.ledger.banks.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 
 import junit.framework.ComparisonFailure;
 

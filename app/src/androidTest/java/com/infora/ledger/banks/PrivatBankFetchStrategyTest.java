@@ -4,6 +4,10 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.application.banks.FetchException;
+import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankFetchStrategy;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.Entity;
 import com.infora.ledger.mocks.MockDatabaseContext;

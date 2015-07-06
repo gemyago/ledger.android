@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import android.util.Log;
 import android.util.Xml;

@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 import android.widget.EditText;
 
-import com.infora.ledger.banks.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.mocks.DummyPrivatBankLinkActivity;
 
 /**

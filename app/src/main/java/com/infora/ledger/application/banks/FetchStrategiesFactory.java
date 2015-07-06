@@ -1,7 +1,7 @@
 package com.infora.ledger.application.banks;
 
-import com.infora.ledger.banks.PrivatBankFetchStrategy;
-import com.infora.ledger.banks.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankFetchStrategy;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 
 import java.util.HashMap;
 

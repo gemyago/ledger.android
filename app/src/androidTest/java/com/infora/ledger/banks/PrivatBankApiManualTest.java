@@ -1,14 +1,16 @@
 package com.infora.ledger.banks;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
+import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.support.LogUtil;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 /**

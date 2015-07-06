@@ -1,5 +1,7 @@
 package com.infora.ledger.banks;
 
+import com.infora.ledger.banks.ua.privatbank.DefaultPrivatBankRequestSignatureBuilder;
+
 import junit.framework.TestCase;
 
 import org.apache.commons.codec.binary.Hex;

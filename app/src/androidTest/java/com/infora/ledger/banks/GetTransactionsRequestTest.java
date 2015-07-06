@@ -2,6 +2,8 @@ package com.infora.ledger.banks;
 
 import android.util.Xml;
 
+import com.infora.ledger.banks.ua.privatbank.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestSignatureBuilder;
 import com.infora.ledger.support.LogUtil;
 
 import junit.framework.TestCase;

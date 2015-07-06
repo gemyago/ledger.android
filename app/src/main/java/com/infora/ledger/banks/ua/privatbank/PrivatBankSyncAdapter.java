@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;

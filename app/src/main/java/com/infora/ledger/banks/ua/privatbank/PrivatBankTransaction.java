@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.data.BankLink;
@@ -7,7 +7,6 @@ import com.infora.ledger.data.PendingTransaction;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

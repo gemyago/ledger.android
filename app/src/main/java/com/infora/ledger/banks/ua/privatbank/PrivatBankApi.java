@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import com.infora.ledger.support.LogUtil;
 import com.squareup.okhttp.MediaType;
