@@ -1,7 +1,10 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import android.test.AndroidTestCase;
 
+import com.infora.ledger.banks.BankApi;
+import com.infora.ledger.banks.BankTransaction;
+import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;

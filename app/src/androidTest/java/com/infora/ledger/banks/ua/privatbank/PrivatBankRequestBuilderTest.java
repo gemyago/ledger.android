@@ -1,7 +1,8 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import android.util.Xml;
 
+import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestBuilder;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestSignatureBuilder;
