@@ -21,10 +21,10 @@ android {
     signingConfigs {
         release {
             def props = loadSecretProperties('release')
-            storeFile file(props.getProperty("keystore-path"))
-            storePassword props.getProperty("keystore-password")
-            keyAlias props.getProperty("keystore-key-alias")
-            keyPassword props.getProperty("keystore-key-password")
+            storeFile file(props.getProperty("keystore-path", "null"))
+            storePassword props.getProperty("keystore-password", "null")
+            keyAlias props.getProperty("keystore-key-alias", "null")
+            keyPassword props.getProperty("keystore-key-password", "null")
         }
     }
     buildTypes {
