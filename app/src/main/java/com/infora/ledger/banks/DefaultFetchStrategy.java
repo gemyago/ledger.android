@@ -76,6 +76,7 @@ public class DefaultFetchStrategy implements FetchStrategy {
             if (isTransactionExists(db, newTransaction.transactionId)) {
                 Log.d(TAG, "Transaction ignored since it has been already fetched. Timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "'.");
             } else {
+                Log.d(TAG, "Adding new transaction");
                 uow.addNew(newTransaction);
             }
         }
