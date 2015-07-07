@@ -17,9 +17,13 @@ public class UkrsibBankLinkData {
     @Override
     public String toString() {
         return "UkrsibBankLinkData{" +
-                "login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", card='" + card + '\'' +
+                "login='" + nullOrTrimmedValue(login) + '\'' +
+                ", password='" + nullOrTrimmedValue(password) + '\'' +
+                ", card='" + nullOrTrimmedValue(card) + '\'' +
                 '}';
+    }
+
+    private static String nullOrTrimmedValue(String value) {
+        return value == null ? "null" : value.charAt(0) + "......" + value.charAt(value.length());
     }
 }

@@ -38,9 +38,13 @@ public class PrivatBankLinkData {
     @Override
     public String toString() {
         return "PrivatBankLinkData{" +
-                "card='" + card + '\'' +
-                ", merchantId='" + merchantId + '\'' +
-                ", password='" + password + '\'' +
+                "card='" + nullOrTrimmedValue(card) + '\'' +
+                ", merchantId='" + nullOrTrimmedValue(merchantId) + '\'' +
+                ", password='" + nullOrTrimmedValue(password) + '\'' +
                 '}';
+    }
+
+    private static String nullOrTrimmedValue(String value) {
+        return value == null ? "null" : value.charAt(0) + "......" + value.charAt(value.length());
     }
 }
