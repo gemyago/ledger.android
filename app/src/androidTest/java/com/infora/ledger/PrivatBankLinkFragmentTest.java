@@ -5,6 +5,7 @@ import android.test.ActivityUnitTestCase;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
 
 /**
@@ -48,7 +49,7 @@ public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
 
         PrivatBankLinkData linkData = new PrivatBankLinkData("card100", "merchant-100", "merchant-100-password");
-        fragment.setBankLinkData(linkData);
+        fragment.setBankLinkData(new BankLink().setLinkData(linkData));
 
         assertEquals("merchant-100", merchantId.getText().toString());
         assertEquals("merchant-100-password", merchantPassword.getText().toString());

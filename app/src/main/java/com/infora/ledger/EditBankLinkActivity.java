@@ -5,10 +5,12 @@ import android.content.AsyncTaskLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -23,6 +25,8 @@ import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.BankLinkFragment;
+import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.sql.SQLException;
@@ -34,6 +38,7 @@ import java.util.Objects;
  * Created by jenya on 01.06.15.
  */
 public class EditBankLinkActivity extends AppCompatActivity {
+    public static final String BANK_LINK_FRAGMENT = "bank-link-fragment";
     private static final String TAG = EditBankLinkActivity.class.getName();
     private static final int LEDGER_ACCOUNTS_LOADER = 1;
     private static final int LEDGER_BANK_LINK_LOADER = 2;
@@ -41,11 +46,22 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private SimpleCursorAdapter spinnerAdapter;
     private DatabaseRepository<BankLink> bankLinksRepo;
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
-    private PrivatBankLinkFragment bankLinkFragment;
+    private BankLinkFragment bankLinkFragment;
     private Button updateButton;
     private Spinner accountsSpinner;
     private long bankLinkId;
     private Date fetchStartingFrom;
+    private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+    private EditText bic;
+
+    public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
+        return bankLinkFragmentsFactory == null ?
+                (bankLinkFragmentsFactory = BankLinkFragmentsFactory.createDefault()) : bankLinkFragmentsFactory;
+    }
+
+    public void setBankLinkFragmentsFactory(BankLinkFragmentsFactory bankLinkFragmentsFactory) {
+        this.bankLinkFragmentsFactory = bankLinkFragmentsFactory;
+    }
 
     public DatabaseRepository<BankLink> getBankLinksRepo() {
         return bankLinksRepo == null ? (bankLinksRepo = DatabaseContext.getInstance(this).createRepository(BankLink.class)) : bankLinksRepo;
@@ -81,9 +97,10 @@ public class EditBankLinkActivity extends AppCompatActivity {
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoaderCallbacks());
 
         bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
-        bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
+        bic = (EditText) findViewById(R.id.bic);
         updateButton = (Button) findViewById(R.id.action_update_bank_link);
         accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
+
     }
 
     @Override
@@ -187,8 +204,13 @@ public class EditBankLinkActivity extends AppCompatActivity {
 
             @Override
             public void onLoadFinished(Loader<BankLink> loader, BankLink data) {
-                Log.d(TAG, "Bank link data id='" + data.id + "' loaded.");
-                bankLinkFragment.setBankLinkData(data.getLinkData(PrivatBankLinkData.class));
+                Log.d(TAG, "Bank link data bic='" + data.bic + "' loaded.");
+                bic.setText(data.bic);
+                bankLinkFragment = getBankLinkFragmentsFactory().get(data.bic);
+                bankLinkFragment.setBankLinkData(data);
+                FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+                t.replace(R.id.bank_link_fragment_container, bankLinkFragment, BANK_LINK_FRAGMENT);
+                t.commit();
 
                 for (int i = 0; i < accountsSpinner.getCount(); i++) {
                     Cursor account = (Cursor) accountsSpinner.getItemAtPosition(i);

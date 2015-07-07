@@ -1,5 +1,6 @@
 package com.infora.ledger.mocks;
 
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.Callable;
  */
 public class MockBankLinkFragment extends BankLinkFragment<MockBankLinkData> {
     private MockBankLinkData mockBankLinkData;
+    public String bic;
 
     @Override
     public MockBankLinkData getBankLinkData() {
@@ -17,9 +19,8 @@ public class MockBankLinkFragment extends BankLinkFragment<MockBankLinkData> {
     }
 
     @Override
-    public void setBankLinkData(MockBankLinkData mockBankLinkData) {
-
-        this.mockBankLinkData = mockBankLinkData;
+    public void setBankLinkData(BankLink bankLink) {
+        this.mockBankLinkData = bankLink.getLinkData(MockBankLinkData.class);
     }
 
     @Override
@@ -27,12 +28,13 @@ public class MockBankLinkFragment extends BankLinkFragment<MockBankLinkData> {
         mockBankLinkData = null;
     }
 
-    public static void registerMockFragment(BankLinkFragmentsFactory factory, String bic, final MockBankLinkData data) {
+    public static void registerMockFragment(BankLinkFragmentsFactory factory, final String bic, final BankLink bankLink) {
         factory.register(bic, new Callable<BankLinkFragment>() {
             @Override
             public BankLinkFragment call() throws Exception {
                 MockBankLinkFragment fragment = new MockBankLinkFragment();
-                fragment.setBankLinkData(data);
+                fragment.bic = bic;
+                if(bankLink != null) fragment.setBankLinkData(bankLink);
                 return fragment;
             }
         });

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.infora.ledger.api.LedgerAccountDto;
@@ -18,12 +19,15 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.LedgerDbHelper;
 import com.infora.ledger.mocks.BarrierSubscriber;
+import com.infora.ledger.mocks.MockBankLinkData;
+import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.util.Arrays;
@@ -40,6 +44,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     private MockDatabaseRepository mockBankLinksRepo;
     private BankLink bankLink;
     private LedgerAccountDto selectedAccount;
+    private BankLinkFragmentsFactory fragmentsFactory;
 
     public EditBankLinkActivityTest() {
         super(EditBankLinkActivity.class);
@@ -56,10 +61,18 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
 
+        fragmentsFactory = new BankLinkFragmentsFactory();
+        MockBankLinkData bic1Data = new MockBankLinkData("login-1", "password-1");
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", null);
+
         Instrumentation instrumentation = new Instrumentation() {
             @Override
             public void callActivityOnCreate(Activity activity, Bundle icicle) {
-                ((EditBankLinkActivity)activity).setAccountsLoaderFactory(createAccountsLoaderFactory());
+                EditBankLinkActivity theActivity = (EditBankLinkActivity) activity;
+                theActivity.setAccountsLoaderFactory(createAccountsLoaderFactory());
+                theActivity.setBankLinkFragmentsFactory(fragmentsFactory);
                 super.callActivityOnCreate(activity, icicle);
             }
 
@@ -75,9 +88,9 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         selectedAccount = new LedgerAccountDto("account-1", "Account 1");
         bankLink = new BankLink()
                 .setId(332)
-                .setBic("BANK-100")
+                .setBic("bic-1")
                 .setAccountId(selectedAccount.id)
-                .setLinkData(new PrivatBankLinkData("card-100", "marchant-100", "password-100"));
+                .setLinkData(bic1Data);
         mockBankLinksRepo = new MockDatabaseRepository(BankLink.class);
         mockBankLinksRepo.entityToGetById = bankLink;
         Intent intent = new Intent();
@@ -86,16 +99,18 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         getActivity().setBankLinksRepo(mockBankLinksRepo);
     }
 
-    public void testLoadBankLink() {
+    public void testLoadBankLinkAndAssignFragment() {
         BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> loadedSubscriber = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
         bus.register(loadedSubscriber);
         getInstrumentation().callActivityOnStart(getActivity());
         loadedSubscriber.await();
+        getActivity().getSupportFragmentManager().executePendingTransactions();
 
-        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
-        PrivatBankLinkData bankLinkData = bankLinkFragment.getBankLinkData();
-        assertEquals(bankLink.getLinkData(PrivatBankLinkData.class), bankLinkData);
+        MockBankLinkFragment bankLinkFragment = (MockBankLinkFragment) getActivity()
+                .getSupportFragmentManager().findFragmentByTag(EditBankLinkActivity.BANK_LINK_FRAGMENT);
+        MockBankLinkData bankLinkData = bankLinkFragment.getBankLinkData();
+        assertEquals(bankLink.getLinkData(MockBankLinkData.class), bankLinkData);
+        assertEquals(bankLink.bic, ((EditText) getActivity().findViewById(R.id.bic)).getText().toString());
     }
 
     public void testLoadAndSelectAccount() {
@@ -118,17 +133,18 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
 
     public void testUpdateBankLink() {
         getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
-        BarrierSubscriber<EditBankLinkActivity.AccountsLoaded> accountsBarrier = new BarrierSubscriber<>(EditBankLinkActivity.AccountsLoaded.class);
-        bus.register(accountsBarrier);
+        BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> bankLinkBarrier = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
+        bus.register(bankLinkBarrier);
         LogUtil.d(this, "Calling activity onStart");
         getInstrumentation().callActivityOnStart(getActivity());
-        accountsBarrier.await();
+        bankLinkBarrier.await();
+        getActivity().getSupportFragmentManager().executePendingTransactions();
 
-        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
+        MockBankLinkFragment bankLinkFragment = (MockBankLinkFragment) getActivity()
+                .getSupportFragmentManager().findFragmentByTag(EditBankLinkActivity.BANK_LINK_FRAGMENT);
 
-        PrivatBankLinkData newLinkData = new PrivatBankLinkData("new-card-100", "new-merchant-100", "new-password-100");
-        bankLinkFragment.setBankLinkData(newLinkData);
+        MockBankLinkData newLinkData = new MockBankLinkData("new-login-100", "new-password-100");
+        bankLinkFragment.setBankLinkData(new BankLink().setLinkData(newLinkData));
         Spinner accountsSpinner = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
         accountsSpinner.setSelection(2);
 

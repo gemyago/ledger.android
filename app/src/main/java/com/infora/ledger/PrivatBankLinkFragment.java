@@ -2,13 +2,13 @@ package com.infora.ledger;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
 
 /**
@@ -31,7 +31,8 @@ public class PrivatBankLinkFragment extends BankLinkFragment<PrivatBankLinkData>
     }
 
     @Override
-    public void setBankLinkData(PrivatBankLinkData linkData) {
+    public void setBankLinkData(BankLink bankLink) {
+        PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class);
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
         EditText card = (EditText) getView().findViewById(R.id.privat_bank_card_number);

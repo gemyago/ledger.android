@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
 
 /**
@@ -26,7 +27,7 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
     }
 
     @Override
-    public void setBankLinkData(UkrsibBankLinkData linkData) {
+    public void setBankLinkData(BankLink bankLink) {
 
     }
 

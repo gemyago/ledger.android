@@ -1,20 +1,18 @@
 package com.infora.ledger.application.commands;
 
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-
 import java.util.Date;
 
 /**
  * Created by jenya on 03.06.15.
  */
-public class UpdateBankLinkCommand {
+public class UpdateBankLinkCommand<TLinkData> {
     public int id;
     public String accountId;
     public String accountName;
-    public PrivatBankLinkData bankLinkData;
+    public TLinkData bankLinkData;
     public Date fetchStartingFrom;
 
-    public UpdateBankLinkCommand(int id, String accountId, String accountName, PrivatBankLinkData bankLinkData) {
+    public UpdateBankLinkCommand(int id, String accountId, String accountName, TLinkData bankLinkData) {
         this.id = id;
         this.accountId = accountId;
         this.accountName = accountName;

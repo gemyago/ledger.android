@@ -24,6 +24,7 @@ import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockBankLinkFragment;
@@ -66,9 +67,9 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         final Context baseContext = getInstrumentation().getTargetContext();
 
         fragmentsFactory = new BankLinkFragmentsFactory();
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new MockBankLinkData("login-1", "password-1"));
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new MockBankLinkData("login-2", "password-2"));
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new MockBankLinkData("login-3", "password-3"));
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new BankLink().setLinkData(new MockBankLinkData("login-1", "password-1")));
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new BankLink().setLinkData(new MockBankLinkData("login-2", "password-2")));
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new BankLink().setLinkData(new MockBankLinkData("login-3", "password-3")));
 
         Instrumentation instrumentation = new Instrumentation() {
             @Override

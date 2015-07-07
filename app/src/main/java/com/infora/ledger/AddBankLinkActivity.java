@@ -39,6 +39,7 @@ import java.util.Set;
 public class AddBankLinkActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = AddBankLinkActivity.class.getName();
     private static final int LEDGER_ACCOUNTS_LOADER = 1;
+    public static final String BANK_LINK_FRAGMENT = "bank-link-fragment";
 
     private SimpleCursorAdapter accountsAdapter;
 
@@ -140,7 +141,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     private <TFragment extends BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         if (fragment == null) {
-            Fragment oldFragment = getSupportFragmentManager().findFragmentByTag("bank-link-fragment");
+            Fragment oldFragment = getSupportFragmentManager().findFragmentByTag(BANK_LINK_FRAGMENT);
             if (oldFragment != null) t.remove(oldFragment);
         } else {
             t.replace(R.id.bank_link_fragment_container, fragment, "bank-link-fragment");

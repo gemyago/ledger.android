@@ -8,17 +8,34 @@
     android:layout_marginBottom="16dp"
     android:orientation="vertical">
 
+    <TextView
+        android:text="Ledger Account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <Spinner
         android:hint="Ledger Account"
         android:id="@+id/ledger_account_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></Spinner>
 
-    <fragment
-        android:id="@+id/bank_link_fragment_container"
-        android:name="com.infora.ledger.PrivatBankLinkFragment"
+    <TextView
+        android:text="Bank"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></fragment>
+        android:layout_height="wrap_content" />
+    <EditText
+        android:hint="Bic"
+        android:id="@+id/bic"
+        android:enabled="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></EditText>
+
+    <LinearLayout
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/bank_link_fragment_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></LinearLayout>
 
     <Button
         android:layout_width="match_parent"
