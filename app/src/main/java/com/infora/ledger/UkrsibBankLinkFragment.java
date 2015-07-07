@@ -2,20 +2,17 @@ package com.infora.ledger;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-import com.infora.ledger.banks.ua.urksibbank.UrksibBankLinkData;
+import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
 import com.infora.ledger.ui.BankLinkFragment;
 
 /**
  * Created by jenya on 01.06.15.
  */
-public class UkrsibBankLinkFragment extends BankLinkFragment<UrksibBankLinkData> {
+public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData> {
 
     @Nullable
     @Override
@@ -24,12 +21,12 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UrksibBankLinkData>
     }
 
     @Override
-    public UrksibBankLinkData getBankLinkData() {
+    public UkrsibBankLinkData getBankLinkData() {
         return null;
     }
 
     @Override
-    public void setBankLinkData(UrksibBankLinkData linkData) {
+    public void setBankLinkData(UkrsibBankLinkData linkData) {
 
     }
 

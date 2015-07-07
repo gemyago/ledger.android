@@ -7,7 +7,7 @@ import com.infora.ledger.data.PendingTransaction;
 /**
  * Created by jenya on 06.07.15.
  */
-public class UrksibBankTransaction implements BankTransaction {
+public class UkrsibBankTransaction implements BankTransaction {
     //http://www.theswiftcodes.com/ukraine/khabua2k/
     public static final String BIC = "KHABUA2K";
 

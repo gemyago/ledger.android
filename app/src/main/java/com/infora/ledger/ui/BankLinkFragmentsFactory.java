@@ -3,7 +3,7 @@ package com.infora.ledger.ui;
 import com.infora.ledger.PrivatBankLinkFragment;
 import com.infora.ledger.UkrsibBankLinkFragment;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
-import com.infora.ledger.banks.ua.urksibbank.UrksibBankTransaction;
+import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class BankLinkFragmentsFactory {
                         return new PrivatBankLinkFragment();
                     }
                 })
-                .register(UrksibBankTransaction.BIC, new Callable<BankLinkFragment>() {
+                .register(UkrsibBankTransaction.BIC, new Callable<BankLinkFragment>() {
                     @Override
                     public BankLinkFragment call() throws Exception {
                         return new UkrsibBankLinkFragment();
