@@ -3,14 +3,14 @@ package com.infora.ledger.mocks;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
-import com.infora.ledger.PrivatBankLinkFragment;
+import com.infora.ledger.ui.BankLinkFragment;
 
 /**
  * Created by jenya on 04.07.15.
  */
 public class DummyBankLinkFragmentTestActivity extends FragmentActivity {
 
-    public PrivatBankLinkFragment fragment;
+    public BankLinkFragment fragment;
 
     @Override
     protected void onStart() {

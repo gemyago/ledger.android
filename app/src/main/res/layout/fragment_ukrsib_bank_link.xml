@@ -8,19 +8,19 @@
         android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/urksib_bank_login"
+        android:id="@+id/ukrsib_bank_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Login" />
 
     <EditText
-        android:id="@+id/urksib_bank_password"
+        android:id="@+id/ukrsib_bank_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password" />
 
     <EditText
-        android:id="@+id/urksib_bank_card_number"
+        android:id="@+id/ukrsib_bank_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Card Number" />
