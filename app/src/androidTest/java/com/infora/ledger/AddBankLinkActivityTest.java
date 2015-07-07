@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,6 +78,33 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date now = new Date();
         assertEquals(dateOnlyFormat.format(now), dateOnlyFormat.format(getActivity().getInitialFetchDate()));
+    }
+
+    public void testAddBankLinkNoBankSelected() {
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        bic.setSelection(0);
+
+        MockSubscriber<AddBankLinkCommand> addHandler = new MockSubscriber<>(AddBankLinkCommand.class);
+        bus.register(addHandler);
+
+        getActivity().addBankLink(null);
+
+        assertEquals(0, addHandler.getEvents().size());
+    }
+
+    public void testAddBankLinkNoAccountSelected() {
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        bic.setSelection(1);
+
+        Spinner ledgerAccountId = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
+        populateLedgerAccounts(ledgerAccountId, new LedgerAccountDto(null, "Please select..."), new LedgerAccountDto("a-1", "Account 1"), new LedgerAccountDto("a-2", "Account 2"));
+
+        MockSubscriber<AddBankLinkCommand> addHandler = new MockSubscriber<>(AddBankLinkCommand.class);
+        bus.register(addHandler);
+
+        getActivity().addBankLink(null);
+
+        assertEquals(0, addHandler.getEvents().size());
     }
 
     public void testAddBankLink() {

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,10 +21,8 @@ import android.widget.Toast;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.banks.ua.urksibbank.UrksibBankTransaction;
-import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
@@ -125,7 +122,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         if (fragment == null) {
             Fragment oldFragment = getSupportFragmentManager().findFragmentByTag("bank-link-fragment");
-            if(oldFragment != null) t.remove(oldFragment);
+            if (oldFragment != null) t.remove(oldFragment);
         } else {
             t.replace(R.id.bank_link_fragment_container, fragment, "bank-link-fragment");
         }
@@ -147,10 +144,24 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
     public void addBankLink(View view) {
         AddBankLinkCommand command = new AddBankLinkCommand<>();
+
         Cursor selectedAccount = (Cursor) ledgerAccountId.getSelectedItem();
-        command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
-        command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
-        command.bic = PrivatBankTransaction.PRIVATBANK_BIC;
+        if (selectedAccount != null) {
+            command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
+            command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
+        }
+
+        if (command.accountId == null) {
+            Toast.makeText(this, "Please select account", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        command.bic = (String) bic.getSelectedItem();
+        if (command.bic.isEmpty()) {
+            Toast.makeText(this, "Please select bank", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         command.initialFetchDate = initialFetchDate;
         command.linkData = bankLinkFragment.getBankLinkData();
         addButton.setEnabled(false);
