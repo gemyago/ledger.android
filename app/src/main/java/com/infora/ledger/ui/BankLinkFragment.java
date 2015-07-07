@@ -1,14 +1,14 @@
 package com.infora.ledger.ui;
 
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import android.support.v4.app.Fragment;
 
 /**
  * Created by mye on 7/7/2015.
  */
-public interface BankLinkFragment<TLinkData> {
-    TLinkData getBankLinkData();
+public abstract class BankLinkFragment<TLinkData> extends Fragment {
+    public abstract TLinkData getBankLinkData();
 
-    void setBankLinkData(TLinkData linkData);
+    public abstract void setBankLinkData(TLinkData linkData);
 
-    void clearLinkData();
+    public abstract void clearLinkData();
 }

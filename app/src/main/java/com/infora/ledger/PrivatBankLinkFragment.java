@@ -14,7 +14,7 @@ import com.infora.ledger.ui.BankLinkFragment;
 /**
  * Created by jenya on 01.06.15.
  */
-public class PrivatBankLinkFragment extends Fragment implements BankLinkFragment<PrivatBankLinkData> {
+public class PrivatBankLinkFragment extends BankLinkFragment<PrivatBankLinkData> {
 
     @Nullable
     @Override

@@ -8,10 +8,12 @@ import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.infora.ledger.api.LedgerAccountDto;
@@ -21,15 +23,19 @@ import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
+import com.infora.ledger.mocks.MockBankLinkData;
+import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockLedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
@@ -39,6 +45,7 @@ import de.greenrobot.event.EventBus;
 public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<AddBankLinkActivity> {
 
     private EventBus bus;
+    private BankLinkFragmentsFactory fragmentsFactory;
 
     public AddBankLinkActivityTest() {
         super(AddBankLinkActivity.class);
@@ -55,10 +62,17 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
 
+        fragmentsFactory = new BankLinkFragmentsFactory();
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new MockBankLinkData("login-1", "password-1"));
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new MockBankLinkData("login-2", "password-2"));
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new MockBankLinkData("login-3", "password-3"));
+
         Instrumentation instrumentation = new Instrumentation() {
             @Override
             public void callActivityOnCreate(Activity activity, Bundle icicle) {
-                ((AddBankLinkActivity)activity).setAccountsLoaderFactory(createAccountsLoaderFactory());
+                AddBankLinkActivity addActivity = (AddBankLinkActivity) activity;
+                addActivity.setAccountsLoaderFactory(createAccountsLoaderFactory());
+                addActivity.setBankLinkFragmentsFactory(fragmentsFactory);
                 super.callActivityOnCreate(activity, icicle);
             }
 
@@ -105,6 +119,17 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         getActivity().addBankLink(null);
 
         assertEquals(0, addHandler.getEvents().size());
+    }
+
+    public void testPopulateBankLinks() {
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) bic.getAdapter();
+        Set<String> knownBics = fragmentsFactory.knownBics();
+        assertEquals(knownBics.size() + 1, adapter.getCount());
+        assertEquals("", adapter.getItem(0));
+        for (int i = 1; i < adapter.getCount() ; i++) {
+             assertTrue(knownBics.contains(adapter.getItem(i)));
+        }
     }
 
     public void testAddBankLink() {

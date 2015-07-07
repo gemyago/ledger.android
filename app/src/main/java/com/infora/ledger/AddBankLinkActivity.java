@@ -27,11 +27,14 @@ import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragment;
+import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Created by jenya on 31.05.15.
@@ -50,6 +53,16 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     private LinearLayout bankLinkFragmentContainer;
     private Button addButton;
     private TextView initialFetchDateText;
+    private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+
+    public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
+        return bankLinkFragmentsFactory == null ?
+                (bankLinkFragmentsFactory = BankLinkFragmentsFactory.createDefault()) : bankLinkFragmentsFactory;
+    }
+
+    public void setBankLinkFragmentsFactory(BankLinkFragmentsFactory bankLinkFragmentsFactory) {
+        this.bankLinkFragmentsFactory = bankLinkFragmentsFactory;
+    }
 
     private LedgerAccountsLoader.Factory getAccountsLoaderFactory() {
         return accountsLoaderFactory == null ?
@@ -77,28 +90,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         addButton = (Button) findViewById(R.id.action_add_bank_link);
         initialFetchDateText = (TextView) findViewById(R.id.initial_fetch_date);
 
-        final ArrayAdapter<CharSequence> bicAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, new String[]{
-                "", PrivatBankTransaction.PRIVATBANK_BIC, UrksibBankTransaction.BIC
-        });
-        bic.setAdapter(bicAdapter);
-        bic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                CharSequence bic = bicAdapter.getItem(i);
-                if (bic == PrivatBankTransaction.PRIVATBANK_BIC) {
-                    setBankLinkFragment(new PrivatBankLinkFragment());
-                } else if (bic == UrksibBankTransaction.BIC) {
-                    setBankLinkFragment(new UkrsibBankLinkFragment());
-                } else {
-                    setBankLinkFragment(null);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                setBankLinkFragment(null);
-            }
-        });
+        initBanksSpinner(bic);
 
         accountsAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_spinner_item,
@@ -118,7 +110,36 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         initialFetchDateText.setText(DateFormat.getDateInstance().format(initialFetchDate));
     }
 
-    private <TFragment extends Fragment & BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
+    private void initBanksSpinner(Spinner bicsSpinner) {
+        BankLinkFragmentsFactory fragmentsFactory = getBankLinkFragmentsFactory();
+        Set<String> knownBicsSet = fragmentsFactory.knownBics();
+        String[] knownBics = new String[knownBicsSet.size()];
+        knownBicsSet.toArray(knownBics);
+        String[] bicItems = new String[knownBicsSet.size() + 1];
+        bicItems[0] = "";
+        System.arraycopy(knownBics, 0, bicItems, 1, knownBics.length);
+
+        final ArrayAdapter<CharSequence> bicAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, bicItems);
+        bicsSpinner.setAdapter(bicAdapter);
+        bicsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedBic = bicAdapter.getItem(i).toString();
+                if (getBankLinkFragmentsFactory().isKnown(selectedBic)) {
+                    setBankLinkFragment(getBankLinkFragmentsFactory().get(selectedBic));
+                } else {
+                    setBankLinkFragment(null);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                setBankLinkFragment(null);
+            }
+        });
+    }
+
+    private <TFragment extends BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         if (fragment == null) {
             Fragment oldFragment = getSupportFragmentManager().findFragmentByTag("bank-link-fragment");
