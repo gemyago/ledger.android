@@ -3,23 +3,24 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:text="Privat Bank Link"
+        android:text="Urksib Bank Link"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <EditText
-        android:id="@+id/privat_bank_merchant_id"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Merchant Id" />
 
     <EditText
-        android:id="@+id/privat_bank_merchant_password"
+        android:id="@+id/urksib_bank_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Merchant Password" />
+        android:hint="Login" />
 
     <EditText
-        android:id="@+id/privat_bank_card_number"
+        android:id="@+id/urksib_bank_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password" />
+
+    <EditText
+        android:id="@+id/urksib_bank_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Card Number" />

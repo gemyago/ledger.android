@@ -23,7 +23,7 @@ public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyPrivat
     }
 
     private PrivatBankLinkFragment getFragment() {
-        return (PrivatBankLinkFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+        return (PrivatBankLinkFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
     }
 
     public void testGetBankLinkData() {

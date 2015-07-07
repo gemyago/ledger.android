@@ -4,10 +4,16 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -18,9 +24,12 @@ import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.urksibbank.UrksibBankTransaction;
+import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
@@ -34,12 +43,14 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     private static final String TAG = AddBankLinkActivity.class.getName();
     private static final int LEDGER_ACCOUNTS_LOADER = 1;
 
-    private SimpleCursorAdapter spinnerAdapter;
+    private SimpleCursorAdapter accountsAdapter;
 
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private Date initialFetchDate;
+    private Spinner bic;
     private Spinner ledgerAccountId;
-    private PrivatBankLinkFragment bankLinkFragment;
+    private BankLinkFragment bankLinkFragment;
+    private LinearLayout bankLinkFragmentContainer;
     private Button addButton;
     private TextView initialFetchDateText;
 
@@ -63,19 +74,43 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         setContentView(R.layout.activity_add_bank_link);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        bic = (Spinner) findViewById(R.id.bic);
         ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+        bankLinkFragmentContainer = (LinearLayout) findViewById(R.id.bank_link_fragment_container);
         addButton = (Button) findViewById(R.id.action_add_bank_link);
         initialFetchDateText = (TextView) findViewById(R.id.initial_fetch_date);
 
-        spinnerAdapter = new SimpleCursorAdapter(this,
+        final ArrayAdapter<CharSequence> bicAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, new String[]{
+                "", PrivatBankTransaction.PRIVATBANK_BIC, UrksibBankTransaction.BIC
+        });
+        bic.setAdapter(bicAdapter);
+        bic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                CharSequence bic = bicAdapter.getItem(i);
+                if (bic == PrivatBankTransaction.PRIVATBANK_BIC) {
+                    setBankLinkFragment(new PrivatBankLinkFragment());
+                } else if (bic == UrksibBankTransaction.BIC) {
+                    setBankLinkFragment(new UkrsibBankLinkFragment());
+                } else {
+                    setBankLinkFragment(null);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                setBankLinkFragment(null);
+            }
+        });
+
+        accountsAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_spinner_item,
                 null,
                 new String[]{LedgerAccountsLoader.COLUMN_NAME},
                 new int[]{android.R.id.text1},
                 0);
         LogUtil.d(this, "assigning adapter");
-        ledgerAccountId.setAdapter(spinnerAdapter);
+        ledgerAccountId.setAdapter(accountsAdapter);
         LogUtil.d(this, "initializing loader");
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, this);
         Calendar c = Calendar.getInstance();
@@ -84,6 +119,18 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
         c.set(Calendar.SECOND, 0);
         initialFetchDate = c.getTime();
         initialFetchDateText.setText(DateFormat.getDateInstance().format(initialFetchDate));
+    }
+
+    private <TFragment extends Fragment & BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        if (fragment == null) {
+            Fragment oldFragment = getSupportFragmentManager().findFragmentByTag("bank-link-fragment");
+            if(oldFragment != null) t.remove(oldFragment);
+        } else {
+            t.replace(R.id.bank_link_fragment_container, fragment, "bank-link-fragment");
+        }
+        t.commit();
+        bankLinkFragment = fragment;
     }
 
     @Override
@@ -99,7 +146,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     }
 
     public void addBankLink(View view) {
-        AddBankLinkCommand<PrivatBankLinkData> command = new AddBankLinkCommand<>();
+        AddBankLinkCommand command = new AddBankLinkCommand<>();
         Cursor selectedAccount = (Cursor) ledgerAccountId.getSelectedItem();
         command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
         command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
@@ -120,7 +167,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     public void onEventMainThread(BankLinkAdded event) {
         Log.d(TAG, "Bank link created. Resetting UI.");
 
-        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
         Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
         Button addButton = (Button) findViewById(R.id.action_add_bank_link);
 
@@ -154,11 +201,11 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         LogUtil.d(AddBankLinkActivity.this, "Loading finished");
-        spinnerAdapter.swapCursor(data);
+        accountsAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        spinnerAdapter.swapCursor(null);
+        accountsAdapter.swapCursor(null);
     }
 }

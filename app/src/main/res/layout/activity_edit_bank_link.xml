@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"></Spinner>
 
     <fragment
-        android:id="@+id/bank_link_fragment"
+        android:id="@+id/bank_link_fragment_container"
         android:name="com.infora.ledger.PrivatBankLinkFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></fragment>

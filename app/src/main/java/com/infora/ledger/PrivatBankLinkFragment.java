@@ -9,11 +9,12 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.ui.BankLinkFragment;
 
 /**
  * Created by jenya on 01.06.15.
  */
-public class PrivatBankLinkFragment extends Fragment {
+public class PrivatBankLinkFragment extends Fragment implements BankLinkFragment<PrivatBankLinkData> {
 
     @Nullable
     @Override
@@ -21,6 +22,7 @@ public class PrivatBankLinkFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_privat_bank_link, container, false);
     }
 
+    @Override
     public PrivatBankLinkData getBankLinkData() {
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
@@ -28,6 +30,7 @@ public class PrivatBankLinkFragment extends Fragment {
         return new PrivatBankLinkData(card.getText().toString(), merchantId.getText().toString(), merchantPassword.getText().toString());
     }
 
+    @Override
     public void setBankLinkData(PrivatBankLinkData linkData) {
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
@@ -37,6 +40,7 @@ public class PrivatBankLinkFragment extends Fragment {
         card.setText(linkData.card);
     }
 
+    @Override
     public void clearLinkData() {
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);

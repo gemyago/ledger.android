@@ -93,7 +93,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         loadedSubscriber.await();
 
         PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
         PrivatBankLinkData bankLinkData = bankLinkFragment.getBankLinkData();
         assertEquals(bankLink.getLinkData(PrivatBankLinkData.class), bankLinkData);
     }
@@ -125,7 +125,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         accountsBarrier.await();
 
         PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+                .getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
 
         PrivatBankLinkData newLinkData = new PrivatBankLinkData("new-card-100", "new-merchant-100", "new-password-100");
         bankLinkFragment.setBankLinkData(newLinkData);

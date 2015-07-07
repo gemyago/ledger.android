@@ -81,7 +81,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoaderCallbacks());
 
         bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
-        bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment);
+        bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
         updateButton = (Button) findViewById(R.id.action_update_bank_link);
         accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
     }
