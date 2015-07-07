@@ -1,4 +1,6 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
+
+import com.infora.ledger.banks.ua.privatbank.DefaultPrivatBankRequestSignatureBuilder;
 
 import junit.framework.TestCase;
 

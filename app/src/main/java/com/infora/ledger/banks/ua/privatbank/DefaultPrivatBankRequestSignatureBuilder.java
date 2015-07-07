@@ -1,4 +1,4 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

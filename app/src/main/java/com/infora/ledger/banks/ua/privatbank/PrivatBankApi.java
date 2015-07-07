@@ -1,5 +1,6 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
 
+import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.support.LogUtil;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -13,20 +14,23 @@ import java.util.List;
 /**
  * Created by jenya on 23.05.15.
  */
-public class PrivatBankApi {
+public class PrivatBankApi implements com.infora.ledger.banks.BankApi<PrivatBankTransaction> {
     private static final String API_URL = "http://pbanua2x-api.my-ledger.com/p24api/rest_fiz";
     private final OkHttpClient client;
     private final PrivatBankResponseParser responseParser;
+    private final PrivatBankRequestBuilder requestBuilder;
     private MediaType XML = MediaType.parse("application/xml");
 
     public PrivatBankApi() {
         client = new OkHttpClient();
         responseParser = new PrivatBankResponseParser();
+        requestBuilder = new PrivatBankRequestBuilder();
     }
 
+    @Override
     public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, PrivatBankException {
         LogUtil.d(this, "Fetching privatbank transactions...");
-        RequestBody body = RequestBody.create(XML, request.toXml());
+        RequestBody body = RequestBody.create(XML, requestBuilder.build(request));
         Request httpRequest = new Request.Builder().url(API_URL).post(body).build();
         Response httpResponse = client.newCall(httpRequest).execute();
         LogUtil.d(this, "Data fetched with status: " + httpResponse.code() + ".");

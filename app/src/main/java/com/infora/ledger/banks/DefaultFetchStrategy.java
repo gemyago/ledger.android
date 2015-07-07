@@ -2,8 +2,7 @@ package com.infora.ledger.banks;
 
 import android.util.Log;
 
-import com.infora.ledger.application.banks.FetchException;
-import com.infora.ledger.application.banks.FetchStrategy;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.PendingTransaction;
@@ -20,16 +19,12 @@ import java.util.List;
 /**
  * Created by jenya on 07.06.15.
  */
-public class PrivatBankFetchStrategy extends FetchStrategy {
-    private static final String TAG = PrivatBankFetchStrategy.class.getName();
+public class DefaultFetchStrategy implements FetchStrategy {
+    private static final String TAG = DefaultFetchStrategy.class.getName();
 
-    private PrivatBankApi api;
+    private final BankApi api;
 
-    public PrivatBankApi getApi() {
-        return api == null ? (api = new PrivatBankApi()) : api;
-    }
-
-    public void setApi(PrivatBankApi api) {
+    public DefaultFetchStrategy(BankApi api) {
         this.api = api;
     }
 
@@ -47,7 +42,6 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             throw new FetchException(e);
         }
 
-        PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class);
         Date lastSyncDate = bankLink.lastSyncDate;
         Date startDate;
         Date now = SystemDate.now();
@@ -61,17 +55,14 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
             startDate = startDateCal.getTime();
         }
 
-        GetTransactionsRequest apiRequest = new GetTransactionsRequest(linkData.card, linkData.merchantId, linkData.password, startDate, now);
-        List<PrivatBankTransaction> bankTransactions;
+        GetTransactionsRequest apiRequest = new GetTransactionsRequest(bankLink, startDate, now);
+        List<BankTransaction> bankTransactions;
         try {
-            Log.d(TAG, "Fetching pb transactions using api. Date from: " + apiRequest.startDate + ", Date to: " + apiRequest.endDate);
-            bankTransactions = getApi().getTransactions(apiRequest);
+            Log.d(TAG, "Fetching transactions using api. Date from: " + apiRequest.startDate + ", Date to: " + apiRequest.endDate);
+            bankTransactions = api.getTransactions(apiRequest);
             Log.d(TAG, "Fetched " + bankTransactions.size() + " transactions.");
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to get pb transactions", e);
-            throw new FetchException(e);
-        } catch (PrivatBankException e) {
-            Log.e(TAG, "Failed to get pb transactions", e);
+        } catch (IOException | PrivatBankException e) {
+            Log.e(TAG, "Failed to fetch transactions", e);
             throw new FetchException(e);
         }
 
@@ -79,12 +70,13 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         uow.attach(bankLink);
 
         Log.d(TAG, "Adding new transactions...");
-        for (PrivatBankTransaction bankTransaction : bankTransactions) {
+        for (BankTransaction bankTransaction : bankTransactions) {
             PendingTransaction newTransaction = bankTransaction.toPendingTransaction(bankLink);
             Log.d(TAG, "Checking if transaction '" + newTransaction.transactionId + "' exists.");
-            if (isTransactionExists(db, newTransaction)) {
+            if (isTransactionExists(db, newTransaction.transactionId)) {
                 Log.d(TAG, "Transaction ignored since it has been already fetched. Timestamp='" + newTransaction.timestamp + "', amount='" + newTransaction.amount + "'.");
             } else {
+                Log.d(TAG, "Adding new transaction");
                 uow.addNew(newTransaction);
             }
         }
@@ -101,9 +93,9 @@ public class PrivatBankFetchStrategy extends FetchStrategy {
         }
     }
 
-    private boolean isTransactionExists(DatabaseContext db, PendingTransaction newTransaction) throws FetchException {
+    private boolean isTransactionExists(DatabaseContext db, String transactionId) throws FetchException {
         try {
-            return db.getTransactionsReadModel().isTransactionExists(newTransaction.transactionId);
+            return db.getTransactionsReadModel().isTransactionExists(transactionId);
         } catch (SQLException e) {
             throw new FetchException(e);
         }

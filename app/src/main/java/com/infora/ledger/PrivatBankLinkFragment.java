@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.infora.ledger.banks.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 
 /**
  * Created by jenya on 01.06.15.

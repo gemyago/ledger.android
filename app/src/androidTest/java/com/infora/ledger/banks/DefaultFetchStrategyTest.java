@@ -3,7 +3,8 @@ package com.infora.ledger.banks;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
-import com.infora.ledger.application.banks.FetchException;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.Entity;
 import com.infora.ledger.mocks.MockDatabaseContext;
@@ -18,9 +19,9 @@ import java.util.Date;
 /**
  * Created by jenya on 09.06.15.
  */
-public class PrivatBankFetchStrategyTest extends AndroidTestCase {
+public class DefaultFetchStrategyTest extends AndroidTestCase {
 
-    private PrivatBankFetchStrategy subject;
+    private DefaultFetchStrategy subject;
     private MockDatabaseContext mockDb;
     private BankLink bankLink;
     private PrivatBankLinkData linkData;
@@ -30,9 +31,8 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        subject = new PrivatBankFetchStrategy();
         mockApi = new MockPrivatBankApi();
-        subject.setApi(mockApi);
+        subject = new DefaultFetchStrategy(mockApi);
         mockDb = new MockDatabaseContext();
         now = SystemDate.setNow(TestHelper.randomDate());
 
@@ -51,8 +51,7 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
         dateFrom.setTime(bankLink.lastSyncDate);
         dateFrom.add(Calendar.DAY_OF_MONTH, 1);
 
-        mockApi.expectedGetTransactionsRequest = new GetTransactionsRequest(
-                linkData.card, linkData.merchantId, linkData.password, dateFrom.getTime(), now);
+        mockApi.expectedGetTransactionsRequest = new GetTransactionsRequest(bankLink, dateFrom.getTime(), now);
     }
 
     @Override
@@ -98,14 +97,14 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = Dates.startOfDay(now);
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final PrivatBankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final PrivatBankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:24")
@@ -113,8 +112,8 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
 
-        mockApi.privatBankTransactions.add(t1);
-        mockApi.privatBankTransactions.add(t2);
+        mockApi.bankTransactions.add(t1);
+        mockApi.bankTransactions.add(t2);
 
         mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
         MockUnitOfWork.Hook hook2 = new MockUnitOfWork.Hook() {
@@ -137,14 +136,14 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final PrivatBankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final PrivatBankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")
@@ -152,8 +151,8 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
 
-        mockApi.privatBankTransactions.add(t1);
-        mockApi.privatBankTransactions.add(t2);
+        mockApi.bankTransactions.add(t1);
+        mockApi.bankTransactions.add(t2);
 
         mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
         MockUnitOfWork.Hook hook2 = new MockUnitOfWork.Hook() {
@@ -179,14 +178,14 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final PrivatBankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final PrivatBankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new PrivatBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")
@@ -194,8 +193,8 @@ public class PrivatBankFetchStrategyTest extends AndroidTestCase {
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
 
-        mockApi.privatBankTransactions.add(t1);
-        mockApi.privatBankTransactions.add(t2);
+        mockApi.bankTransactions.add(t1);
+        mockApi.bankTransactions.add(t2);
 
         mockDb.mockTransactionsReadModel.injectAnd(t1.toPendingTransaction(bankLink))
                 .injectAnd(t2.toPendingTransaction(bankLink));

@@ -1,6 +1,6 @@
 package com.infora.ledger.application.commands;
 
-import com.infora.ledger.banks.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 
 import java.util.Date;
 

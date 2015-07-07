@@ -3,7 +3,7 @@ package com.infora.ledger.application;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
-import com.infora.ledger.application.banks.FetchException;
+import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
@@ -15,7 +15,7 @@ import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
-import com.infora.ledger.banks.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;

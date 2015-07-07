@@ -1,4 +1,8 @@
-package com.infora.ledger.banks;
+package com.infora.ledger.banks.ua.privatbank;
+
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankResponseParser;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 
 import junit.framework.TestCase;
 

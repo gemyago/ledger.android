@@ -17,18 +17,16 @@ import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
-import com.infora.ledger.banks.PrivatBankLinkData;
-import com.infora.ledger.banks.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerAccountsLoader;
-import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 

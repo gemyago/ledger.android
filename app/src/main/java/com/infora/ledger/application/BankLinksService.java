@@ -2,9 +2,9 @@ package com.infora.ledger.application;
 
 import android.util.Log;
 
-import com.infora.ledger.application.banks.FetchException;
-import com.infora.ledger.application.banks.FetchStrategiesFactory;
-import com.infora.ledger.application.banks.FetchStrategy;
+import com.infora.ledger.banks.FetchException;
+import com.infora.ledger.banks.FetchStrategiesFactory;
+import com.infora.ledger.banks.FetchStrategy;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
@@ -19,9 +19,7 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
-import com.infora.ledger.data.UnitOfWork;
 import com.infora.ledger.support.Dates;
-import com.infora.ledger.support.SystemDate;
 
 import java.sql.SQLException;
 import java.util.Arrays;
