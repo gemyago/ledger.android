@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -28,6 +30,7 @@ import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockLedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
@@ -132,19 +135,39 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         }
     }
 
+    public void testSelectBankLinkShouldInjectCorrespondingFragment() {
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        bic.setSelection(1);
+        bic.getOnItemSelectedListener().onItemSelected(null, null, 1, 1);
+        LogUtil.d(this, "BIC item selection set to 1.");
+        String selectedBic = (String) bic.getAdapter().getItem(1);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        fragmentManager.executePendingTransactions();
+        MockBankLinkFragment fragment = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
+        assertSame(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
+
+        bic.setSelection(2);
+        bic.getOnItemSelectedListener().onItemSelected(null, null, 2, 2);
+        fragmentManager.executePendingTransactions();
+        LogUtil.d(this, "BIC item selection set to 2.");
+        selectedBic = (String) bic.getAdapter().getItem(2);
+        fragment = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
+        assertSame(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
+    }
+
     public void testAddBankLink() {
-        Window wnd = getActivity().getWindow();
-        Spinner ledgerAccountId = (Spinner) wnd.findViewById(R.id.ledger_account_id);
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        bic.setSelection(1);
+        bic.getOnItemSelectedListener().onItemSelected(null, null, 1, 1);
+        String selectedBic = (String) bic.getAdapter().getItem(1);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        fragmentManager.executePendingTransactions();
+
+        Spinner ledgerAccountId = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
         populateLedgerAccounts(ledgerAccountId, new LedgerAccountDto("a-1", "Account 1"), new LedgerAccountDto("a-2", "Account 2"));
         ledgerAccountId.setSelection(2);
-        EditText merchantId = (EditText) wnd.findViewById(R.id.privat_bank_merchant_id);
-        merchantId.setText("merchant-100");
-        EditText merchantPassword = (EditText) wnd.findViewById(R.id.privat_bank_merchant_password);
-        merchantPassword.setText("password-100");
-        EditText cardNumber = (EditText) wnd.findViewById(R.id.privat_bank_card_number);
-        cardNumber.setText("card-100");
 
-        Button addButton = (Button) wnd.findViewById(R.id.action_add_bank_link);
+        Button addButton = (Button) getActivity().findViewById(R.id.action_add_bank_link);
 
         MockSubscriber<AddBankLinkCommand> addHandler = new MockSubscriber<>(AddBankLinkCommand.class);
         bus.register(addHandler);
@@ -153,38 +176,34 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
 
         assertEquals(1, addHandler.getEvents().size());
         AddBankLinkCommand cmd = addHandler.getEvent();
-        assertEquals(PrivatBankTransaction.PRIVATBANK_BIC, cmd.bic);
+        assertEquals(selectedBic, cmd.bic);
         assertEquals(getActivity().getInitialFetchDate(), cmd.initialFetchDate);
         assertEquals("a-2", cmd.accountId);
         assertEquals("Account 2", cmd.accountName);
-        PrivatBankLinkData linkData = (PrivatBankLinkData) cmd.linkData;
-        assertEquals("merchant-100", linkData.merchantId);
-        assertEquals("password-100", linkData.password);
-        assertEquals("card-100", linkData.card);
+        assertEquals(fragmentsFactory.get(selectedBic).getBankLinkData(), cmd.linkData);
         assertFalse(addButton.isEnabled());
     }
 
     public void testLinkAdded() {
-        Window wnd = getActivity().getWindow();
-        Spinner ledgerAccountId = (Spinner) wnd.findViewById(R.id.ledger_account_id);
+        Spinner bic = (Spinner) getActivity().findViewById(R.id.bic);
+        bic.setSelection(1);
+        bic.getOnItemSelectedListener().onItemSelected(null, null, 1, 1);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        fragmentManager.executePendingTransactions();
+
+        Spinner ledgerAccountId = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
         populateLedgerAccounts(ledgerAccountId, new LedgerAccountDto("a-1", "Account 1"), new LedgerAccountDto("a-2", "Account 2"));
         ledgerAccountId.setSelection(1);
-        EditText merchantId = (EditText) wnd.findViewById(R.id.privat_bank_merchant_id);
-        merchantId.setText("merchant-100");
-        EditText merchantPassword = (EditText) wnd.findViewById(R.id.privat_bank_merchant_password);
-        merchantPassword.setText("password-100");
-        EditText cardNumber = (EditText) wnd.findViewById(R.id.privat_bank_card_number);
-        cardNumber.setText("card-100");
 
-        Button addButton = (Button) wnd.findViewById(R.id.action_add_bank_link);
+        Button addButton = (Button) getActivity().findViewById(R.id.action_add_bank_link);
         addButton.setEnabled(false);
 
         getActivity().onEventMainThread(new BankLinkAdded("a-2", "bic"));
+        fragmentManager.executePendingTransactions();
 
         assertEquals(0, ledgerAccountId.getSelectedItemId());
-        assertEquals("", merchantId.getText().toString());
-        assertEquals("", merchantPassword.getText().toString());
-        assertEquals("", cardNumber.getText().toString());
+        assertEquals(0, bic.getSelectedItemPosition());
+        assertNull(fragmentManager.findFragmentByTag("bank-link-fragment"));
         assertTrue(addButton.isEnabled());
     }
 

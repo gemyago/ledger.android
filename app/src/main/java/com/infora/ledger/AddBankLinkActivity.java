@@ -125,6 +125,7 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String selectedBic = bicAdapter.getItem(i).toString();
+                Log.d(TAG, "Bank selected bic='" + selectedBic + "'. Assigning bank link fragment.");
                 if (getBankLinkFragmentsFactory().isKnown(selectedBic)) {
                     setBankLinkFragment(getBankLinkFragmentsFactory().get(selectedBic));
                 } else {
@@ -199,12 +200,9 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     public void onEventMainThread(BankLinkAdded event) {
         Log.d(TAG, "Bank link created. Resetting UI.");
 
-        PrivatBankLinkFragment bankLinkFragment = (PrivatBankLinkFragment) getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
-        Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        Button addButton = (Button) findViewById(R.id.action_add_bank_link);
-
+        setBankLinkFragment(null);
         ledgerAccountId.setSelection(0);
-        bankLinkFragment.clearLinkData();
+        bic.setSelection(0);
         addButton.setEnabled(true);
 
         Toast.makeText(this, "Bank link added", Toast.LENGTH_SHORT).show();

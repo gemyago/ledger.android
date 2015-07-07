@@ -30,4 +30,12 @@ public class MockBankLinkData {
         result = 31 * result + (password != null ? password.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "MockBankLinkData{" +
+                "login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

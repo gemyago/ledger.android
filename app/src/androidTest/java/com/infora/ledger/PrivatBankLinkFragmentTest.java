@@ -5,32 +5,32 @@ import android.test.ActivityUnitTestCase;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-import com.infora.ledger.mocks.DummyPrivatBankLinkActivity;
+import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
 
 /**
  * Created by jenya on 01.06.15.
  */
-public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyPrivatBankLinkActivity> {
+public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLinkFragmentTestActivity> {
+
+    private PrivatBankLinkFragment fragment;
 
     public PrivatBankLinkFragmentTest() {
-        super(DummyPrivatBankLinkActivity.class);
+        super(DummyBankLinkFragmentTestActivity.class);
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        startActivity(new Intent(), null, null);
-    }
-
-    private PrivatBankLinkFragment getFragment() {
-        return (PrivatBankLinkFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.bank_link_fragment_container);
+        startActivity(new Intent(getInstrumentation().getTargetContext(), DummyBankLinkFragmentTestActivity.class), null, null);
+        getActivity().fragment = fragment = new PrivatBankLinkFragment();
+        getInstrumentation().callActivityOnStart(getActivity());
+        getActivity().getSupportFragmentManager().executePendingTransactions();
     }
 
     public void testGetBankLinkData() {
-        PrivatBankLinkFragment fragment = getFragment();
-        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
+        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
 
         merchantId.setText("merchant-100");
         merchantPassword.setText("merchant-100-password");
@@ -43,10 +43,9 @@ public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyPrivat
     }
 
     public void testSetBankLinkData() {
-        PrivatBankLinkFragment fragment = getFragment();
-        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
+        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
 
         PrivatBankLinkData linkData = new PrivatBankLinkData("card100", "merchant-100", "merchant-100-password");
         fragment.setBankLinkData(linkData);
@@ -57,10 +56,9 @@ public class PrivatBankLinkFragmentTest extends ActivityUnitTestCase<DummyPrivat
     }
 
     public void testClearLinkData() {
-        PrivatBankLinkFragment fragment = getFragment();
-        EditText merchantId = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_id);
-        EditText merchantPassword = (EditText) getActivity().findViewById(R.id.privat_bank_merchant_password);
-        EditText card = (EditText) getActivity().findViewById(R.id.privat_bank_card_number);
+        EditText merchantId = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_id);
+        EditText merchantPassword = (EditText) fragment.getView().findViewById(R.id.privat_bank_merchant_password);
+        EditText card = (EditText) fragment.getView().findViewById(R.id.privat_bank_card_number);
 
         merchantId.setText("merchant-100");
         merchantPassword.setText("merchant-100-password");
