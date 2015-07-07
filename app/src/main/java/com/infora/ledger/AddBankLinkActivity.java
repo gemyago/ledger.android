@@ -21,8 +21,6 @@ import android.widget.Toast;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
-import com.infora.ledger.banks.ua.urksibbank.UrksibBankTransaction;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
@@ -31,7 +29,6 @@ import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
