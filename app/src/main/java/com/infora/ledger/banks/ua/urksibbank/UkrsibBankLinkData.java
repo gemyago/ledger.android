@@ -13,4 +13,13 @@ public class UkrsibBankLinkData {
         this.password = password;
         this.card = card;
     }
+
+    @Override
+    public String toString() {
+        return "UkrsibBankLinkData{" +
+                "login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", card='" + card + '\'' +
+                '}';
+    }
 }
