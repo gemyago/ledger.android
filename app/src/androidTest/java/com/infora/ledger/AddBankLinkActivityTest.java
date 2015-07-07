@@ -145,7 +145,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.executePendingTransactions();
         MockBankLinkFragment fragment = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
-        assertSame(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
+        assertEquals(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
 
         bic.setSelection(2);
         bic.getOnItemSelectedListener().onItemSelected(null, null, 2, 2);
@@ -153,7 +153,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         LogUtil.d(this, "BIC item selection set to 2.");
         selectedBic = (String) bic.getAdapter().getItem(2);
         fragment = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
-        assertSame(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
+        assertEquals(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment.getBankLinkData());
     }
 
     public void testAddBankLink() {
