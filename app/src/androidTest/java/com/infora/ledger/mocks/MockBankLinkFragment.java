@@ -20,6 +20,11 @@ public class MockBankLinkFragment extends BankLinkFragment<MockBankLinkData> {
 
     @Override
     public void setBankLinkData(BankLink bankLink) {
+        assignValues(bankLink);
+    }
+
+    @Override
+    public void assignValues(BankLink bankLink) {
         this.mockBankLinkData = bankLink.getLinkData(MockBankLinkData.class);
     }
 

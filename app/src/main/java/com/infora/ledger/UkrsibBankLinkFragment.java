@@ -28,11 +28,10 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
         login = (EditText) getView().findViewById(R.id.ukrsib_bank_login);
         password = (EditText) getView().findViewById(R.id.ukrsib_bank_password);
         card = (EditText) getView().findViewById(R.id.ukrsib_bank_card_number);
+        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
@@ -41,7 +40,7 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
     }
 
     @Override
-    public void setBankLinkData(BankLink bankLink) {
+    public void assignValues(BankLink bankLink) {
         UkrsibBankLinkData linkData = bankLink.getLinkData(UkrsibBankLinkData.class);
         login.setText(linkData.login);
         password.setText(linkData.password);

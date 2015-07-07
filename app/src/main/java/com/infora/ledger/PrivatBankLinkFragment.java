@@ -31,7 +31,7 @@ public class PrivatBankLinkFragment extends BankLinkFragment<PrivatBankLinkData>
     }
 
     @Override
-    public void setBankLinkData(BankLink bankLink) {
+    public void assignValues(BankLink bankLink) {
         PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class);
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
