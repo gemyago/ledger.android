@@ -2,6 +2,8 @@ package com.infora.ledger.banks;
 
 import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
+import com.infora.ledger.banks.ua.urksibbank.UkrsibBankApi;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -34,6 +36,12 @@ public class FetchStrategiesFactory {
             @Override
             public FetchStrategy call() throws Exception {
                 return new DefaultFetchStrategy(new PrivatBankApi());
+            }
+        });
+        factory.fetchStrategies.put(UkrsibBankTransaction.BIC, new Callable<FetchStrategy>() {
+            @Override
+            public FetchStrategy call() throws Exception {
+                return new DefaultFetchStrategy(new UkrsibBankApi());
             }
         });
         return factory;
