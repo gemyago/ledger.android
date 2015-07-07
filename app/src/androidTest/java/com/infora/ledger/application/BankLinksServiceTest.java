@@ -84,6 +84,19 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals("bank-100", subscriber.getEvent().bic);
     }
 
+    public void testAddBankLinkCommandWithNullLinkData() {
+        AddBankLinkCommand command = new AddBankLinkCommand();
+
+        boolean exceptionThrown = false;
+        try {
+            subject.onEventBackgroundThread(command);
+        } catch (IllegalArgumentException ex) {
+            exceptionThrown = true;
+            assertEquals("command.linkData can not be null.", ex.getMessage());
+        }
+        assertTrue(exceptionThrown);
+    }
+
     public void testAddBankLinkCommandFailed() {
         AddBankLinkCommand command = new AddBankLinkCommand();
         command.accountId = "account-100";

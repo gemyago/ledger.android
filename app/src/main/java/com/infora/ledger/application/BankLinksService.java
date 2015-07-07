@@ -55,6 +55,8 @@ public class BankLinksService {
     public void onEventBackgroundThread(AddBankLinkCommand command) {
         Log.d(TAG, "Inserting new bank link for bank: " + command.bic + ", account: " + command.accountName);
 
+        if(command.linkData == null) throw new IllegalArgumentException("command.linkData can not be null.");
+
         Calendar lastSyncDate = Calendar.getInstance();
         lastSyncDate.setTime(command.initialFetchDate);
         lastSyncDate.add(Calendar.DAY_OF_MONTH, -1);
