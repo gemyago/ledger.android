@@ -1,5 +1,7 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
+import com.infora.ledger.support.ObfuscatedString;
+
 /**
  * Created by mye on 7/7/2015.
  */
@@ -17,13 +19,9 @@ public class UkrsibBankLinkData {
     @Override
     public String toString() {
         return "UkrsibBankLinkData{" +
-                "login='" + nullOrTrimmedValue(login) + '\'' +
-                ", password='" + nullOrTrimmedValue(password) + '\'' +
-                ", card='" + nullOrTrimmedValue(card) + '\'' +
+                "login='" + ObfuscatedString.value(login) + '\'' +
+                ", password='" + ObfuscatedString.value(password) + '\'' +
+                ", card='" + ObfuscatedString.value(card) + '\'' +
                 '}';
-    }
-
-    private static String nullOrTrimmedValue(String value) {
-        return value == null ? "null" : value.charAt(0) + "......" + value.charAt(value.length());
     }
 }

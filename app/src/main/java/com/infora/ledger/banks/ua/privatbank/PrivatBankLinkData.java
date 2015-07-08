@@ -1,5 +1,7 @@
 package com.infora.ledger.banks.ua.privatbank;
 
+import com.infora.ledger.support.ObfuscatedString;
+
 /**
  * Created by jenya on 30.05.15.
  */
@@ -38,13 +40,9 @@ public class PrivatBankLinkData {
     @Override
     public String toString() {
         return "PrivatBankLinkData{" +
-                "card='" + nullOrTrimmedValue(card) + '\'' +
-                ", merchantId='" + nullOrTrimmedValue(merchantId) + '\'' +
-                ", password='" + nullOrTrimmedValue(password) + '\'' +
+                "card='" + ObfuscatedString.value(card) + '\'' +
+                ", merchantId='" + ObfuscatedString.value(merchantId) + '\'' +
+                ", password='" + ObfuscatedString.value(password) + '\'' +
                 '}';
-    }
-
-    private static String nullOrTrimmedValue(String value) {
-        return value == null ? "null" : value.charAt(0) + "......" + value.charAt(value.length());
     }
 }

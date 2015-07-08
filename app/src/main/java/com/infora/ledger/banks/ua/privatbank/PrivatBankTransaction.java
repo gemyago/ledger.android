@@ -4,6 +4,7 @@ import com.infora.ledger.TransactionContract;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.support.ObfuscatedString;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -109,7 +110,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
     @Override
     public String toString() {
         return "PrivatBankTransaction{" +
-                "card='" + card + '\'' +
+                "card='" + ObfuscatedString.value(card) + '\'' +
                 ", trandate='" + trandate + '\'' +
                 ", trantime='" + trantime + '\'' +
                 ", amount='" + amount + '\'' +

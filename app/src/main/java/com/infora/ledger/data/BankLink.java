@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import com.google.gson.Gson;
 import com.infora.ledger.support.Dates;
+import com.infora.ledger.support.ObfuscatedString;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -150,8 +151,8 @@ public class BankLink implements Entity {
     public String toString() {
         return "BankLink{" +
                 "id=" + id +
-                ", accountId='" + accountId + '\'' +
-                ", accountName='" + accountName + '\'' +
+                ", accountId='" + ObfuscatedString.value(accountId) + '\'' +
+                ", accountName='" + ObfuscatedString.value(accountName) + '\'' +
                 ", bic='" + bic + '\'' +
                 ", linkData='" + linkData + '\'' +
                 ", lastSyncDate='" + (lastSyncDate == null ? null : LedgerDbHelper.toISO8601(lastSyncDate)) + '\'' +
