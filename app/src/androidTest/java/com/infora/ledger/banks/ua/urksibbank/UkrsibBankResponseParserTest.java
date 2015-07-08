@@ -27,7 +27,7 @@ public class UkrsibBankResponseParserTest extends TestCase {
         boolean parseErrorThrown = false;
         try {
             parser.parseAccountNumber("12345678123490");
-        } catch (UrksibBankException ex) {
+        } catch (UkrsibBankException ex) {
             assertEquals("Failed to get account for card: " + ObfuscatedString.value("12345678123490"), ex.getMessage());
             parseErrorThrown = true;
         }

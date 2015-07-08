@@ -34,7 +34,7 @@ public class UkrsibBankResponseParser {
         return viewState.val();
     }
 
-    public String parseAccountNumber(String cardNumber) throws UrksibBankException {
+    public String parseAccountNumber(String cardNumber) throws UkrsibBankException {
         Element currentAccounts = document.getElementsByClass("current-accounts").get(0);
         Elements accountColumns = currentAccounts.getElementsByClass("accountColumn");
         for (Element accountColumn : accountColumns) {
@@ -45,7 +45,7 @@ public class UkrsibBankResponseParser {
                 return clickJs.substring(start + ACCOUNT_PATTERN_START_TOKEN.length(), clickJs.indexOf("']]", start));
             }
         }
-        throw new UrksibBankException("Failed to get account for card: " + ObfuscatedString.value(cardNumber));
+        throw new UkrsibBankException("Failed to get account for card: " + ObfuscatedString.value(cardNumber));
     }
 
     public List<UkrsibBankTransaction> parseTransactions(String cardNumber) {
