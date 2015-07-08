@@ -47,7 +47,8 @@ public class UkrsibBankApiManualTest extends TestCase {
         try {
             api.getTransactions(new GetTransactionsRequest(bankLink, Dates.addDays(new Date(), 10), new Date()));
         } catch (FetchException ex) {
-            assertEquals("Authentication failed.", ex.getMessage());
+            LogUtil.e(this, "Authentication failed.", ex);
+            assertTrue(ex.getMessage().startsWith("Authentication failed:"));
             errorRaised = true;
         }
         assertTrue("Authentication error has not been raised", errorRaised);

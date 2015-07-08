@@ -13,18 +13,18 @@ import java.util.List;
  * Created by mye on 7/8/2015.
  */
 public class UkrsibBankResponseParserTest extends TestCase {
-    public void testHasLoginErrorMessages() throws IOException, FetchException {
+    public void testGetLoginErrorMessage() throws IOException, FetchException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithViewState().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
-        assertFalse(parser.hasLoginErrorMessages());
+        assertNull(parser.getLoginErrorMessage());
 
         stream = new ByteArrayInputStream(WelcomeHtml.contentsWithHiddenEndSessionErrorMessage().getBytes());
         parser = new UkrsibBankResponseParser(stream);
-        assertFalse(parser.hasLoginErrorMessages());
+        assertNull(parser.getLoginErrorMessage());
 
         stream = new ByteArrayInputStream(WelcomeHtml.contentsWithErrorMessage().getBytes());
         parser = new UkrsibBankResponseParser(stream);
-        assertTrue(parser.hasLoginErrorMessages());
+        assertEquals("other authentication failure message.", parser.getLoginErrorMessage());
     }
 
     public void testParseViewState() throws IOException, FetchException {
@@ -42,7 +42,7 @@ public class UkrsibBankResponseParserTest extends TestCase {
         try {
             parser.parseAccountNumber("12345678123490");
         } catch (UkrsibBankException ex) {
-            assertEquals("Failed to get account for card: " + ObfuscatedString.value("12345678123490"), ex.getMessage());
+            assertEquals("Account not found. Card: " + ObfuscatedString.value("12345678123490"), ex.getMessage());
             parseErrorThrown = true;
         }
         assertTrue("Parse error wasn't thrown.", parseErrorThrown);

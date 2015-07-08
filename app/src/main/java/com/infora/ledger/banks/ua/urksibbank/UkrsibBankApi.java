@@ -37,32 +37,32 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         UkrsibBankLinkData linkData = request.bankLink.getLinkData(UkrsibBankLinkData.class);
 
         Log.d(TAG, "Retrieving initial view state");
-        Response response = execute(client, new Request.Builder().url(WELCOME_URL).build());
-        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(response.body().byteStream());
-        String viewState = parser.parseViewState();
-
         Request authRequest = new Request.Builder()
                 .url(LOGIN_URL)
                 .post(new FormEncodingBuilder()
                         .add("j_username", linkData.login)
                         .add("j_password", linkData.password)
-                        .add("javax.faces.ViewState", viewState)
-                        .add("login_SUBMIT", "1")
                         .build())
                 .build();
-        response = execute(client, authRequest);
-        parser = new UkrsibBankResponseParser(response.body().byteStream());
-        if(parser.hasLoginErrorMessages()) throw new FetchException("Authentication failed.");
+        Response response = execute(client, authRequest);
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(response.body().byteStream());
+        final String loginErrorMessage = parser.getLoginErrorMessage();
+        if(loginErrorMessage != null) throw new FetchException("Authentication failed: " + loginErrorMessage);
+
+        //Redirects are not allowed further. The redirect would mean failure.
+        client.setFollowRedirects(false);
+
         Log.d(TAG, "Authenticated. Retrieving card account number.");
+        //TODO: Account number should be here.
         String accountNumber = parser.parseAccountNumber(linkData.card);
-        viewState = parser.parseViewState();
+        String viewState = parser.parseViewState();
 
         Log.d(TAG, "Card account number retrieved: " + ObfuscatedString.value(accountNumber) + ". Retrieving transactions.");
 
         response = execute(client, new Request.Builder()
                 .url(WELCOME_URL)
                 .post(new FormEncodingBuilder()
-                                .add("accountId", linkData.card)
+                                .add("accountId", accountNumber)
                                 .add("javax.faces.ViewState", viewState)
                                 .add("welcomeForm:_idcl", "welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_64")
                                 .add("welcomeForm_SUBMIT", "1")
@@ -79,9 +79,5 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         Response response = client.newCall(authRequest).execute();
         if (!response.isSuccessful()) throw new IOException("Request failed. " + response);
         return response;
-    }
-
-    private void ensureNoRedirect(Response response) throws IOException {
-        if(response.isRedirect()) throw new IOException("Unexpected redirect: " + response);
     }
 }

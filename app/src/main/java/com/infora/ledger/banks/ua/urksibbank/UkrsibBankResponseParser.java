@@ -29,14 +29,14 @@ public class UkrsibBankResponseParser {
         }
     }
 
-    public boolean hasLoginErrorMessages() {
+    public String getLoginErrorMessage() {
         Elements errorLoginElements = document.getElementsByClass("error-login");
-        if(errorLoginElements.size() == 0) return false;
+        if (errorLoginElements.size() == 0) return null;
         Elements messages = errorLoginElements.get(0).getElementsByClass("message");
         for (Element message : messages) {
-            if(!"display: none;".equals(message.attr("style"))) return true;
+            if (!"display: none;".equals(message.attr("style"))) return message.text();
         }
-        return false;
+        return null;
     }
 
     public String parseViewState() {
@@ -55,7 +55,7 @@ public class UkrsibBankResponseParser {
                 return clickJs.substring(start + ACCOUNT_PATTERN_START_TOKEN.length(), clickJs.indexOf("']]", start));
             }
         }
-        throw new UkrsibBankException("Failed to get account for card: " + ObfuscatedString.value(cardNumber));
+        throw new UkrsibBankException("Account not found. Card: " + ObfuscatedString.value(cardNumber));
     }
 
     public List<UkrsibBankTransaction> parseTransactions(String cardNumber) {
