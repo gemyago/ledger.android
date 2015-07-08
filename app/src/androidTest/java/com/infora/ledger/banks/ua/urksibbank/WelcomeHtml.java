@@ -35,6 +35,27 @@ public class WelcomeHtml {
                 "</html>";
     }
 
+    public static String contentsWithErrorMessage() {
+        return "<div class=\"entrance-content\" id=\"autorization\">\n" +
+                "\t<div class=\"login-wrapper\">\n" +
+                "\t\t<div class=\"error-login\">\n" +
+                "\t\t\t<h2 class=\"message\" id=\"endSession\" style=\"display: none;\">session error message.</h2>\n" +
+                "\t\t\t<h2 class=\"message\">other authentication failure message.</h2><span id=\"showEndSessionMessaage\">false</span>\n" +
+                "\t\t</div>\n" +
+                "\t</div>\n" +
+                "</div>";
+    }
+
+    public static String contentsWithHiddenEndSessionErrorMessage() {
+        return "<div class=\"entrance-content\" id=\"autorization\">\n" +
+                "\t<div class=\"login-wrapper\">\n" +
+                "\t\t<div class=\"error-login\">\n" +
+                "\t\t\t<h2 class=\"message\" id=\"endSession\" style=\"display: none;\">session error message.</h2>\n" +
+                "\t\t</div>\n" +
+                "\t</div>\n" +
+                "</div>";
+    }
+
     public static String contentsWithAccounts() {
         return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n" +
                 "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +

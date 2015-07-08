@@ -13,6 +13,20 @@ import java.util.List;
  * Created by mye on 7/8/2015.
  */
 public class UkrsibBankResponseParserTest extends TestCase {
+    public void testHasLoginErrorMessages() throws IOException, FetchException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithViewState().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        assertFalse(parser.hasLoginErrorMessages());
+
+        stream = new ByteArrayInputStream(WelcomeHtml.contentsWithHiddenEndSessionErrorMessage().getBytes());
+        parser = new UkrsibBankResponseParser(stream);
+        assertFalse(parser.hasLoginErrorMessages());
+
+        stream = new ByteArrayInputStream(WelcomeHtml.contentsWithErrorMessage().getBytes());
+        parser = new UkrsibBankResponseParser(stream);
+        assertTrue(parser.hasLoginErrorMessages());
+    }
+
     public void testParseViewState() throws IOException, FetchException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithViewState().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);

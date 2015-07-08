@@ -29,6 +29,16 @@ public class UkrsibBankResponseParser {
         }
     }
 
+    public boolean hasLoginErrorMessages() {
+        Elements errorLoginElements = document.getElementsByClass("error-login");
+        if(errorLoginElements.size() == 0) return false;
+        Elements messages = errorLoginElements.get(0).getElementsByClass("message");
+        for (Element message : messages) {
+            if(!"display: none;".equals(message.attr("style"))) return true;
+        }
+        return false;
+    }
+
     public String parseViewState() {
         Elements viewState = document.getElementsByAttributeValue("name", "javax.faces.ViewState");
         return viewState.val();
