@@ -9,4 +9,8 @@ public class LogUtil {
     public static void d(Object owner, String message) {
         Log.d(owner.getClass().getCanonicalName(), message);
     }
+
+    public static void e(Object owner, String message, Throwable e) {
+        Log.e(owner.getClass().getCanonicalName(), message, e);
+    }
 }
