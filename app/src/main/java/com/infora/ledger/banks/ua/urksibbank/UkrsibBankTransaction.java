@@ -63,8 +63,9 @@ public class UkrsibBankTransaction implements BankTransaction {
     @Override
     public PendingTransaction toPendingTransaction(BankLink bankLink) {
         String actualAmount = accountAmount.replace(" ", "").replace("-", "");
+        String authCodeOrHashCode = this.authCode == null ? String.valueOf(Math.abs(description.hashCode())) : this.authCode;
         return new PendingTransaction(
-                BIC + DATE_FORMAT_FOR_TRANSACTION_ID.format(trandate) + authCode + actualAmount.replace(".", ""),
+                BIC + DATE_FORMAT_FOR_TRANSACTION_ID.format(trandate) + authCodeOrHashCode + actualAmount.replace(".", ""),
                 actualAmount,
                 description,
                 false,

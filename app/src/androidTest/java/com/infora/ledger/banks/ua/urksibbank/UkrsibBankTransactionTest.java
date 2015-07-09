@@ -36,4 +36,14 @@ public class UkrsibBankTransactionTest extends TestCase {
         assertEquals(UkrsibBankTransaction.BIC + "20150612" + usbt1.authCode + "1938366", pendingt1.transactionId);
         assertEquals("19383.66", pendingt1.amount);
     }
+
+    public void testToPendingTransactionNoAuthCode() throws Exception {
+        UkrsibBankTransaction usbt1 = new UkrsibBankTransaction()
+                .setTrandate(Dates.create(2015, 06 - 1, 12)).setCommitDate(Dates.create(2015, 06 - 1, 16))
+                .setDescription("transaction description")
+                .setCurrency("UAH").setAmount("-19 383.66").setAccountAmount("-19 383.66");
+
+        PendingTransaction pendingt1 = usbt1.toPendingTransaction(new BankLink().setAccountId("account-1"));
+        assertEquals(UkrsibBankTransaction.BIC + "20150612" + Math.abs(usbt1.description.hashCode()) + "1938366", pendingt1.transactionId);
+    }
 }
