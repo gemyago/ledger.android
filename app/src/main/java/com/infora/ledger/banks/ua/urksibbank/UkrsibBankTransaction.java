@@ -5,6 +5,8 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.support.Dates;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -13,6 +15,7 @@ import java.util.Date;
 public class UkrsibBankTransaction implements BankTransaction {
     //http://www.theswiftcodes.com/ukraine/khabua2k/
     public static final String BIC = "KHABUA2K";
+    private static final DateFormat DATE_FORMAT_FOR_TRANSACTION_ID = new SimpleDateFormat("yyyyMMdd");
 
     public Date trandate;
     public Date commitDate;
@@ -59,7 +62,15 @@ public class UkrsibBankTransaction implements BankTransaction {
 
     @Override
     public PendingTransaction toPendingTransaction(BankLink bankLink) {
-        return null;
+        String actualAmount = accountAmount.replace(" ", "").replace("-", "");
+        return new PendingTransaction(
+                BIC + DATE_FORMAT_FOR_TRANSACTION_ID.format(trandate) + authCode + actualAmount.replace(".", ""),
+                actualAmount,
+                description,
+                false,
+                false,
+                trandate,
+                BIC).setAccountId(bankLink.accountId);
     }
 
     @Override
