@@ -23,6 +23,7 @@ import java.util.List;
 public class UkrsibBankResponseParser {
 
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private final String ACCOUNT_LINK_ID_START_TOKEN = "oamSubmitForm('welcomeForm','";
     private final String ACCOUNT_PATTERN_START_TOKEN = "[['accountId','";
     private final Document document;
 
@@ -49,15 +50,38 @@ public class UkrsibBankResponseParser {
         return viewState.val();
     }
 
-    public String parseAccountId(String cardNumber) throws UkrsibBankException {
+    public DatesSubmitData parseDatesSubmitData() throws UkrsibBankException {
+        final Elements headerReportsTables = document.getElementsByClass("headerReportsTable");
+        if(headerReportsTables.size() != 1)
+            throw new UkrsibBankException("Failed to parse dates submit data. The headerReportsTable not found.");
+        final Element headerReportsTable = headerReportsTables.get(0);
+        final Elements calendarWrappers = headerReportsTable.getElementsByClass("calendar-wrapper");
+        if(calendarWrappers.size() != 1)
+            throw new UkrsibBankException("Failed to parse dates submit data. The calendar-wrapper not found.");
+        final Elements calendars = calendarWrappers.get(0).getElementsByClass("calendar");
+        if(calendars.size() != 2)
+            throw new UkrsibBankException("Failed to parse dates submit data: calendars not found.");
+        final Elements submits = headerReportsTable.select("td#filter > input[type=submit]");
+        if(submits.size() != 1)
+            throw new UkrsibBankException("Failed to parse dates submit data: submit button not found.");
+
+        return new DatesSubmitData(calendars.get(0).attr("id"), calendars.get(1).attr("id"), submits.get(0).attr("id"));
+    }
+
+    public AccountSubmitData parseAccountSubmitData(String cardNumber) throws UkrsibBankException {
         Element currentAccounts = document.getElementsByClass("current-accounts").get(0);
         Elements accountColumns = currentAccounts.getElementsByClass("accountColumn");
         for (Element accountColumn : accountColumns) {
             Element a = accountColumn.getElementsByTag("a").get(0);
             if (a.text().equals(cardNumber)) {
                 String clickJs = a.attr("onclick");
-                int start = clickJs.indexOf(ACCOUNT_PATTERN_START_TOKEN);
-                return clickJs.substring(start + ACCOUNT_PATTERN_START_TOKEN.length(), clickJs.indexOf("']]", start));
+
+                int start = clickJs.indexOf(ACCOUNT_LINK_ID_START_TOKEN) + ACCOUNT_LINK_ID_START_TOKEN.length();
+                final String linkId = clickJs.substring(start, clickJs.indexOf("'", start));
+
+                start = clickJs.indexOf(ACCOUNT_PATTERN_START_TOKEN);
+                final String accountId = clickJs.substring(start + ACCOUNT_PATTERN_START_TOKEN.length(), clickJs.indexOf("']]", start));
+                return new AccountSubmitData(accountId, linkId);
             }
         }
         throw new UkrsibBankException("Account not found. Card: " + ObfuscatedString.value(cardNumber));
@@ -86,11 +110,11 @@ public class UkrsibBankResponseParser {
 
                     Element tbody = opersTable.getElementsByTag("tbody").get(0);
                     Elements rows = tbody.getElementsByTag("tr");
-                    if(rows.size() > 0) {
+                    if (rows.size() > 0) {
                         Elements firstRowCells = rows.get(0).getElementsByTag("td");
-                        if(firstRowCells.size() == 7) {
+                        if (firstRowCells.size() == 7) {
                             appendTransactions(transactions, opersTable, regularParser);
-                        } else if(firstRowCells.size() == 6) {
+                        } else if (firstRowCells.size() == 6) {
                             appendTransactions(transactions, opersTable, cardLocksParser);
                         } else {
                             throw new ParseException("Unexpected cells count: " + firstRowCells.size(), 0);
@@ -112,7 +136,8 @@ public class UkrsibBankResponseParser {
     public List<UkrsibBankTransaction> parseAccountTransactions() throws ParseException {
         ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
         Elements opersTables = document.select("form#cardAccountInfoForm > table.opersTable");
-        if(opersTables.size() != 1) throw new ParseException("Unexpected number of opersTables. Expected 1, got " + opersTables.size(), 0);
+        if (opersTables.size() != 1)
+            throw new ParseException("Unexpected number of opersTables. Expected 1, got " + opersTables.size(), 0);
         appendTransactions(transactions, opersTables.get(0), new AccountTransactionTableRowParser());
         return transactions;
     }
@@ -180,6 +205,29 @@ public class UkrsibBankResponseParser {
                     .setAmount(cells.get(cellNumber++).text().trim())
                     .setAccountAmount(cells.get(cellNumber++).text().trim());
             return transaction;
+        }
+    }
+
+    public static class AccountSubmitData {
+        public String accountId;
+        public String linkId;
+
+        public AccountSubmitData(String accountId, String linkId) {
+
+            this.accountId = accountId;
+            this.linkId = linkId;
+        }
+    }
+
+    public static class DatesSubmitData {
+        public String startDateId;
+        public String endDateId;
+        public String okButtonId;
+
+        public DatesSubmitData(String startDateId, String endDateId, String okButtonId) {
+            this.startDateId = startDateId;
+            this.endDateId = endDateId;
+            this.okButtonId = okButtonId;
         }
     }
 }

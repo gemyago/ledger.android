@@ -35,6 +35,31 @@ public class WelcomeHtml {
                 "</html>";
     }
 
+    public static String contentsWithDateSubmitData() {
+        return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n" +
+                "<html>\n" +
+                "\t<head>\n" +
+                "\t\t<title></title>\n" +
+                "\t</head>\n" +
+                "\t<body>\n" +
+                "\t\t<div>\n" +
+                "\t\t\t<table class=\"headerReportsTable\">\n" +
+                "\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t<td id=\"filter\">\n" +
+                "\t\t\t\t\t\t<fieldset class=\"calendar-wrapper\">\n" +
+                "\t\t\t\t\t\t\t<input type=\"radio\" value=\"0\" checked=\"checked\" name=\"cardAccountInfoForm:reportPeriod\" id=\"cardAccountInfoForm:reportPeriod:0\"> \n" +
+                "\t\t\t\t\t\t\t<input type=\"text\" value=\"10.07.2014\" class=\"calendar\" size=\"9\" name=\"cardAccountInfoForm:j_id_jsp_672206071_38\" id=\"cardAccountInfoForm:j_id_jsp_672206071_38\"> \n" +
+                "\t\t\t\t\t\t\t<input type=\"text\" value=\"30.09.2014\" class=\"calendar\" size=\"9\" name=\"cardAccountInfoForm:j_id_jsp_672206071_40\" id=\"cardAccountInfoForm:j_id_jsp_672206071_40\">\n" +
+                "\t\t\t\t\t\t</fieldset>\n" +
+                "\t\t\t\t\t\t<input type=\"submit\" class=\"button\" value=\"OK\" name=\"cardAccountInfoForm:j_id_jsp_672206071_43\" id=\"cardAccountInfoForm:j_id_jsp_672206071_43\">\n" +
+                "\t\t\t\t\t</td>\n" +
+                "\t\t\t\t</tr>\n" +
+                "\t\t\t</table>\n" +
+                "\t\t</div>\n" +
+                "\t</body>\n" +
+                "</html>\n";
+    }
+
     public static String contentsWithErrorMessage() {
         return "<div class=\"entrance-content\" id=\"autorization\">\n" +
                 "\t<div class=\"login-wrapper\">\n" +
@@ -103,7 +128,7 @@ public class WelcomeHtml {
                 "                                </td>\n" +
                 "                                <td class=\"accountColumn\">\n" +
                 "                                    <a title=\"?????????? ???????\"\n" +
-                "                                       onclick=\"return oamSubmitForm('welcomeForm','welcomeForm:j_id_jsp_692165209_58:0:j_id_jsp_692165209_71',null,[['accountId','11112222']]);\"\n" +
+                "                                       onclick=\"return oamSubmitForm('welcomeForm','welcomeForm:j_id_jsp_692165209_58:0:j_id_jsp_692165209_41',null,[['accountId','11112222']]);\"\n" +
                 "                                       href=\"#\">33334444555566</a>\n" +
                 "                                </td>\n" +
                 "                                <td class=\"currencyColumn\">UAH</td>\n" +
@@ -137,7 +162,7 @@ public class WelcomeHtml {
                 "                                <td class=\"amountColumn\">10 100.43</td>\n" +
                 "                                <td class=\"paymentColumn\">\n" +
                 "                                    <a title=\"?????????? ??????\"\n" +
-                "                                       onclick=\"return oamSubmitForm('welcomeForm','welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_82',null,[['debitAccount','77778888'],['docType','doc/ua_owner_transfer']]);\"\n" +
+                "                                       onclick=\"return oamSubmitForm('welcomeForm','welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_83',null,[['debitAccount','77778888'],['docType','doc/ua_owner_transfer']]);\"\n" +
                 "                                       href=\"#\"></a>\n" +
                 "                                </td>\n" +
                 "                            </tr>\n" +

@@ -59,9 +59,11 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
 
         //Redirects are not allowed further. The redirect would mean failure.
         client.setFollowRedirects(false);
+        client.setFollowSslRedirects(false);
 
         Log.d(TAG, "Authenticated. Retrieving card accountId.");
-        String accountId = parser.parseAccountId(linkData.account);
+        UkrsibBankResponseParser.AccountSubmitData accountSubmitData = parser.parseAccountSubmitData(linkData.account);
+        final String accountId = accountSubmitData.accountId;
         String viewState = parser.parseViewState();
 
         Log.d(TAG, "Card accountId retrieved: " + ObfuscatedString.value(accountId) + ". Retrieving transactions.");
@@ -71,7 +73,7 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
                 .post(new FormEncodingBuilder()
                                 .add("accountId", accountId)
                                 .add("javax.faces.ViewState", viewState)
-                                .add("welcomeForm:_idcl", "welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_64")
+                                .add("welcomeForm:_idcl", accountSubmitData.linkId)
                                 .add("welcomeForm_SUBMIT", "1")
                                 .build()
                 )
@@ -81,14 +83,15 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         Date monthAgo = Dates.monthAgo(endOfToday);
         if (!(startDate.compareTo(monthAgo) >= 0 && endDate.compareTo(endOfToday) <= 0)) {
             Log.d(TAG, "Specified dates range is now from the last month. Sending additional request to get requested transactions.");
+            final UkrsibBankResponseParser.DatesSubmitData datesSubmitData = parser.parseDatesSubmitData();
             response = execute(client, new Request.Builder()
                     .url(TRANSACTIONS_FOR_DATES_URL)
                     .post(new FormEncodingBuilder()
                                     .add("accountId", accountId)
                                     .add("javax.faces.ViewState", parser.parseViewState())
-                                    .add("cardAccountInfoForm:j_id_jsp_1610737686_38", UkrsibBankResponseParser.DATE_FORMAT.format(startDate))
-                                    .add("cardAccountInfoForm:j_id_jsp_1610737686_40", UkrsibBankResponseParser.DATE_FORMAT.format(endDate))
-                                    .add("cardAccountInfoForm:j_id_jsp_1610737686_43", "OK")
+                                    .add(datesSubmitData.startDateId, UkrsibBankResponseParser.DATE_FORMAT.format(startDate))
+                                    .add(datesSubmitData.endDateId, UkrsibBankResponseParser.DATE_FORMAT.format(endDate))
+                                    .add(datesSubmitData.okButtonId, "OK")
                                     .add("cardAccountInfoForm:reportPeriod", "0")
                                     .add("cardAccountInfoForm_SUBMIT", "1")
                                     .build()

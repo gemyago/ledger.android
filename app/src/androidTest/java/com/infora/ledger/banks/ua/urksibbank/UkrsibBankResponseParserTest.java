@@ -35,14 +35,27 @@ public class UkrsibBankResponseParserTest extends TestCase {
         assertEquals("the-view-state-value", parser.parseViewState());
     }
 
-    public void testParseAccountId() throws FetchException {
+    public void testParseDatesSubmitData() throws IOException, FetchException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithDateSubmitData().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        final UkrsibBankResponseParser.DatesSubmitData datesSubmitData = parser.parseDatesSubmitData();
+        assertEquals("cardAccountInfoForm:j_id_jsp_672206071_38", datesSubmitData.startDateId);
+        assertEquals("cardAccountInfoForm:j_id_jsp_672206071_40", datesSubmitData.endDateId);
+        assertEquals("cardAccountInfoForm:j_id_jsp_672206071_43", datesSubmitData.okButtonId);
+    }
+
+    public void testParseAccountSubmitData() throws FetchException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithAccounts().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
-        assertEquals("11112222", parser.parseAccountId("33334444555566"));
-        assertEquals("77778888", parser.parseAccountId("99998888000099"));
+        UkrsibBankResponseParser.AccountSubmitData submitData = parser.parseAccountSubmitData("33334444555566");
+        assertEquals("11112222", submitData.accountId);
+        assertEquals("welcomeForm:j_id_jsp_692165209_58:0:j_id_jsp_692165209_41", submitData.linkId);
+        submitData = parser.parseAccountSubmitData("99998888000099");
+        assertEquals("77778888", submitData.accountId);
+        assertEquals("welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_71", submitData.linkId);
         boolean parseErrorThrown = false;
         try {
-            parser.parseAccountId("12345678123490");
+            parser.parseAccountSubmitData("12345678123490");
         } catch (UkrsibBankException ex) {
             assertEquals("Account not found. Card: " + ObfuscatedString.value("12345678123490"), ex.getMessage());
             parseErrorThrown = true;
