@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class UkrsibBankResponseParser {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     private final String ACCOUNT_PATTERN_START_TOKEN = "[['accountId','";
     private final Document document;
 

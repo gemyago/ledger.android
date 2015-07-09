@@ -11,6 +11,12 @@ import java.util.Date;
  * Created by jenya on 16.06.15.
  */
 public class Dates {
+    public static Date monthAgo(Date date) {
+        Calendar cal = getCalendar(date);
+        cal.add(Calendar.MONTH, -1);
+        return cal.getTime();
+    }
+
     public static Date create(int year, int month, int day) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);

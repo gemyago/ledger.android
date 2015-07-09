@@ -54,7 +54,15 @@ public class UkrsibBankApiManualTest extends TestCase {
 
     public void testGetTransactionsWithingLastMonth() throws IOException, FetchException {
         List<UkrsibBankTransaction> transactions = api.getTransactions(
-                new GetTransactionsRequest(bankLink, Dates.addDays(new Date(), 10), new Date()));
+                new GetTransactionsRequest(bankLink, Dates.create(2015, 07-1, 01), new Date()));
+        for (UkrsibBankTransaction transaction : transactions) {
+            LogUtil.d(this, transaction.toString());
+        }
+    }
+
+    public void testGetTransactionsForPreviousMonths() throws IOException, FetchException {
+        List<UkrsibBankTransaction> transactions = api.getTransactions(
+                new GetTransactionsRequest(bankLink, Dates.create(2014, 07-1, 01), Dates.create(2014, 9-1, 30)));
         for (UkrsibBankTransaction transaction : transactions) {
             LogUtil.d(this, transaction.toString());
         }
