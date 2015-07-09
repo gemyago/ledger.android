@@ -1,7 +1,6 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
 import com.infora.ledger.banks.FetchException;
-import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.ObfuscatedString;
 
 import org.jsoup.Jsoup;
@@ -68,14 +67,16 @@ public class UkrsibBankResponseParser {
         if (cardNumber.length() != 16)
             throw new IllegalArgumentException("cardNumber expected to contain 16 digits.");
         ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
-        Element externalTable = document.getElementsByClass("externalTable").get(0);
-        Elements opersTables = externalTable.getElementsByClass("opersTable");
-        String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(12, 16);
-        for (Element opersTable : opersTables) {
-            Elements caption = opersTable.getElementsByTag("caption");
-            if (caption.text().contains(cardPattern)) {
-                appendTransactions(transactions, opersTable);
-                break;
+        Elements externalTables = document.getElementsByClass("externalTable");
+        for (Element externalTable : externalTables) {
+            Elements opersTables = externalTable.getElementsByClass("opersTable");
+            String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(12, 16);
+            for (Element opersTable : opersTables) {
+                Elements caption = opersTable.getElementsByTag("caption");
+                if (caption.text().contains(cardPattern)) {
+                    appendTransactions(transactions, opersTable);
+                    break;
+                }
             }
         }
         return transactions;
@@ -86,15 +87,27 @@ public class UkrsibBankResponseParser {
         Elements rows = tbody.getElementsByTag("tr");
         for (Element row : rows) {
             Elements cells = row.getElementsByTag("td");
-            transactions.add(new UkrsibBankTransaction()
-                            .setTrandate(parseDate(cells.get(0).text().trim()))
-                            .setCommitDate(parseDate(cells.get(1).text().trim()))
-                            .setAuthCode(cells.get(2).text().trim())
-                            .setDescription(cells.get(3).text().trim())
-                            .setCurrency(cells.get(4).text().trim())
-                            .setAmount(cells.get(5).text().trim())
-                            .setAccountAmount(cells.get(6).text().trim())
-            );
+            int cellNumber = 0;
+            UkrsibBankTransaction transaction;
+            if(cells.size() == 7) { //Regular card expenses or account expenses
+                transaction = new UkrsibBankTransaction()
+                        .setTrandate(parseDate(cells.get(cellNumber++).text().trim()))
+                        .setCommitDate(parseDate(cells.get(cellNumber++).text().trim()))
+                        .setAuthCode(cells.get(cellNumber++).text().trim());
+            } else if(cells.size() == 6) { //Locks table
+                transaction = new UkrsibBankTransaction()
+                        .setAuthCode(cells.get(cellNumber++).text().trim())
+                        .setTrandate(parseDate(cells.get(cellNumber++).text().trim()));
+            } else {
+                throw new ParseException("Unexpected cells count: " + cells.size(), row.siblingIndex());
+            }
+
+            transaction.setDescription(cells.get(cellNumber++).text().trim())
+                    .setCurrency(cells.get(cellNumber++).text().trim())
+                    .setAmount(cells.get(cellNumber++).text().trim())
+                    .setAccountAmount(cells.get(cellNumber++).text().trim());
+
+            transactions.add(transaction);
         }
     }
 

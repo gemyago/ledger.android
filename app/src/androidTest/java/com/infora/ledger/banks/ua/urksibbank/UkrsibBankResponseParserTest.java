@@ -56,12 +56,12 @@ public class UkrsibBankResponseParserTest extends TestCase {
         List<UkrsibBankTransaction> transactions = parser.parseTransactions("1111110000002222");
         assertEquals(2, transactions.size());
         assertEquals(new UkrsibBankTransaction()
-                        .setTrandate(Dates.create(2015, 06-1, 12)).setCommitDate(Dates.create(2015, 06-1, 16)).setAuthCode("605357")
+                        .setTrandate(Dates.create(2015, 06 - 1, 12)).setCommitDate(Dates.create(2015, 06 - 1, 16)).setAuthCode("605357")
                         .setDescription("????????? ??????? ? ????????? ?????-????????\\ATM80524\\UA\\KHARKIV\\GEROI\\GEROIV TRUDA A")
                         .setCurrency("UAH").setAmount("-500.00").setAccountAmount("-500.00"),
                 transactions.get(0));
         assertEquals(new UkrsibBankTransaction()
-                        .setTrandate(Dates.create(2015, 06-1, 17)).setCommitDate(Dates.create(2015, 06-1, 18)).setAuthCode("154670")
+                        .setTrandate(Dates.create(2015, 06 - 1, 17)).setCommitDate(Dates.create(2015, 06 - 1, 18)).setAuthCode("154670")
                         .setDescription("????????? ??????? ? ????????? ?????\\A0308854\\UA\\KHARKIV\\UKRSIBBANK")
                         .setCurrency("UAH").setAmount("-4 000.00").setAccountAmount("-4 000.00"),
                 transactions.get(1));
@@ -69,15 +69,45 @@ public class UkrsibBankResponseParserTest extends TestCase {
         transactions = parser.parseTransactions("3333330000004444");
         assertEquals(5, transactions.size());
         assertEquals(new UkrsibBankTransaction()
-                        .setTrandate(Dates.create(2015, 06-1, 04)).setCommitDate(Dates.create(2015, 06-1, 8)).setAuthCode("92963Z")
+                        .setTrandate(Dates.create(2015, 06 - 1, 04)).setCommitDate(Dates.create(2015, 06 - 1, 8)).setAuthCode("92963Z")
                         .setDescription("?????? ???????\\??????\\S1HA0HFD\\UA\\DERGACHI\\KHAR\\7YABOYKO")
                         .setCurrency("UAH").setAmount("-200.00").setAccountAmount("-200.00"),
                 transactions.get(0));
         assertEquals(new UkrsibBankTransaction()
-                        .setTrandate(Dates.create(2015, 06-1, 06)).setCommitDate(Dates.create(2015, 06-1, 9)).setAuthCode("02671Z")
+                        .setTrandate(Dates.create(2015, 06 - 1, 06)).setCommitDate(Dates.create(2015, 06 - 1, 9)).setAuthCode("02671Z")
                         .setDescription("?????? ???????\\??????\\S1HA0HFD\\UA\\DERGACHI\\KHAR\\7YABOYKO")
                         .setCurrency("USD").setAmount("-100.00").setAccountAmount("-815.23"),
                 transactions.get(4));
 
+    }
+
+    public void testParseCardTransactionsWithLocks() throws FetchException, ParseException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithLocks().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        List<UkrsibBankTransaction> transactions = parser.parseTransactions("1111110000002222");
+        assertEquals(2, transactions.size());
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 07 - 1, 9)).setAuthCode("832989")
+                        .setDescription("Regular expence\\KLASSKORKA KHARKOV UKR")
+                        .setCurrency("UAH").setAmount("-471.98").setAccountAmount("-471.98"),
+                transactions.get(0));
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 07 - 1, 9)).setAuthCode("836710")
+                        .setDescription("Regular expence\\KLASSKORKA KHARKOV UKR")
+                        .setCurrency("USD").setAmount("-26.24").setAccountAmount("-433.21"),
+                transactions.get(1));
+
+        transactions = parser.parseTransactions("3333330000004444");
+        assertEquals(2, transactions.size());
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 07 - 1, 8)).setAuthCode("232989")
+                        .setDescription("Regular expence\\KLASSKORKA KHARKOV UKR 3")
+                        .setCurrency("UAH").setAmount("-421.98").setAccountAmount("-421.98"),
+                transactions.get(0));
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 07 - 1, 7)).setAuthCode("336710")
+                        .setDescription("Regular expence\\KLASSKORKA KHARKOV UKR 4")
+                        .setCurrency("UAH").setAmount("-16.24").setAccountAmount("-16.24"),
+                transactions.get(1));
     }
 }
