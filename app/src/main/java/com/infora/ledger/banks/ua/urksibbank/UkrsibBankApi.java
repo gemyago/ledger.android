@@ -97,7 +97,7 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
             parser = new UkrsibBankResponseParser(response.body().byteStream());
         }
         tryLogout(client);
-        return parseAndFilterTransactions(parser, linkData.card, startDate, endDate);
+        return parseAndFilterTransactions(parser, linkData.fetchAccountTransactions, linkData.card, startDate, endDate);
     }
 
     private void tryLogout(OkHttpClient client) {
@@ -112,10 +112,13 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         }
     }
 
-    private List<UkrsibBankTransaction> parseAndFilterTransactions(UkrsibBankResponseParser parser, String card, Date startDate, Date endDate) throws FetchException {
-        List<UkrsibBankTransaction> transactions = null;
+    private List<UkrsibBankTransaction> parseAndFilterTransactions(UkrsibBankResponseParser parser, boolean fetchAccountTransactions, String card, Date startDate, Date endDate) throws FetchException {
+        List<UkrsibBankTransaction> transactions;
         try {
             transactions = parser.parseTransactions(card);
+            if(fetchAccountTransactions) {
+                transactions.addAll(parser.parseAccountTransactions());
+            }
         } catch (ParseException e) {
             throw new FetchException("Failed to parse transactions.", e);
         }
