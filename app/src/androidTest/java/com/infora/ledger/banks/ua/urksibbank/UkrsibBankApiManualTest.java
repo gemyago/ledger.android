@@ -35,12 +35,12 @@ public class UkrsibBankApiManualTest extends TestCase {
         api = new UkrsibBankApi();
 
         bankLink = new BankLink()
-                .setLinkData(new UkrsibBankLinkData("TODO", "TODO", "TODO", "TODO"));
+                .setLinkData(new UkrsibBankLinkData("TODO", "TODO", "TODO", "TODO", false));
     }
 
     public void testGetTransactionsWrongLoginPassword() throws IOException, FetchException {
         bankLink = new BankLink()
-                .setLinkData(new UkrsibBankLinkData("fake", "fake", "fake", "fake"));
+                .setLinkData(new UkrsibBankLinkData("fake", "fake", "fake", "fake", false));
         boolean errorRaised = false;
         try {
             api.getTransactions(new GetTransactionsRequest(bankLink, Dates.addDays(new Date(), 10), new Date()));

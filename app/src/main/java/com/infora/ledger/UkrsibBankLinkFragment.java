@@ -36,7 +36,7 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
 
     @Override
     public UkrsibBankLinkData getBankLinkData() {
-        return new UkrsibBankLinkData(login.getText().toString(), password.getText().toString(), null, card.getText().toString());
+        return new UkrsibBankLinkData(login.getText().toString(), password.getText().toString(), null, card.getText().toString(), false);
     }
 
     @Override
