@@ -8,11 +8,13 @@ import com.infora.ledger.support.ObfuscatedString;
 public class UkrsibBankLinkData {
     public String login;
     public String password;
+    public String account;
     public String card;
 
-    public UkrsibBankLinkData(String login, String password, String card) {
+    public UkrsibBankLinkData(String login, String password, String account, String card) {
         this.login = login;
         this.password = password;
+        this.account = account;
         this.card = card;
     }
 
@@ -21,6 +23,7 @@ public class UkrsibBankLinkData {
         return "UkrsibBankLinkData{" +
                 "login='" + ObfuscatedString.value(login) + '\'' +
                 ", password='" + ObfuscatedString.value(password) + '\'' +
+                ", account='" + ObfuscatedString.value(account) + '\'' +
                 ", card='" + ObfuscatedString.value(card) + '\'' +
                 '}';
     }

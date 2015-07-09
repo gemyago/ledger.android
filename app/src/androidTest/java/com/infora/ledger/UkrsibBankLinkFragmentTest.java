@@ -32,7 +32,7 @@ public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         EditText password = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_password);
         EditText card = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_card_number);
 
-        UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", "card-1");
+        UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", null, "card-1");
         fragment.setBankLinkData(new BankLink().setLinkData(linkData));
 
         assertEquals(linkData.login, login.getText().toString());
@@ -60,7 +60,7 @@ public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         EditText password = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_password);
         EditText card = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_card_number);
 
-        UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", "card-1");
+        UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", null, "card-1");
         fragment.setBankLinkData(new BankLink().setLinkData(linkData));
         fragment.clearLinkData();
 

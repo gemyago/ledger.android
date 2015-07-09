@@ -1,7 +1,5 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
-import android.os.Environment;
-
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
@@ -37,12 +35,12 @@ public class UkrsibBankApiManualTest extends TestCase {
         api = new UkrsibBankApi();
 
         bankLink = new BankLink()
-                .setLinkData(new UkrsibBankLinkData("TODO", "TODO", "TODO"));
+                .setLinkData(new UkrsibBankLinkData("TODO", "TODO", "TODO", "TODO"));
     }
 
     public void testGetTransactionsWrongLoginPassword() throws IOException, FetchException {
         bankLink = new BankLink()
-                .setLinkData(new UkrsibBankLinkData("fake", "fake", "fake"));
+                .setLinkData(new UkrsibBankLinkData("fake", "fake", "fake", "fake"));
         boolean errorRaised = false;
         try {
             api.getTransactions(new GetTransactionsRequest(bankLink, Dates.addDays(new Date(), 10), new Date()));

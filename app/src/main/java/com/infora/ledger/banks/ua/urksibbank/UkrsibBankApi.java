@@ -5,12 +5,10 @@ import android.util.Log;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
-import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.support.ObfuscatedString;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -36,7 +34,7 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
 
         UkrsibBankLinkData linkData = request.bankLink.getLinkData(UkrsibBankLinkData.class);
 
-        Log.d(TAG, "Retrieving initial view state");
+        Log.d(TAG, "Authenticating...");
         Request authRequest = new Request.Builder()
                 .url(LOGIN_URL)
                 .post(new FormEncodingBuilder()
@@ -52,17 +50,16 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         //Redirects are not allowed further. The redirect would mean failure.
         client.setFollowRedirects(false);
 
-        Log.d(TAG, "Authenticated. Retrieving card account number.");
-        //TODO: Account number should be here.
-        String accountNumber = parser.parseAccountNumber(linkData.card);
+        Log.d(TAG, "Authenticated. Retrieving card accountId.");
+        String accountId = parser.parseAccountId(linkData.account);
         String viewState = parser.parseViewState();
 
-        Log.d(TAG, "Card account number retrieved: " + ObfuscatedString.value(accountNumber) + ". Retrieving transactions.");
+        Log.d(TAG, "Card accountId retrieved: " + ObfuscatedString.value(accountId) + ". Retrieving transactions.");
 
         response = execute(client, new Request.Builder()
                 .url(WELCOME_URL)
                 .post(new FormEncodingBuilder()
-                                .add("accountId", accountNumber)
+                                .add("accountId", accountId)
                                 .add("javax.faces.ViewState", viewState)
                                 .add("welcomeForm:_idcl", "welcomeForm:j_id_jsp_692165209_58:1:j_id_jsp_692165209_64")
                                 .add("welcomeForm_SUBMIT", "1")

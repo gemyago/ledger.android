@@ -33,14 +33,14 @@ public class UkrsibBankResponseParserTest extends TestCase {
         assertEquals("the-view-state-value", parser.parseViewState());
     }
 
-    public void testParseAccountNumber() throws FetchException {
+    public void testParseAccountId() throws FetchException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithAccounts().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
-        assertEquals("11112222", parser.parseAccountNumber("33334444555566"));
-        assertEquals("77778888", parser.parseAccountNumber("99998888000099"));
+        assertEquals("11112222", parser.parseAccountId("33334444555566"));
+        assertEquals("77778888", parser.parseAccountId("99998888000099"));
         boolean parseErrorThrown = false;
         try {
-            parser.parseAccountNumber("12345678123490");
+            parser.parseAccountId("12345678123490");
         } catch (UkrsibBankException ex) {
             assertEquals("Account not found. Card: " + ObfuscatedString.value("12345678123490"), ex.getMessage());
             parseErrorThrown = true;
@@ -51,7 +51,7 @@ public class UkrsibBankResponseParserTest extends TestCase {
     public void testParseCardTransactions() throws FetchException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithTransactions().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
-        List<UkrsibBankTransaction> transactions = parser.parseTransactions("11111100002222");
+        List<UkrsibBankTransaction> transactions = parser.parseTransactions("1111110000002222");
         assertEquals(2, transactions.size());
         assertEquals(new UkrsibBankTransaction()
                         .setTrandate("12.06.2015").setCommitDate("16.06.2015").setAuthCode("605357")
@@ -64,7 +64,7 @@ public class UkrsibBankResponseParserTest extends TestCase {
                         .setCurrency("UAH").setAmount("-4 000.00").setAccountAmount("-4 000.00"),
                 transactions.get(1));
 
-        transactions = parser.parseTransactions("33333300004444");
+        transactions = parser.parseTransactions("3333330000004444");
         assertEquals(5, transactions.size());
         assertEquals(new UkrsibBankTransaction()
                         .setTrandate("04.06.2015").setCommitDate("08.06.2015").setAuthCode("92963Z")

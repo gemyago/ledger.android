@@ -44,7 +44,7 @@ public class UkrsibBankResponseParser {
         return viewState.val();
     }
 
-    public String parseAccountNumber(String cardNumber) throws UkrsibBankException {
+    public String parseAccountId(String cardNumber) throws UkrsibBankException {
         Element currentAccounts = document.getElementsByClass("current-accounts").get(0);
         Elements accountColumns = currentAccounts.getElementsByClass("accountColumn");
         for (Element accountColumn : accountColumns) {
@@ -59,12 +59,12 @@ public class UkrsibBankResponseParser {
     }
 
     public List<UkrsibBankTransaction> parseTransactions(String cardNumber) {
-        if (cardNumber.length() != 14)
-            throw new IllegalArgumentException("cardNumber expected to contain 14 digits.");
+        if (cardNumber.length() != 16)
+            throw new IllegalArgumentException("cardNumber expected to contain 16 digits.");
         ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
         Element externalTable = document.getElementsByClass("externalTable").get(0);
         Elements opersTables = externalTable.getElementsByClass("opersTable");
-        String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(10, 14);
+        String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(12, 16);
         for (Element opersTable : opersTables) {
             Elements caption = opersTable.getElementsByTag("caption");
             if (caption.text().contains(cardPattern)) {
