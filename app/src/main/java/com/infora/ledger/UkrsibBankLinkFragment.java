@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
@@ -18,6 +19,8 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
 
     private EditText login;
     private EditText password;
+    private EditText account;
+    private CheckBox fetchAccountTransactions;
     private EditText card;
 
     @Nullable
@@ -30,13 +33,20 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         login = (EditText) getView().findViewById(R.id.ukrsib_bank_login);
         password = (EditText) getView().findViewById(R.id.ukrsib_bank_password);
+        account = (EditText) getView().findViewById(R.id.ukrsib_bank_account_number);
+        fetchAccountTransactions = (CheckBox) getView().findViewById(R.id.ukrsib_bank_fetch_account_transactions);
         card = (EditText) getView().findViewById(R.id.ukrsib_bank_card_number);
         super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
     public UkrsibBankLinkData getBankLinkData() {
-        return new UkrsibBankLinkData(login.getText().toString(), password.getText().toString(), null, card.getText().toString(), false);
+        return new UkrsibBankLinkData(
+                login.getText().toString(),
+                password.getText().toString(),
+                account.getText().toString(),
+                card.getText().toString(),
+                fetchAccountTransactions.isChecked());
     }
 
     @Override
@@ -44,6 +54,8 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
         UkrsibBankLinkData linkData = bankLink.getLinkData(UkrsibBankLinkData.class);
         login.setText(linkData.login);
         password.setText(linkData.password);
+        account.setText(linkData.account);
+        fetchAccountTransactions.setChecked(linkData.fetchAccountTransactions);
         card.setText(linkData.card);
     }
 
@@ -51,6 +63,8 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
     public void clearLinkData() {
         login.setText("");
         password.setText("");
+        account.setText("");
+        fetchAccountTransactions.setChecked(false);
         card.setText("");
     }
 }

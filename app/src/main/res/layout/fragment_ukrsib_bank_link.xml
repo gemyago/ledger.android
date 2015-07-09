@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <TextView
-        android:text="Urksib Bank Link"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Urksib Bank Link" />
 
     <EditText
         android:id="@+id/ukrsib_bank_login"
@@ -20,8 +22,20 @@
         android:hint="Password" />
 
     <EditText
+        android:id="@+id/ukrsib_bank_account_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Account Number" />
+
+    <EditText
         android:id="@+id/ukrsib_bank_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Card Number" />
+
+    <CheckBox
+        android:id="@+id/ukrsib_bank_fetch_account_transactions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fetch transactions not linked to any card" />
 </LinearLayout>

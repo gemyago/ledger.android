@@ -14,13 +14,14 @@ public class UkrsibBankLinkData {
     /**
      * Indicates if account specific transactions (not linked to any card) should be fetched.
      */
-    public Boolean fetchAccountTransactions;
+    public boolean fetchAccountTransactions;
 
-    public UkrsibBankLinkData(String login, String password, String account, String card, Boolean fetchAccountTransactions) {
+    public UkrsibBankLinkData(String login, String password, String account, String card, boolean fetchAccountTransactions) {
         this.login = login;
         this.password = password;
         this.account = account;
         this.card = card;
+        this.fetchAccountTransactions = fetchAccountTransactions;
     }
 
     @Override
