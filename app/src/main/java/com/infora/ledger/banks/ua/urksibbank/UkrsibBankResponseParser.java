@@ -63,18 +63,39 @@ public class UkrsibBankResponseParser {
         throw new UkrsibBankException("Account not found. Card: " + ObfuscatedString.value(cardNumber));
     }
 
+    /**
+     * Parse transactions linked to the card provided
+     *
+     * @param cardNumber
+     * @return
+     * @throws ParseException
+     */
     public List<UkrsibBankTransaction> parseTransactions(String cardNumber) throws ParseException {
         if (cardNumber.length() != 16)
             throw new IllegalArgumentException("cardNumber expected to contain 16 digits.");
         ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
         Elements externalTables = document.getElementsByClass("externalTable");
+        RegularCardTransactionTableRowParser regularParser = new RegularCardTransactionTableRowParser();
+        CardLocksTransactionTableRowParser cardLocksParser = new CardLocksTransactionTableRowParser();
         for (Element externalTable : externalTables) {
             Elements opersTables = externalTable.getElementsByClass("opersTable");
             String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(12, 16);
             for (Element opersTable : opersTables) {
                 Elements caption = opersTable.getElementsByTag("caption");
                 if (caption.text().contains(cardPattern)) {
-                    appendTransactions(transactions, opersTable);
+
+                    Element tbody = opersTable.getElementsByTag("tbody").get(0);
+                    Elements rows = tbody.getElementsByTag("tr");
+                    if(rows.size() > 0) {
+                        Elements firstRowCells = rows.get(0).getElementsByTag("td");
+                        if(firstRowCells.size() == 7) {
+                            appendTransactions(transactions, opersTable, regularParser);
+                        } else if(firstRowCells.size() == 6) {
+                            appendTransactions(transactions, opersTable, cardLocksParser);
+                        } else {
+                            throw new ParseException("Unexpected cells count: " + firstRowCells.size(), 0);
+                        }
+                    }
                     break;
                 }
             }
@@ -82,36 +103,83 @@ public class UkrsibBankResponseParser {
         return transactions;
     }
 
-    private void appendTransactions(ArrayList<UkrsibBankTransaction> transactions, Element opersTable) throws ParseException {
+    /**
+     * Parse transactions not linked to any card
+     *
+     * @return
+     * @throws ParseException
+     */
+    public List<UkrsibBankTransaction> parseAccountTransactions() throws ParseException {
+        ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
+        Elements opersTables = document.select("form#cardAccountInfoForm > table.opersTable");
+        if(opersTables.size() != 1) throw new ParseException("Unexpected number of opersTables. Expected 1, got " + opersTables.size(), 0);
+        appendTransactions(transactions, opersTables.get(0), new AccountTransactionTableRowParser());
+        return transactions;
+    }
+
+
+    private void appendTransactions(ArrayList<UkrsibBankTransaction> transactions, Element opersTable, TransactionTableRowParser parser) throws ParseException {
         Element tbody = opersTable.getElementsByTag("tbody").get(0);
         Elements rows = tbody.getElementsByTag("tr");
         for (Element row : rows) {
-            Elements cells = row.getElementsByTag("td");
-            int cellNumber = 0;
-            UkrsibBankTransaction transaction;
-            if(cells.size() == 7) { //Regular card expenses or account expenses
-                transaction = new UkrsibBankTransaction()
-                        .setTrandate(parseDate(cells.get(cellNumber++).text().trim()))
-                        .setCommitDate(parseDate(cells.get(cellNumber++).text().trim()))
-                        .setAuthCode(cells.get(cellNumber++).text().trim());
-            } else if(cells.size() == 6) { //Locks table
-                transaction = new UkrsibBankTransaction()
-                        .setAuthCode(cells.get(cellNumber++).text().trim())
-                        .setTrandate(parseDate(cells.get(cellNumber++).text().trim()));
-            } else {
-                throw new ParseException("Unexpected cells count: " + cells.size(), row.siblingIndex());
-            }
-
-            transaction.setDescription(cells.get(cellNumber++).text().trim())
-                    .setCurrency(cells.get(cellNumber++).text().trim())
-                    .setAmount(cells.get(cellNumber++).text().trim())
-                    .setAccountAmount(cells.get(cellNumber++).text().trim());
-
-            transactions.add(transaction);
+            transactions.add(parser.parse(row));
         }
     }
 
-    private Date parseDate(String dateString) throws ParseException {
+    private static Date parseDate(String dateString) throws ParseException {
         return DATE_FORMAT.parse(dateString);
+    }
+
+    private interface TransactionTableRowParser {
+        UkrsibBankTransaction parse(Element cell) throws ParseException;
+    }
+
+    private static class RegularCardTransactionTableRowParser implements TransactionTableRowParser {
+        @Override
+        public UkrsibBankTransaction parse(Element row) throws ParseException {
+            Elements cells = row.getElementsByTag("td");
+            int cellNumber = 0;
+            UkrsibBankTransaction transaction = new UkrsibBankTransaction()
+                    .setTrandate(parseDate(cells.get(cellNumber++).text().trim()))
+                    .setCommitDate(parseDate(cells.get(cellNumber++).text().trim()))
+                    .setAuthCode(cells.get(cellNumber++).text().trim())
+                    .setDescription(cells.get(cellNumber++).text().trim())
+                    .setCurrency(cells.get(cellNumber++).text().trim())
+                    .setAmount(cells.get(cellNumber++).text().trim())
+                    .setAccountAmount(cells.get(cellNumber++).text().trim());
+            return transaction;
+        }
+    }
+
+    private static class CardLocksTransactionTableRowParser implements TransactionTableRowParser {
+        @Override
+        public UkrsibBankTransaction parse(Element row) throws ParseException {
+            Elements cells = row.getElementsByTag("td");
+            int cellNumber = 0;
+            UkrsibBankTransaction transaction = new UkrsibBankTransaction()
+                    .setAuthCode(cells.get(cellNumber++).text().trim())
+                    .setTrandate(parseDate(cells.get(cellNumber++).text().trim()))
+                    .setDescription(cells.get(cellNumber++).text().trim())
+                    .setCurrency(cells.get(cellNumber++).text().trim())
+                    .setAmount(cells.get(cellNumber++).text().trim())
+                    .setAccountAmount(cells.get(cellNumber++).text().trim());
+            return transaction;
+        }
+    }
+
+    private static class AccountTransactionTableRowParser implements TransactionTableRowParser {
+        @Override
+        public UkrsibBankTransaction parse(Element row) throws ParseException {
+            Elements cells = row.getElementsByTag("td");
+            int cellNumber = 0;
+            UkrsibBankTransaction transaction = new UkrsibBankTransaction()
+                    .setTrandate(parseDate(cells.get(cellNumber++).text().trim()))
+                    .setCommitDate(parseDate(cells.get(cellNumber++).text().trim()))
+                    .setDescription(cells.get(cellNumber++).text().trim())
+                    .setCurrency(cells.get(cellNumber++).text().trim())
+                    .setAmount(cells.get(cellNumber++).text().trim())
+                    .setAccountAmount(cells.get(cellNumber++).text().trim());
+            return transaction;
+        }
     }
 }

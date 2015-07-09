@@ -110,4 +110,23 @@ public class UkrsibBankResponseParserTest extends TestCase {
                         .setCurrency("UAH").setAmount("-16.24").setAccountAmount("-16.24"),
                 transactions.get(1));
     }
+
+    public void testParseAccountTransactions() throws FetchException, ParseException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithAccountTransactions().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        List<UkrsibBankTransaction> transactions = parser.parseAccountTransactions();
+        assertEquals(2, transactions.size());
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 06 - 1, 15))
+                        .setCommitDate(Dates.create(2015, 06 - 1, 15))
+                        .setDescription("Regular income")
+                        .setCurrency("UAH").setAmount("4 186.95").setAccountAmount("4 186.95"),
+                transactions.get(0));
+        assertEquals(new UkrsibBankTransaction()
+                        .setTrandate(Dates.create(2015, 06 - 1, 30))
+                        .setCommitDate(Dates.create(2015, 06 - 1, 30))
+                        .setDescription("General expense")
+                        .setCurrency("USD").setAmount("1000.00").setAccountAmount("22103.01"),
+                transactions.get(1));
+    }
 }

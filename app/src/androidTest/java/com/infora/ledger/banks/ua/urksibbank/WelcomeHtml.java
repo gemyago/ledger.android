@@ -317,82 +317,160 @@ public class WelcomeHtml {
     }
 
     public static String contentsWithLocks() {
-            return "<table class=\"externalTable\">\n" +
-                    "</table>\n" +
-                    "\n" +
-                    "<table class=\"externalTable\">\n" +
-                    "    <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:tbody_element\">\n" +
-                    "    <tr>\n" +
-                    "        <td>\n" +
-                    "            <table class=\"opersTable\">\n" +
-                    "                <caption>MasterCard Debit 333333****4444 SURNAME NAME</caption>\n" +
-                    "                <thead>\n" +
-                    "                </thead>\n" +
-                    "                <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:1:j_id_jsp_1610737686_178:tbody_element\">\n" +
-                    "                <tr class=\"darkRow\">\n" +
-                    "                    <td class=\"dateColumn\">232989</td>\n" +
-                    "                    <td class=\"dateColumn\">08.07.2015</td>\n" +
-                    "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR 3</td>\n" +
-                    "                    <td class=\"currencyColumn\">UAH</td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-421.98</nobr>\n" +
-                    "                    </td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-421.98</nobr>\n" +
-                    "                    </td>\n" +
-                    "                </tr>\n" +
-                    "                <tr class=\"brightRow\">\n" +
-                    "                    <td class=\"dateColumn\">336710</td>\n" +
-                    "                    <td class=\"dateColumn\">07.07.2015</td>\n" +
-                    "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR 4</td>\n" +
-                    "                    <td class=\"currencyColumn\">UAH</td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-16.24</nobr>\n" +
-                    "                    </td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-16.24</nobr>\n" +
-                    "                    </td>\n" +
-                    "                </tr>\n" +
-                    "                </tbody>\n" +
-                    "            </table>\n" +
-                    "        </td>\n" +
-                    "    </tr>\n" +
-                    "    <tr>\n" +
-                    "        <td>\n" +
-                    "            <table class=\"opersTable\">\n" +
-                    "                <caption>MasterCard Debit 111111****2222 SURNAME NAME</caption>\n" +
-                    "                <thead>\n" +
-                    "                </thead>\n" +
-                    "                <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:1:j_id_jsp_1610737686_178:tbody_element\">\n" +
-                    "                <tr class=\"darkRow\">\n" +
-                    "                    <td class=\"dateColumn\">832989</td>\n" +
-                    "                    <td class=\"dateColumn\">09.07.2015</td>\n" +
-                    "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR</td>\n" +
-                    "                    <td class=\"currencyColumn\">UAH</td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-471.98</nobr>\n" +
-                    "                    </td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-471.98</nobr>\n" +
-                    "                    </td>\n" +
-                    "                </tr>\n" +
-                    "                <tr class=\"brightRow\">\n" +
-                    "                    <td class=\"dateColumn\">836710</td>\n" +
-                    "                    <td class=\"dateColumn\">09.07.2015</td>\n" +
-                    "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR</td>\n" +
-                    "                    <td class=\"currencyColumn\">USD</td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-26.24</nobr>\n" +
-                    "                    </td>\n" +
-                    "                    <td class=\"amountColumn\">\n" +
-                    "                        <nobr>-433.21</nobr>\n" +
-                    "                    </td>\n" +
-                    "                </tr>\n" +
-                    "                </tbody>\n" +
-                    "            </table>\n" +
-                    "        </td>\n" +
-                    "    </tr>\n" +
-                    "    </tbody>\n" +
-                    "</table>";
+        return "<table class=\"externalTable\">\n" +
+                "</table>\n" +
+                "\n" +
+                "<table class=\"externalTable\">\n" +
+                "    <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:tbody_element\">\n" +
+                "    <tr>\n" +
+                "        <td>\n" +
+                "            <table class=\"opersTable\">\n" +
+                "                <caption>MasterCard Debit 333333****4444 SURNAME NAME</caption>\n" +
+                "                <thead>\n" +
+                "                </thead>\n" +
+                "                <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:1:j_id_jsp_1610737686_178:tbody_element\">\n" +
+                "                <tr class=\"darkRow\">\n" +
+                "                    <td class=\"dateColumn\">232989</td>\n" +
+                "                    <td class=\"dateColumn\">08.07.2015</td>\n" +
+                "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR 3</td>\n" +
+                "                    <td class=\"currencyColumn\">UAH</td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-421.98</nobr>\n" +
+                "                    </td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-421.98</nobr>\n" +
+                "                    </td>\n" +
+                "                </tr>\n" +
+                "                <tr class=\"brightRow\">\n" +
+                "                    <td class=\"dateColumn\">336710</td>\n" +
+                "                    <td class=\"dateColumn\">07.07.2015</td>\n" +
+                "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR 4</td>\n" +
+                "                    <td class=\"currencyColumn\">UAH</td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-16.24</nobr>\n" +
+                "                    </td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-16.24</nobr>\n" +
+                "                    </td>\n" +
+                "                </tr>\n" +
+                "                </tbody>\n" +
+                "            </table>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "    <tr>\n" +
+                "        <td>\n" +
+                "            <table class=\"opersTable\">\n" +
+                "                <caption>MasterCard Debit 111111****2222 SURNAME NAME</caption>\n" +
+                "                <thead>\n" +
+                "                </thead>\n" +
+                "                <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_175:1:j_id_jsp_1610737686_178:tbody_element\">\n" +
+                "                <tr class=\"darkRow\">\n" +
+                "                    <td class=\"dateColumn\">832989</td>\n" +
+                "                    <td class=\"dateColumn\">09.07.2015</td>\n" +
+                "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR</td>\n" +
+                "                    <td class=\"currencyColumn\">UAH</td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-471.98</nobr>\n" +
+                "                    </td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-471.98</nobr>\n" +
+                "                    </td>\n" +
+                "                </tr>\n" +
+                "                <tr class=\"brightRow\">\n" +
+                "                    <td class=\"dateColumn\">836710</td>\n" +
+                "                    <td class=\"dateColumn\">09.07.2015</td>\n" +
+                "                    <td>Regular expence\\KLASSKORKA KHARKOV UKR</td>\n" +
+                "                    <td class=\"currencyColumn\">USD</td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-26.24</nobr>\n" +
+                "                    </td>\n" +
+                "                    <td class=\"amountColumn\">\n" +
+                "                        <nobr>-433.21</nobr>\n" +
+                "                    </td>\n" +
+                "                </tr>\n" +
+                "                </tbody>\n" +
+                "            </table>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "    </tbody>\n" +
+                "</table>";
+    }
+
+    public static String contentsWithAccountTransactions() {
+        return "<form enctype=\"application/x-www-form-urlencoded\"\n" +
+                "      action=\"/web_banking/protected/reports/sap_card_account_info.jsf\" method=\"post\"\n" +
+                "      name=\"cardAccountInfoForm\" id=\"cardAccountInfoForm\">\n" +
+                "    <table class=\"opersTable\">\n" +
+                "        <thead>\n" +
+                "        </thead>\n" +
+                "        <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_109:tbody_element\">\n" +
+                "        <tr class=\"darkRow\">\n" +
+                "            <td class=\"dateColumn\">15.06.2015</td>\n" +
+                "            <td class=\"dateColumn\">15.06.2015</td>\n" +
+                "            <td>Regular income</td>\n" +
+                "            <td class=\"currencyColumn\">UAH</td>\n" +
+                "            <td class=\"amountColumn\">\n" +
+                "                <nobr>4 186.95</nobr>\n" +
+                "            </td>\n" +
+                "            <td class=\"amountColumn\">\n" +
+                "                <nobr>4 186.95</nobr>\n" +
+                "            </td>\n" +
+                "        </tr>\n" +
+                "        <tr class=\"brightRow\">\n" +
+                "            <td class=\"dateColumn\">30.06.2015</td>\n" +
+                "            <td class=\"dateColumn\">30.06.2015</td>\n" +
+                "            <td>General expense</td>\n" +
+                "            <td class=\"currencyColumn\">USD</td>\n" +
+                "            <td class=\"amountColumn\">\n" +
+                "                <nobr>1000.00</nobr>\n" +
+                "            </td>\n" +
+                "            <td class=\"amountColumn\">\n" +
+                "                <nobr>22103.01</nobr>\n" +
+                "            </td>\n" +
+                "        </tr>\n" +
+                "        </tbody>\n" +
+                "    </table>\n" +
+                "    <table class=\"externalTable\">\n" +
+                "        <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_136:tbody_element\">\n" +
+                "        <tr>\n" +
+                "            <td>\n" +
+                "                <table class=\"opersTable\">\n" +
+                "                    <caption>MasterCard Debit 111111****2222 SURNAME NAME</caption>\n" +
+                "                    <thead>\n" +
+                "                    </thead>\n" +
+                "                    <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_136:0:j_id_jsp_1610737686_139:tbody_element\">\n" +
+                "                    <tr class=\"darkRow\">\n" +
+                "                        <td class=\"dateColumn\">12.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">16.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">605357</td>\n" +
+                "                        <td>General expense</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-500.00</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-500.00</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr class=\"brightRow\">\n" +
+                "                        <td class=\"dateColumn\">17.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">18.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">154670</td>\n" +
+                "                        <td>General expense</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-4 000.00</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-4 000.00</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    </tbody>\n" +
+                "                </table>\n" +
+                "            </td>\n" +
+                "        </tr>\n" +
+                "        </tbody>\n" +
+                "    </table>\n" +
+                "</form>";
     }
 }
