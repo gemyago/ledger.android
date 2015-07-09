@@ -11,6 +11,18 @@ import java.util.Date;
  * Created by jenya on 16.06.15.
  */
 public class Dates {
+    public static Date create(int year, int month, int day) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DATE, day);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+
     public static Date startOfDay(Date original) {
         Calendar cal = getCalendar(original);
         cal.set(Calendar.HOUR_OF_DAY, 0);

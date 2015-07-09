@@ -3,6 +3,9 @@ package com.infora.ledger.banks.ua.urksibbank;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.support.Dates;
+
+import java.util.Date;
 
 /**
  * Created by jenya on 06.07.15.
@@ -11,20 +14,20 @@ public class UkrsibBankTransaction implements BankTransaction {
     //http://www.theswiftcodes.com/ukraine/khabua2k/
     public static final String BIC = "KHABUA2K";
 
-    public String trandate;
-    public String commitDate;
+    public Date trandate;
+    public Date commitDate;
     public String authCode;
     public String description;
     public String currency;
     public String amount;
     public String accountAmount;
 
-    public UkrsibBankTransaction setTrandate(String trandate) {
+    public UkrsibBankTransaction setTrandate(Date trandate) {
         this.trandate = trandate;
         return this;
     }
 
-    public UkrsibBankTransaction setCommitDate(String commitDate) {
+    public UkrsibBankTransaction setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
         return this;
     }
@@ -66,9 +69,9 @@ public class UkrsibBankTransaction implements BankTransaction {
 
         UkrsibBankTransaction that = (UkrsibBankTransaction) o;
 
-        if (trandate != null ? !trandate.equals(that.trandate) : that.trandate != null)
+        if (!Dates.areEqual(trandate, that.trandate))
             return false;
-        if (commitDate != null ? !commitDate.equals(that.commitDate) : that.commitDate != null)
+        if (!Dates.areEqual(commitDate, that.commitDate))
             return false;
         if (authCode != null ? !authCode.equals(that.authCode) : that.authCode != null)
             return false;

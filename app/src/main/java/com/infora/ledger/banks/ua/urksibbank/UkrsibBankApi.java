@@ -5,6 +5,7 @@ import android.util.Log;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
+import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.ObfuscatedString;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -13,6 +14,9 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.net.CookieManager;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,7 +31,9 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
 
     @Override
     public List<UkrsibBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, FetchException {
-        Log.i(TAG, "Fetching ukrsibbank transactions. From: " + request.startDate + ", to: " + request.endDate);
+        Date startDate = Dates.startOfDay(request.startDate);
+        Date endDate = Dates.endOfDay(request.endDate);
+        Log.i(TAG, "Fetching ukrsibbank transactions. From: " + startDate + ", to: " + endDate);
 
         OkHttpClient client = new OkHttpClient();
         client.setCookieHandler(new CookieManager());
@@ -67,9 +73,25 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
                 )
                 .build());
         parser = new UkrsibBankResponseParser(response.body().byteStream());
-        List<UkrsibBankTransaction> transactions = parser.parseTransactions(linkData.card);
-        Log.d(TAG, transactions.size() + " parsed.");
-        return transactions;
+        List<UkrsibBankTransaction> transactions = null;
+        try {
+            transactions = parser.parseTransactions(linkData.card);
+        } catch (ParseException e) {
+            throw new FetchException("Failed to parse transactions.", e);
+        }
+        List<UkrsibBankTransaction> filteredTransactions = filterTransactions(transactions, startDate, endDate);
+        Log.d(TAG, transactions.size() + " parsed, filtered by dates: " + filteredTransactions.size());
+
+        return filteredTransactions;
+    }
+
+    private List<UkrsibBankTransaction> filterTransactions(List<UkrsibBankTransaction> transactions, Date startDate, Date endDate) {
+        ArrayList<UkrsibBankTransaction> filteredTransactions = new ArrayList<>();
+        for (UkrsibBankTransaction transaction : transactions) {
+            if(transaction.trandate.compareTo(startDate) >= 0 && transaction.trandate.compareTo(endDate) <= 0)
+                filteredTransactions.add(transaction);
+        }
+        return filteredTransactions;
     }
 
     private Response execute(OkHttpClient client, Request authRequest) throws IOException {
