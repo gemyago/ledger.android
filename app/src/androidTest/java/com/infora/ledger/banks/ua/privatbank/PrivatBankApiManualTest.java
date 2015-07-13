@@ -23,6 +23,7 @@ import java.util.List;
 public class PrivatBankApiManualTest extends AndroidTestCase {
 
     private BankApi api;
+    private BankLink bankLink;
 
     @Override
     protected void runTest() throws Throwable {
@@ -37,20 +38,23 @@ public class PrivatBankApiManualTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         api = new PrivatBankApi();
+        final PrivatBankLinkData linkData = new PrivatBankLinkData("TODO (do not commit)",
+                "TODO (do not commit)",
+                "TODO (do not commit)");
+        bankLink = new BankLink().setLinkData(linkData);
     }
 
     public void testGetTransactions() throws IOException, FetchException {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
-        calendar.add(Calendar.DATE, -3);
+        calendar.add(Calendar.DATE, -5);
         Date yesterday = calendar.getTime();
-        final PrivatBankLinkData linkData = new PrivatBankLinkData("TODO (do not commit)",
-                "TODO (do not commit)",
-                "TODO (do not commit)");
+
         GetTransactionsRequest request = new GetTransactionsRequest(
-                new BankLink().setLinkData(linkData),
+                bankLink,
                 yesterday,
                 now);
+
         List<BankTransaction> transactions = api.getTransactions(request);
         LogUtil.d(this, "Fetched transactions " + transactions.size());
         for (BankTransaction transaction : transactions) {
