@@ -15,7 +15,7 @@ import java.util.List;
  * Created by jenya on 23.05.15.
  */
 public class PrivatBankApi implements com.infora.ledger.banks.BankApi<PrivatBankTransaction> {
-    private static final String API_URL = "http://pbanua2x-api.my-ledger.com/p24api/rest_fiz";
+    private static final String API_URL = "https://my-ledger.com/pbanua2x-api/p24api/rest_fiz";
     private final OkHttpClient client;
     private final PrivatBankResponseParser responseParser;
     private final PrivatBankRequestBuilder requestBuilder;

@@ -25,7 +25,7 @@
     <string name="login_title">Welcome to Ledger!</string>
 
     <string name="prefs_ledger_host">Ledger host</string>
-    <string name="prefs_ledger_host_summary">Host name of the ledger server. Sample: http://my-ledger.com.</string>
+    <string name="prefs_ledger_host_summary">Host name of the ledger server. Sample: https://my-ledger.com.</string>
     <string name="prefs_use_manual_sync">Synchronize manually</string>
     <string name="prefs_use_manual_sync_summary">Local and remote data will be synchronized only on synchronize action.</string>
     <string name="action_report">Report</string>
