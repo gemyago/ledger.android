@@ -6,6 +6,7 @@ import android.accounts.OperationCanceledException;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.api.ApiAdapter;
+import com.infora.ledger.api.DeviceSecretDto;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
@@ -23,7 +24,7 @@ public class ApiManualTest extends AndroidTestCase {
     /**
      * Before running tests please specify api endpoint url
      */
-    private String endpointUrl = "http://10.1.0.19:3000";
+    private String endpointUrl = "TODO: SPECIFY";
 
     private ApiAdapter adapter;
     private LedgerApi ledgerApi;
@@ -114,5 +115,12 @@ public class ApiManualTest extends AndroidTestCase {
             ledgerApi.rejectPendingTransaction(transaction.transactionId);
         }
         assertEquals(0, ledgerApi.getPendingTransactions().size());
+    }
+
+    public void testGetDeviceSecret() {
+        adapter.authenticateApi(ledgerApi, account);
+        DeviceSecretDto deviceSecret = adapter.getDeviceSecret(ledgerApi);
+        assertNotNull(deviceSecret.secret);
+        assertEquals(deviceSecret.secret, adapter.getDeviceSecret(ledgerApi).secret);
     }
 }

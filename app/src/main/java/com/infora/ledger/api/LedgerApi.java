@@ -45,4 +45,8 @@ public interface LedgerApi {
 
     @DELETE("/pending-transactions/{id}")
     Void rejectPendingTransaction(@Path("id") String transactionId);
+
+    @FormUrlEncoded
+    @POST("/api/devices/register.json")
+    DeviceSecretDto registerDevice(@Field("device_id") String deviceId, @Field("name") String name);
 }

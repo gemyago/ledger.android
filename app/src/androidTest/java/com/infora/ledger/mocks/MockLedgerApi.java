@@ -1,6 +1,7 @@
 package com.infora.ledger.mocks;
 
 import com.infora.ledger.api.AuthenticityToken;
+import com.infora.ledger.api.DeviceSecretDto;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
@@ -80,6 +81,11 @@ public class MockLedgerApi implements LedgerApi {
     @Override
     public Void rejectPendingTransaction(@Field("aggregate_id") String transactionId) {
         rejectedPendingTrasnsactions.add(transactionId);
+        return null;
+    }
+
+    @Override
+    public DeviceSecretDto registerDevice(@Field("device_id") String deviceId, @Field("name") String name) {
         return null;
     }
 

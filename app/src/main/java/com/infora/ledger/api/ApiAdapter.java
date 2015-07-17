@@ -3,7 +3,9 @@ package com.infora.ledger.api;
 import android.accounts.Account;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.infora.ledger.support.AccountManagerWrapper;
@@ -94,6 +96,10 @@ public class ApiAdapter {
             }
         }
         setAuthenticityToken(authenticityToken.getValue());
+    }
+
+    public DeviceSecretDto getDeviceSecret(LedgerApi api) {
+        return api.registerDevice(Settings.Secure.ANDROID_ID, Build.MODEL);
     }
 
     private String tryGettingToken(Account account, boolean invalidate) {
