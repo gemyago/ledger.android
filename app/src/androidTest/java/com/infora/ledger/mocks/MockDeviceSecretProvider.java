@@ -1,7 +1,5 @@
 package com.infora.ledger.mocks;
 
-import android.accounts.Account;
-
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.DeviceSecretProvider;
 
@@ -10,18 +8,26 @@ import com.infora.ledger.application.DeviceSecretProvider;
  */
 public class MockDeviceSecretProvider extends DeviceSecretProvider {
     private DeviceSecret secret;
+    private DeviceSecret pendingSecret;
 
     public MockDeviceSecretProvider(DeviceSecret secret) {
-        this.secret = secret;
+        super(null, null);
+        this.pendingSecret = secret;
     }
 
     @Override
     public DeviceSecret secret() {
-        return secret;
+        if (hasBeenRegistered()) return secret;
+        throw new RuntimeException("The secret has not been loaded yet.");
     }
 
     @Override
-    public void loadDeviceSecret(Account account) {
-        throw new RuntimeException("Not implemented");
+    public boolean hasBeenRegistered() {
+        return secret != null;
+    }
+
+    @Override
+    public void ensureDeviceRegistered() {
+        secret = pendingSecret;
     }
 }

@@ -203,6 +203,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
                     public BankLink loadInBackground() {
                         Log.d(TAG, "Loading bank link data.");
                         try {
+                            getDeviceSecretProvider().ensureDeviceRegistered();
                             return getBankLinksRepo().getById(bankLinkId);
                         } catch (SQLException e) {
                             //TODO: Implement error handling.

@@ -3,12 +3,16 @@ package com.infora.ledger.api;
 import android.accounts.Account;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.infora.ledger.SettingsFragment;
 import com.infora.ledger.support.AccountManagerWrapper;
+import com.infora.ledger.support.SharedPreferencesUtil;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
@@ -121,5 +125,12 @@ public class ApiAdapter {
             throw new RuntimeException(e);
         }
         return googleIdToken;
+    }
+
+    public static ApiAdapter createAdapter(Context context, AccountManagerWrapper accountManager) {
+        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
+        String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
+        Log.d(TAG, "Using ledger host: " + ledgerHost);
+        return new ApiAdapter(accountManager, ledgerHost);
     }
 }

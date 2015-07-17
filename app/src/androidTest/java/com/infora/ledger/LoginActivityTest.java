@@ -9,6 +9,7 @@ import android.test.ActivityUnitTestCase;
 import android.view.View;
 
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
+import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 
 import de.greenrobot.event.EventBus;
@@ -39,19 +40,16 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
     public void testOnActivityResultIfAccountWasPicked() {
         EventBus bus = new EventBus();
         final boolean[] commandDispatched = {false};
-        bus.register(new RememberUserEmailCommandHandler() {
-            @Override
-            public void onEvent(CreateSystemAccountCommand cmd) {
-                assertEquals("test@mail.com", cmd.getEmail());
-                commandDispatched[0] = true;
-            }
-        });
+
+        MockSubscriber<CreateSystemAccountCommand> createSysAccountSubscriber = new MockSubscriber(CreateSystemAccountCommand.class);
+        bus.register(createSysAccountSubscriber);
         startActivity(new Intent(), null, null);
         getActivity().setBus(bus);
         Intent data = new Intent();
         data.putExtra(AccountManager.KEY_ACCOUNT_NAME, "test@mail.com");
         getActivity().onActivityResult(LoginActivity.REQUEST_CODE_PICK_ACCOUNT, Activity.RESULT_OK, data);
-        assertTrue("The command to remember user email was not dispatched.", commandDispatched[0]);
+        assertEquals(1, createSysAccountSubscriber.getEvents().size());
+        assertEquals("test@mail.com", createSysAccountSubscriber.getEvent().getEmail());
 
         Intent startedActivity = getStartedActivityIntent();
         assertNotNull(startedActivity);
@@ -67,10 +65,6 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
         assertEquals(LoginActivity.REQUEST_CODE_PICK_ACCOUNT, getStartedActivityRequest());
         Intent startedActivity = getStartedActivityIntent();
         assertEquals("com.google", startedActivity.getStringArrayExtra("allowableAccountTypes")[0]);
-    }
-
-    private interface RememberUserEmailCommandHandler {
-        void onEvent(CreateSystemAccountCommand cmd);
     }
 
     private class DummyGooglePlayServicesUtilWrapper extends GooglePlayServicesUtilWrapper {

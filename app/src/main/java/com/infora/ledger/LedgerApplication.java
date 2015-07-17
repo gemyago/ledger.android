@@ -10,7 +10,6 @@ import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
-import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
@@ -59,7 +58,7 @@ public class LedgerApplication extends Application {
         EventBus bus = getBus();
         bus.register(this);
 
-        deviceSecretProvider = new DeviceSecretProvider();
+        deviceSecretProvider = new DeviceSecretProvider(this, getAccountManager());
 
         PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);

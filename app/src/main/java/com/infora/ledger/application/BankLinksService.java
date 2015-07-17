@@ -56,6 +56,7 @@ public class BankLinksService {
 
     public void onEventBackgroundThread(AddBankLinkCommand command) {
         Log.d(TAG, "Inserting new bank link for bank: " + command.bic + ", account: " + command.accountName);
+        secretProvider.ensureDeviceRegistered();
 
         if(command.linkData == null) throw new IllegalArgumentException("command.linkData can not be null.");
 
@@ -83,6 +84,7 @@ public class BankLinksService {
 
     public void onEventBackgroundThread(UpdateBankLinkCommand command) {
         Log.d(TAG, "Updating bank link id='" + command.id + "'");
+        secretProvider.ensureDeviceRegistered();
         try {
             BankLink bankLink = repository.getById(command.id);
             bankLink.accountId = command.accountId;
@@ -122,6 +124,7 @@ public class BankLinksService {
     }
 
     public void fetchBankTransactions(BankLink bankLink) throws FetchException {
+        secretProvider.ensureDeviceRegistered();
         FetchStrategy fetchStrategy = getFetchStrategies().getStrategy(bankLink.bic);
         fetchStrategy.fetchBankTransactions(db, bankLink, secretProvider.secret());
     }

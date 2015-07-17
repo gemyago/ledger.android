@@ -42,6 +42,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     private MockDatabaseContext db;
     private Date fetchFromDate;
     private DeviceSecret secret;
+    private MockDeviceSecretProvider secretProvider;
 
     @Override
     public void setUp() throws Exception {
@@ -51,7 +52,8 @@ public class BankLinksServiceTest extends AndroidTestCase {
         repository = new MockDatabaseRepository(BankLink.class);
         db.addMockRepo(BankLink.class, repository);
         secret = DeviceSecret.generateNew();
-        subject = new BankLinksService(bus, db, new MockDeviceSecretProvider(secret));
+        secretProvider = new MockDeviceSecretProvider(secret);
+        subject = new BankLinksService(bus, db, secretProvider);
     }
 
     public void testAddBankLinkCommand() {
