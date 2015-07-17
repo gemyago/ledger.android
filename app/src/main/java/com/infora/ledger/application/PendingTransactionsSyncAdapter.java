@@ -63,10 +63,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         resolver = context.getContentResolver();
         LedgerApplication app = (LedgerApplication) context.getApplicationContext();
         syncStrategy = new FullSyncSynchronizationStrategy(app.getBus(), new TransactionsReadModel(context));
-        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
-        String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
-        Log.d(TAG, "Using ledger host: " + ledgerHost);
-        apiAdapter = new ApiAdapter(new AccountManagerWrapper(context), ledgerHost);
+        apiAdapter = ApiAdapter.createAdapter(context, new AccountManagerWrapper(context));
     }
 
     @Override
