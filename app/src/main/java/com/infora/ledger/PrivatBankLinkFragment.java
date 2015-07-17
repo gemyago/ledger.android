@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -31,8 +32,8 @@ public class PrivatBankLinkFragment extends BankLinkFragment<PrivatBankLinkData>
     }
 
     @Override
-    public void assignValues(BankLink bankLink) {
-        PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class);
+    public void assignValues(BankLink bankLink, DeviceSecret secret) {
+        PrivatBankLinkData linkData = bankLink.getLinkData(PrivatBankLinkData.class, secret);
         EditText merchantId = (EditText) getView().findViewById(R.id.privat_bank_merchant_id);
         EditText merchantPassword = (EditText) getView().findViewById(R.id.privat_bank_merchant_password);
         EditText card = (EditText) getView().findViewById(R.id.privat_bank_card_number);

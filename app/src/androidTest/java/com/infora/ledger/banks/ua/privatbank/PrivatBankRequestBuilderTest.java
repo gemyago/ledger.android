@@ -2,10 +2,8 @@ package com.infora.ledger.banks.ua.privatbank;
 
 import android.util.Xml;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.GetTransactionsRequest;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestBuilder;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankRequestSignatureBuilder;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.LogUtil;
 
@@ -24,15 +22,18 @@ import java.util.GregorianCalendar;
  */
 public class PrivatBankRequestBuilderTest extends TestCase {
 
+    private DeviceSecret secret;
+
     public void testBuild() throws Exception {
         Date startDate = new GregorianCalendar(2010, 7, 1).getTime();
         Date endDate = new GregorianCalendar(2010, 8, 1).getTime();
         final PrivatBankRequestBuilder builder = new PrivatBankRequestBuilder();
 
         final PrivatBankLinkData linkData = new PrivatBankLinkData("card-100", "merchant-110", "password-110");
+        secret = DeviceSecret.generateNew();
         final BankLink bankLink = new BankLink()
                 .setBic("pb")
-                .setLinkData(linkData);
+                .setLinkData(linkData, secret);
         final GetTransactionsRequest request = new GetTransactionsRequest(bankLink, startDate, endDate);
 
         builder.setSignatureBuilder(new PrivatBankRequestSignatureBuilder() {
@@ -52,7 +53,7 @@ public class PrivatBankRequestBuilderTest extends TestCase {
             }
         });
 
-        String xml = builder.build(request);
+        String xml = builder.build(request, secret);
 
         LogUtil.d(this, "xml = " + xml);
 

@@ -2,6 +2,7 @@ package com.infora.ledger.banks;
 
 import android.util.Log;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
@@ -29,7 +30,7 @@ public class DefaultFetchStrategy implements FetchStrategy {
     }
 
     @Override
-    public void fetchBankTransactions(DatabaseContext db, BankLink bankLink) throws FetchException {
+    public void fetchBankTransactions(DatabaseContext db, BankLink bankLink, DeviceSecret secret) throws FetchException {
         Log.i(TAG, "Starting fetching transaction for bank: " + bankLink.bic);
         bankLink.isInProgress = true;
         bankLink.hasSucceed = false;
@@ -59,7 +60,7 @@ public class DefaultFetchStrategy implements FetchStrategy {
         List<BankTransaction> bankTransactions;
         try {
             Log.d(TAG, "Fetching transactions using api. Date from: " + apiRequest.startDate + ", Date to: " + apiRequest.endDate);
-            bankTransactions = api.getTransactions(apiRequest);
+            bankTransactions = api.getTransactions(apiRequest, secret);
             Log.d(TAG, "Fetched " + bankTransactions.size() + " transactions.");
         } catch (IOException | PrivatBankException e) {
             Log.e(TAG, "Failed to fetch transactions", e);

@@ -3,6 +3,7 @@ package com.infora.ledger.data;
 import android.database.Cursor;
 
 import com.google.gson.Gson;
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.ObfuscatedString;
 import com.j256.ormlite.field.DatabaseField;
@@ -106,11 +107,11 @@ public class BankLink implements Entity {
         lastSyncDate = LedgerDbHelper.parseISO8601(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_SYNC_DATE)));
     }
 
-    public <T> T getLinkData(Class<T> classOfT) {
+    public <T> T getLinkData(Class<T> classOfT, DeviceSecret secret) {
         return new Gson().fromJson(linkData, classOfT);
     }
 
-    public <T> BankLink setLinkData(T data) {
+    public <T> BankLink setLinkData(T data, DeviceSecret secret) {
         linkData = new Gson().toJson(data);
         return this;
     }

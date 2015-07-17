@@ -1,5 +1,6 @@
 package com.infora.ledger.mocks;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.banks.GetTransactionsRequest;
@@ -21,7 +22,7 @@ public class MockPrivatBankApi implements BankApi {
     public List<BankTransaction> bankTransactions = new ArrayList<>();
 
     @Override
-    public List<BankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, PrivatBankException {
+    public List<BankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, PrivatBankException {
         if (expectedGetTransactionsRequest == null) {
             throw new AssertionError("GetTransactionRequest expectation not assigned.");
         }

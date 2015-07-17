@@ -34,13 +34,15 @@ public class BankLinksService {
     private static final String TAG = BankLinksService.class.getName();
     private final EventBus bus;
     private DatabaseContext db;
+    private DeviceSecretProvider secretProvider;
     private DatabaseRepository<BankLink> repository;
 
     private FetchStrategiesFactory fetchStrategies;
 
-    public BankLinksService(EventBus bus, DatabaseContext db) {
+    public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
         this.bus = bus;
         this.db = db;
+        this.secretProvider = secretProvider;
         this.repository = db.createRepository(BankLink.class);
     }
 
@@ -69,7 +71,7 @@ public class BankLinksService {
                 .setAccountName(command.accountName)
                 .setBic(command.bic)
                 .setLastSyncDate(lastSyncDate.getTime())
-                .setLinkData(command.linkData);
+                .setLinkData(command.linkData, secretProvider.secret());
         try {
             repository.save(bankLink);
             bus.post(new BankLinkAdded(command.accountId, command.bic));
@@ -85,7 +87,7 @@ public class BankLinksService {
             BankLink bankLink = repository.getById(command.id);
             bankLink.accountId = command.accountId;
             bankLink.accountName = command.accountName;
-            bankLink.setLinkData(command.bankLinkData);
+            bankLink.setLinkData(command.bankLinkData, secretProvider.secret());
             if (command.fetchStartingFrom != null) {
                 Log.d(TAG, "Fetch starting from assigned to: " + command.fetchStartingFrom + ". Setting lastSyncDate to previous day.");
                 //Transactions are fetched from lastSyncDate + 1.day so setting it to the previous day
@@ -121,6 +123,6 @@ public class BankLinksService {
 
     public void fetchBankTransactions(BankLink bankLink) throws FetchException {
         FetchStrategy fetchStrategy = getFetchStrategies().getStrategy(bankLink.bic);
-        fetchStrategy.fetchBankTransactions(db, bankLink);
+        fetchStrategy.fetchBankTransactions(db, bankLink, secretProvider.secret());
     }
 }

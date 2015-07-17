@@ -1,5 +1,6 @@
 package com.infora.ledger.banks.ua.privatbank;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.support.LogUtil;
 import com.squareup.okhttp.MediaType;
@@ -28,9 +29,9 @@ public class PrivatBankApi implements com.infora.ledger.banks.BankApi<PrivatBank
     }
 
     @Override
-    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, PrivatBankException {
+    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, PrivatBankException {
         LogUtil.d(this, "Fetching privatbank transactions...");
-        RequestBody body = RequestBody.create(XML, requestBuilder.build(request));
+        RequestBody body = RequestBody.create(XML, requestBuilder.build(request, secret));
         Request httpRequest = new Request.Builder().url(API_URL).post(body).build();
         Response httpResponse = client.newCall(httpRequest).execute();
         LogUtil.d(this, "Data fetched with status: " + httpResponse.code() + ".");

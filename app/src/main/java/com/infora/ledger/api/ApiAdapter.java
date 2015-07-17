@@ -98,7 +98,7 @@ public class ApiAdapter {
         setAuthenticityToken(authenticityToken.getValue());
     }
 
-    public DeviceSecretDto getDeviceSecret(LedgerApi api) {
+    public DeviceSecret getDeviceSecret(LedgerApi api) {
         return api.registerDevice(Settings.Secure.ANDROID_ID, Build.MODEL);
     }
 

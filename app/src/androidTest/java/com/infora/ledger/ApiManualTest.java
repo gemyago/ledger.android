@@ -6,7 +6,7 @@ import android.accounts.OperationCanceledException;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.api.ApiAdapter;
-import com.infora.ledger.api.DeviceSecretDto;
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
@@ -119,7 +119,7 @@ public class ApiManualTest extends AndroidTestCase {
 
     public void testGetDeviceSecret() {
         adapter.authenticateApi(ledgerApi, account);
-        DeviceSecretDto deviceSecret = adapter.getDeviceSecret(ledgerApi);
+        DeviceSecret deviceSecret = adapter.getDeviceSecret(ledgerApi);
         assertNotNull(deviceSecret.secret);
         assertEquals(deviceSecret.secret, adapter.getDeviceSecret(ledgerApi).secret);
     }

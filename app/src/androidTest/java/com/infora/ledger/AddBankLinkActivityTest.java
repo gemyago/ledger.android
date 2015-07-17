@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
@@ -50,6 +51,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
 
     private EventBus bus;
     private BankLinkFragmentsFactory fragmentsFactory;
+    private DeviceSecret secret;
 
     public AddBankLinkActivityTest() {
         super(AddBankLinkActivity.class);
@@ -67,9 +69,10 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         final Context baseContext = getInstrumentation().getTargetContext();
 
         fragmentsFactory = new BankLinkFragmentsFactory();
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new BankLink().setLinkData(new MockBankLinkData("login-1", "password-1")));
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new BankLink().setLinkData(new MockBankLinkData("login-2", "password-2")));
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new BankLink().setLinkData(new MockBankLinkData("login-3", "password-3")));
+        secret = DeviceSecret.generateNew();
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new BankLink().setLinkData(new MockBankLinkData("login-1", "password-1"), secret), secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new BankLink().setLinkData(new MockBankLinkData("login-2", "password-2"), secret), secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new BankLink().setLinkData(new MockBankLinkData("login-3", "password-3"), secret), secret);
 
         Instrumentation instrumentation = new Instrumentation() {
             @Override

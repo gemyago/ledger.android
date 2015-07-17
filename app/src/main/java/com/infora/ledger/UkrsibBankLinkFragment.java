@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -50,8 +51,8 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
     }
 
     @Override
-    public void assignValues(BankLink bankLink) {
-        UkrsibBankLinkData linkData = bankLink.getLinkData(UkrsibBankLinkData.class);
+    public void assignValues(BankLink bankLink, DeviceSecret secret) {
+        UkrsibBankLinkData linkData = bankLink.getLinkData(UkrsibBankLinkData.class, secret);
         login.setText(linkData.login);
         password.setText(linkData.password);
         account.setText(linkData.account);

@@ -2,6 +2,7 @@ package com.infora.ledger.banks.ua.privatbank;
 
 import android.util.Xml;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.GetTransactionsRequest;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -30,11 +31,11 @@ public class PrivatBankRequestBuilder {
         this.signatureBuilder = signatureBuilder;
     }
 
-    public String build(GetTransactionsRequest request) throws IOException {
+    public String build(GetTransactionsRequest request, DeviceSecret secret) throws IOException {
         XmlSerializer dataPart = Xml.newSerializer();
         StringWriter dataPartOutput = new StringWriter();
         dataPart.setOutput(dataPartOutput);
-        final PrivatBankLinkData linkData = request.bankLink.getLinkData(PrivatBankLinkData.class);
+        final PrivatBankLinkData linkData = request.bankLink.getLinkData(PrivatBankLinkData.class, secret);
         buildData(linkData, request.startDate, request.endDate, dataPart).flush();
         String signature = getSignatureBuilder().build(dataPartOutput.toString(), linkData.password);
 

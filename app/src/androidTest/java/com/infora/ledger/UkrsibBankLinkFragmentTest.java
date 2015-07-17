@@ -5,6 +5,7 @@ import android.test.ActivityUnitTestCase;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
@@ -14,6 +15,7 @@ import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
  */
 public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLinkFragmentTestActivity> {
     private UkrsibBankLinkFragment fragment;
+    private DeviceSecret secret;
 
     public UkrsibBankLinkFragmentTest() {
         super(DummyBankLinkFragmentTestActivity.class);
@@ -26,6 +28,7 @@ public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         getActivity().fragment = fragment = new UkrsibBankLinkFragment();
         getInstrumentation().callActivityOnStart(getActivity());
         getActivity().getSupportFragmentManager().executePendingTransactions();
+        secret = DeviceSecret.generateNew();
     }
 
     public void testSetBankLinkData() {
@@ -36,7 +39,7 @@ public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         EditText card = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_card_number);
 
         UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", "account-1", "card-1", true);
-        fragment.setBankLinkData(new BankLink().setLinkData(linkData));
+        fragment.setBankLinkData(new BankLink().setLinkData(linkData, secret), secret);
 
         assertEquals(linkData.login, login.getText().toString());
         assertEquals(linkData.password, password.getText().toString());
@@ -74,7 +77,7 @@ public class UkrsibBankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLi
         EditText card = (EditText) fragment.getView().findViewById(R.id.ukrsib_bank_card_number);
 
         UkrsibBankLinkData linkData = new UkrsibBankLinkData("login-1", "password-1", "account-1", "card-1", true);
-        fragment.setBankLinkData(new BankLink().setLinkData(linkData));
+        fragment.setBankLinkData(new BankLink().setLinkData(linkData, secret), secret);
         fragment.clearLinkData();
 
         assertEquals("", login.getText().toString());

@@ -15,6 +15,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
@@ -52,6 +53,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private long bankLinkId;
     private Date fetchStartingFrom;
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+    private DeviceSecretProvider deviceSecretProvider;
     private EditText bic;
 
     public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
@@ -78,6 +80,15 @@ public class EditBankLinkActivity extends AppCompatActivity {
 
     public void setAccountsLoaderFactory(LedgerAccountsLoader.Factory accountsLoaderFactory) {
         this.accountsLoaderFactory = accountsLoaderFactory;
+    }
+
+    public DeviceSecretProvider getDeviceSecretProvider() {
+        return deviceSecretProvider == null ?
+                (deviceSecretProvider = ((LedgerApplication)getApplication()).getDeviceSecretProvider()) : deviceSecretProvider;
+    }
+
+    public void setDeviceSecretProvider(DeviceSecretProvider deviceSecretProvider) {
+        this.deviceSecretProvider = deviceSecretProvider;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,7 +218,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 Log.d(TAG, "Bank link data bic='" + data.bic + "' loaded.");
                 bic.setText(data.bic);
                 bankLinkFragment = getBankLinkFragmentsFactory().get(data.bic);
-                bankLinkFragment.setBankLinkData(data);
+                bankLinkFragment.setBankLinkData(data, getDeviceSecretProvider().secret());
                 FragmentTransaction t = getSupportFragmentManager().beginTransaction();
                 t.replace(R.id.bank_link_fragment_container, bankLinkFragment, BANK_LINK_FRAGMENT);
                 t.commit();

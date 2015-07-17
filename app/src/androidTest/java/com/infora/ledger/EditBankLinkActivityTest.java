@@ -10,11 +10,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.LedgerDbHelper;
@@ -45,6 +45,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     private BankLink bankLink;
     private LedgerAccountDto selectedAccount;
     private BankLinkFragmentsFactory fragmentsFactory;
+    private DeviceSecret secret;
 
     public EditBankLinkActivityTest() {
         super(EditBankLinkActivity.class);
@@ -60,12 +61,13 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     public void setUp() throws Exception {
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
+        secret = DeviceSecret.generateNew();
 
         fragmentsFactory = new BankLinkFragmentsFactory();
         MockBankLinkData bic1Data = new MockBankLinkData("login-1", "password-1");
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", null);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null, secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null, secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", null, secret);
 
         Instrumentation instrumentation = new Instrumentation() {
             @Override
@@ -90,7 +92,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 .setId(332)
                 .setBic("bic-1")
                 .setAccountId(selectedAccount.id)
-                .setLinkData(bic1Data);
+                .setLinkData(bic1Data, secret);
         mockBankLinksRepo = new MockDatabaseRepository(BankLink.class);
         mockBankLinksRepo.entityToGetById = bankLink;
         Intent intent = new Intent();
@@ -109,7 +111,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         MockBankLinkFragment bankLinkFragment = (MockBankLinkFragment) getActivity()
                 .getSupportFragmentManager().findFragmentByTag(EditBankLinkActivity.BANK_LINK_FRAGMENT);
         MockBankLinkData bankLinkData = bankLinkFragment.getBankLinkData();
-        assertEquals(bankLink.getLinkData(MockBankLinkData.class), bankLinkData);
+        assertEquals(bankLink.getLinkData(MockBankLinkData.class, secret), bankLinkData);
         assertEquals(bankLink.bic, ((EditText) getActivity().findViewById(R.id.bic)).getText().toString());
     }
 
@@ -144,7 +146,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 .getSupportFragmentManager().findFragmentByTag(EditBankLinkActivity.BANK_LINK_FRAGMENT);
 
         MockBankLinkData newLinkData = new MockBankLinkData("new-login-100", "new-password-100");
-        bankLinkFragment.setBankLinkData(new BankLink().setLinkData(newLinkData));
+        bankLinkFragment.setBankLinkData(new BankLink().setLinkData(newLinkData, secret), secret);
         Spinner accountsSpinner = (Spinner) getActivity().findViewById(R.id.ledger_account_id);
         accountsSpinner.setSelection(2);
 

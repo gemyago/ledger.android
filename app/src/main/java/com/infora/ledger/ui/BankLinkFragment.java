@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.data.BankLink;
 
 /**
@@ -11,6 +12,7 @@ import com.infora.ledger.data.BankLink;
  */
 public abstract class BankLinkFragment<TLinkData> extends Fragment {
     private BankLink assignedBankLink;
+    private DeviceSecret assignedSecret;
 
     public abstract TLinkData getBankLinkData();
 
@@ -21,17 +23,21 @@ public abstract class BankLinkFragment<TLinkData> extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         isViewCreated = true;
         if (assignedBankLink != null) {
-            assignValues(assignedBankLink);
+            assignValues(assignedBankLink, assignedSecret);
             assignedBankLink = null;
+            assignedSecret = null;
         }
     }
 
-    public void setBankLinkData(BankLink bankLink) {
-        if(isViewCreated) assignValues(bankLink);
-        else assignedBankLink = bankLink;
+    public void setBankLinkData(BankLink bankLink, DeviceSecret secret) {
+        if(isViewCreated) assignValues(bankLink, secret);
+        else {
+            assignedBankLink = bankLink;
+            assignedSecret = secret;
+        }
     }
 
     public abstract void clearLinkData();
 
-    protected abstract void assignValues(BankLink bankLink);
+    protected abstract void assignValues(BankLink bankLink, DeviceSecret secret);
 }

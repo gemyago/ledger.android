@@ -48,5 +48,5 @@ public interface LedgerApi {
 
     @FormUrlEncoded
     @POST("/api/devices/register.json")
-    DeviceSecretDto registerDevice(@Field("device_id") String deviceId, @Field("name") String name);
+    DeviceSecret registerDevice(@Field("device_id") String deviceId, @Field("name") String name);
 }

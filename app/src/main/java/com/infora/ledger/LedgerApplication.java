@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.application.BankLinksService;
+import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.data.BankLink;
@@ -28,6 +29,7 @@ public class LedgerApplication extends Application {
 
     private AccountManagerWrapper accountManager;
     private DatabaseContext databaseContext;
+    private DeviceSecretProvider deviceSecretProvider;
 
     public AccountManagerWrapper getAccountManager() {
         return accountManager == null ? (accountManager = new AccountManagerWrapper(this)) : accountManager;
@@ -57,11 +59,12 @@ public class LedgerApplication extends Application {
         EventBus bus = getBus();
         bus.register(this);
 
+        deviceSecretProvider = new DeviceSecretProvider();
 
         PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
         bus.register(pendingTransactionsService);
 
-        BankLinksService bankLinksService = new BankLinksService(bus, getDatabaseContext());
+        BankLinksService bankLinksService = new BankLinksService(bus, getDatabaseContext(), getDeviceSecretProvider());
         bus.register(bankLinksService);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
@@ -88,5 +91,9 @@ public class LedgerApplication extends Application {
         Log.i(TAG, "Adding new account: " + cmd.getEmail());
         Account account = new Account(cmd.getEmail(), ACCOUNT_TYPE);
         getAccountManager().addAccountExplicitly(account, null);
+    }
+
+    public DeviceSecretProvider getDeviceSecretProvider() {
+        return deviceSecretProvider;
     }
 }

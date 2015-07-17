@@ -2,6 +2,7 @@ package com.infora.ledger.banks.ua.urksibbank;
 
 import android.util.Log;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
@@ -32,7 +33,7 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
 
 
     @Override
-    public List<UkrsibBankTransaction> getTransactions(GetTransactionsRequest request) throws IOException, FetchException {
+    public List<UkrsibBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
         Date startDate = Dates.startOfDay(request.startDate);
         Date endDate = Dates.endOfDay(request.endDate);
         Date endOfToday = Dates.endOfDay(SystemDate.now());
@@ -42,7 +43,7 @@ public class UkrsibBankApi implements BankApi<UkrsibBankTransaction> {
         OkHttpClient client = new OkHttpClient();
         client.setCookieHandler(new CookieManager());
 
-        UkrsibBankLinkData linkData = request.bankLink.getLinkData(UkrsibBankLinkData.class);
+        UkrsibBankLinkData linkData = request.bankLink.getLinkData(UkrsibBankLinkData.class, secret);
 
         Log.d(TAG, "Authenticating...");
         Request authRequest = new Request.Builder()

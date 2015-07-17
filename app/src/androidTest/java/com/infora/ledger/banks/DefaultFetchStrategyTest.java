@@ -3,6 +3,7 @@ package com.infora.ledger.banks;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
@@ -27,6 +28,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
     private PrivatBankLinkData linkData;
     private MockPrivatBankApi mockApi;
     private Date now;
+    private DeviceSecret secret;
 
     @Override
     protected void setUp() throws Exception {
@@ -41,11 +43,12 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         lastSyncDate.add(Calendar.DAY_OF_MONTH, -5);
 
         linkData = new PrivatBankLinkData("card-100", "merchant-100", "password-100");
+        secret = DeviceSecret.generateNew();
         bankLink = new BankLink()
                 .setAccountId("account-100")
                 .setBic("bic-100")
                 .setLastSyncDate(lastSyncDate.getTime())
-                .setLinkData(linkData);
+                .setLinkData(linkData, secret);
 
         Calendar dateFrom = Calendar.getInstance();
         dateFrom.setTime(bankLink.lastSyncDate);
@@ -85,7 +88,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
             }
         };
         mockDb.addUnitOfWorkHook(hook2);
-        subject.fetchBankTransactions(mockDb, bankLink);
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
         hook1.assertCommitted();
         hook2.assertCommitted();
     }
@@ -124,7 +127,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
             }
         };
         mockDb.addUnitOfWorkHook(hook2);
-        subject.fetchBankTransactions(mockDb, bankLink);
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
         hook2.assertCommitted();
     }
 
@@ -166,7 +169,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
             }
         };
         mockDb.addUnitOfWorkHook(hook2);
-        subject.fetchBankTransactions(mockDb, bankLink);
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
         hook2.assertCommitted();
     }
 
@@ -205,6 +208,6 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 fail("It is not expected that new entities are added. Got: " + entity);
             }
         });
-        subject.fetchBankTransactions(mockDb, bankLink);
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
     }
 }
