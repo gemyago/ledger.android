@@ -37,7 +37,7 @@ import de.greenrobot.event.EventBus;
 public class BankLinksServiceTest extends AndroidTestCase {
 
     private BankLinksService subject;
-    private MockDatabaseRepository repository;
+    private MockDatabaseRepository<BankLink> repository;
     private EventBus bus;
     private MockDatabaseContext db;
     private Date fetchFromDate;
@@ -82,6 +82,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
                         .setLastSyncDate(cal.getTime())
                         .setLinkData(command.linkData, secret)
         ));
+        assertEquals(command.linkData, repository.savedEntities.get(0).getLinkData(MockBankLinkData.class, secret));
 
         assertEquals(1, subscriber.getEvents().size());
         assertEquals("account-100", subscriber.getEvent().accountId);
@@ -133,16 +134,15 @@ public class BankLinksServiceTest extends AndroidTestCase {
         bus.register(updatedHandler);
         repository.entityToGetById = bankLink;
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
-                new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
+                new MockBankLinkData("login-100", "password-100")));
         assertEquals(1, repository.savedEntities.size());
         assertEquals(initialLastSyncDate, bankLink.lastSyncDate);
         assertTrue(repository.savedEntities.contains(bankLink));
         assertEquals("new-account-100", bankLink.accountId);
         assertEquals("New Account 100", bankLink.accountName);
-        PrivatBankLinkData actualLinkData = bankLink.getLinkData(PrivatBankLinkData.class, secret);
-        assertEquals("new-card-1", actualLinkData.card);
-        assertEquals("new-merchant-1", actualLinkData.merchantId);
-        assertEquals("new-password-1", actualLinkData.password);
+        MockBankLinkData actualLinkData = bankLink.getLinkData(MockBankLinkData.class, secret);
+        assertEquals("login-100", actualLinkData.login);
+        assertEquals("password-100", actualLinkData.password);
         assertEquals(1, updatedHandler.getEvents().size());
         assertEquals(bankLink.id, updatedHandler.getEvents().get(0).id);
     }

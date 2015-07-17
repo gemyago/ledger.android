@@ -169,7 +169,8 @@ public class BankLink implements Entity {
         if (!accountId.equals(bankLink.accountId)) return false;
         if (!accountName.equals(bankLink.accountName)) return false;
         if (!bic.equals(bankLink.bic)) return false;
-        if (!linkData.equals(bankLink.linkData)) return false;
+        //Link data is no longer part of equality since it is encrypted and will be different for the same value
+        //if (!linkData.equals(bankLink.linkData)) return false;
         return Dates.areEqual(lastSyncDate, bankLink.lastSyncDate);
 
     }
@@ -180,7 +181,8 @@ public class BankLink implements Entity {
         result = 31 * result + accountId.hashCode();
         result = 31 * result + accountName.hashCode();
         result = 31 * result + bic.hashCode();
-        result = 31 * result + linkData.hashCode();
+        //Link data is no longer part of equality since it is encrypted and will be different for the same value
+        //result = 31 * result + linkData.hashCode();
         result = 31 * result + (lastSyncDate != null ? LedgerDbHelper.toISO8601(lastSyncDate).hashCode() : 0);
         result = 31 * result + (isInProgress ? 1 : 0);
         result = 31 * result + (hasSucceed ? 1 : 0);

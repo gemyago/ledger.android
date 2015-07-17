@@ -22,6 +22,7 @@ import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockDatabaseRepository;
+import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
@@ -75,6 +76,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 EditBankLinkActivity theActivity = (EditBankLinkActivity) activity;
                 theActivity.setAccountsLoaderFactory(createAccountsLoaderFactory());
                 theActivity.setBankLinkFragmentsFactory(fragmentsFactory);
+                theActivity.setDeviceSecretProvider(new MockDeviceSecretProvider(secret));
                 super.callActivityOnCreate(activity, icicle);
             }
 
