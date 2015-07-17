@@ -1,6 +1,7 @@
 package com.infora.ledger.data;
 
 import android.database.Cursor;
+import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.infora.ledger.api.DeviceSecret;
@@ -9,7 +10,14 @@ import com.infora.ledger.support.ObfuscatedString;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_ID;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_NAME;
@@ -108,11 +116,43 @@ public class BankLink implements Entity {
     }
 
     public <T> T getLinkData(Class<T> classOfT, DeviceSecret secret) {
-        return new Gson().fromJson(linkData, classOfT);
+        byte[] rawLinkDataBytes = Base64.decode(linkData, Base64.DEFAULT);
+
+        //First 16 bytes (128 bits) is the IV
+        byte[] iv = new byte[16];
+        System.arraycopy(rawLinkDataBytes, 0, iv, 0, 16);
+
+        byte[] actualLinkDataBytes = new byte[rawLinkDataBytes.length - 16];
+        System.arraycopy(rawLinkDataBytes, 16, actualLinkDataBytes, 0, actualLinkDataBytes.length);
+
+
+        try {
+            Cipher cipher = Cipher.getInstance(DeviceSecret.ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secret.keySpec(), new IvParameterSpec(iv));
+            return new Gson().fromJson(new String(cipher.doFinal(actualLinkDataBytes)), classOfT);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to decrypt link data.", e);
+        }
     }
 
     public <T> BankLink setLinkData(T data, DeviceSecret secret) {
-        linkData = new Gson().toJson(data);
+        try {
+            IvParameterSpec iv = generateIv();
+            Cipher cipher = Cipher.getInstance(DeviceSecret.ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secret.keySpec(), iv);
+
+            String jsonData = new Gson().toJson(data);
+            byte[] encryptedData = cipher.doFinal(jsonData.getBytes());
+
+            //Joining iv and encrypted data
+            byte[] finalData = new byte[iv.getIV().length + encryptedData.length];
+            System.arraycopy(iv.getIV(), 0, finalData, 0, iv.getIV().length);
+            System.arraycopy(encryptedData, 0, finalData, iv.getIV().length, encryptedData.length);
+
+            linkData = Base64.encodeToString(finalData, Base64.DEFAULT);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to encrypt link data", e);
+        }
         return this;
     }
 
@@ -134,7 +174,6 @@ public class BankLink implements Entity {
 
     }
 
-
     @Override
     public int hashCode() {
         int result = id;
@@ -148,6 +187,7 @@ public class BankLink implements Entity {
         return result;
     }
 
+
     @Override
     public String toString() {
         return "BankLink{" +
@@ -160,5 +200,12 @@ public class BankLink implements Entity {
                 ", isInProgress=" + isInProgress +
                 ", hasSucceed=" + hasSucceed +
                 '}';
+    }
+
+    public static IvParameterSpec generateIv() throws NoSuchAlgorithmException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(DeviceSecret.KEY_ALGORITHM);
+        keyGen.init(128);
+        SecretKey secretKey = keyGen.generateKey();
+        return new IvParameterSpec(secretKey.getEncoded());
     }
 }
