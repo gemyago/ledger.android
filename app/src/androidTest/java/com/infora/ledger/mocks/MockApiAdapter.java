@@ -4,7 +4,6 @@ import android.accounts.Account;
 
 import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.LedgerApi;
-import com.infora.ledger.support.AccountManagerWrapper;
 
 /**
  * Created by jenya on 11.04.15.
@@ -14,7 +13,7 @@ public class MockApiAdapter extends ApiAdapter {
     public OnAuthenticateApiCallback onAuthenticateApiCallback;
 
     public MockApiAdapter() {
-        super(null, "not-existing");
+        super(null, null, "not-existing");
     }
 
     @Override
