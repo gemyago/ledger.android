@@ -31,11 +31,12 @@ public class ApiAdapter {
     private static final String TAG = ApiAdapter.class.getName();
 
     private RestAdapter restAdapter;
-    private LedgerApi ledgerApi;
     private String authenticityToken;
+    private final Context context;
     private final AccountManagerWrapper accountManager;
 
-    public ApiAdapter(AccountManagerWrapper accountManager, String endpoint) {
+    public ApiAdapter(Context context, AccountManagerWrapper accountManager, String endpoint) {
+        this.context = context;
         this.accountManager = accountManager;
         OkHttpClient client = new OkHttpClient();
         final String[] apiCookie = new String[1];
@@ -103,7 +104,8 @@ public class ApiAdapter {
     }
 
     public DeviceSecret getDeviceSecret(LedgerApi api) {
-        return api.registerDevice(Settings.Secure.ANDROID_ID, Build.MODEL);
+        final String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return api.registerDevice(androidId, Build.MODEL);
     }
 
     private String tryGettingToken(Account account, boolean invalidate) {
@@ -131,6 +133,6 @@ public class ApiAdapter {
         SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
         String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         Log.d(TAG, "Using ledger host: " + ledgerHost);
-        return new ApiAdapter(accountManager, ledgerHost);
+        return new ApiAdapter(context, accountManager, ledgerHost);
     }
 }

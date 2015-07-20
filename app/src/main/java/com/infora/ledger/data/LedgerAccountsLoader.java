@@ -71,7 +71,7 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
         String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         Log.d(TAG, "Using ledger host: " + ledgerHost);
         AccountManagerWrapper accountManager = new AccountManagerWrapper(context);
-        ApiAdapter apiAdapter = new ApiAdapter(accountManager, ledgerHost);
+        ApiAdapter apiAdapter = new ApiAdapter(context, accountManager, ledgerHost);
         LedgerApi api = apiAdapter.createApi();
         Account[] accounts = accountManager.getApplicationAccounts();
         if (accounts.length == 0)

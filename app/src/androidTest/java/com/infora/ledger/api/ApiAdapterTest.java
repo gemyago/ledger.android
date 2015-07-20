@@ -26,7 +26,7 @@ public class ApiAdapterTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         accountManager = new MockAccountManagerWrapper(getContext());
-        subject = new ApiAdapter(accountManager, "not-existing");
+        subject = new ApiAdapter(getContext(), accountManager, "not-existing");
     }
 
     public void testAuthenticateApi() throws Exception {
