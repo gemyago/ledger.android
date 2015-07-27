@@ -13,4 +13,10 @@
         android:defaultValue="false"
         >
     </SwitchPreference>
+    <com.infora.ledger.DefaultTransactionAccountPreference
+        android:key="default_transaction_account"
+        android:title="Default Transaction Account"
+        android:summary="Transactions will be reported with the account specified here"
+        >
+    </com.infora.ledger.DefaultTransactionAccountPreference>
 </PreferenceScreen>
