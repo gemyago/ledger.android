@@ -154,7 +154,8 @@ public class ReportActivity extends ActionBarActivity {
         }
         String comment = etComment.getText().toString();
         findViewById(R.id.report).setEnabled(false);
-        BusUtils.post(this, new ReportTransactionCommand(amount, comment));
+        String accountId = SharedPreferencesUtil.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, null);
+        BusUtils.post(this, new ReportTransactionCommand(accountId, amount, comment));
     }
 
     @EventHandler

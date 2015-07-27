@@ -3,6 +3,8 @@ package com.infora.ledger;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContentResolver;
 import android.view.View;
 import android.view.Window;
@@ -19,6 +21,7 @@ import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.util.concurrent.BrokenBarrierException;
 
@@ -46,6 +49,9 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void setUp() throws Exception {
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
+        SharedPreferences.Editor edit = SharedPreferencesUtil.getDefaultSharedPreferences(baseContext).edit();
+        edit.remove(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID).commit();
+
         bus = new EventBus();
         final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
         MockContentResolver mockContentResolver = new MockContentResolver(app);
@@ -93,9 +99,30 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
 
         ReportTransactionCommand cmd = subscriber.getEvent();
         assertNotNull(cmd);
+        assertNull(cmd.accountId);
         assertEquals(amount.getText().toString(), cmd.getAmount());
         assertEquals(comment.getText().toString(), cmd.getComment());
         assertFalse("The report button was not disabled", reportButton.isEnabled());
+    }
+
+    public void testReportNewTransactionWithDefaultAccount() {
+        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, "account-100");
+        editor.apply();
+
+        EventBus bus = new EventBus();
+        BusUtils.setBus(getActivity(), bus);
+        MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
+        bus.register(subscriber);
+        Window wnd = getActivity().getWindow();
+        ((EditText) wnd.findViewById(R.id.amount)).setText("100.22");
+
+        wnd.findViewById(R.id.report).callOnClick();
+
+        ReportTransactionCommand cmd = subscriber.getEvent();
+        assertNotNull(cmd);
+        assertEquals("account-100", cmd.accountId);
     }
 
     public void testReportNewTransactionOnImeCommentEditorAction() {

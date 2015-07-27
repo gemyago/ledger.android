@@ -43,9 +43,10 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     }
 
     public void testReportPendingTransaction() {
-        subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
+        subject.onEventBackgroundThread(new ReportTransactionCommand("account-100", "100.01", "Comment 100.01"));
         assertEquals(TransactionContract.CONTENT_URI, provider.getInsertArgs().getUri());
-        assertEquals(2, provider.getInsertArgs().getValues().size());
+        assertEquals(3, provider.getInsertArgs().getValues().size());
+        assertEquals("account-100", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_ACCOUNT_ID));
         assertEquals("100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_AMOUNT));
         assertEquals("Comment 100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_COMMENT));
     }
@@ -54,7 +55,7 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>(TransactionReportedEvent.class);
         bus.register(subscriber);
         provider.setInsertedUri(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 100));
-        subject.onEventBackgroundThread(new ReportTransactionCommand("100.01", "Comment 100.01"));
+        subject.onEventBackgroundThread(new ReportTransactionCommand(null, "100.01", "Comment 100.01"));
         assertEquals(100, subscriber.getEvent().getId());
     }
 

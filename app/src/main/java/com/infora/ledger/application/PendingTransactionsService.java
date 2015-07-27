@@ -33,6 +33,7 @@ public class PendingTransactionsService {
     public void onEventBackgroundThread(ReportTransactionCommand command) {
         Log.d(TAG, "Reporting new transaction");
         ContentValues values = new ContentValues();
+        values.put(TransactionContract.COLUMN_ACCOUNT_ID, command.accountId);
         values.put(TransactionContract.COLUMN_AMOUNT, command.getAmount());
         values.put(TransactionContract.COLUMN_COMMENT, command.getComment());
 
