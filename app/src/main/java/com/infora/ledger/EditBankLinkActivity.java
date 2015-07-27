@@ -26,6 +26,7 @@ import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.support.SpinnerSelector;
 import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
@@ -224,14 +225,7 @@ public class EditBankLinkActivity extends AppCompatActivity {
                 t.replace(R.id.bank_link_fragment_container, bankLinkFragment, BANK_LINK_FRAGMENT);
                 t.commit();
 
-                for (int i = 0; i < accountsSpinner.getCount(); i++) {
-                    Cursor account = (Cursor) accountsSpinner.getItemAtPosition(i);
-                    String accountId = account.getString(account.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
-                    if (Objects.equals(data.accountId, accountId)) {
-                        accountsSpinner.setSelection(i);
-                        break;
-                    }
-                }
+                SpinnerSelector.select(accountsSpinner, LedgerAccountsLoader.COLUMN_ACCOUNT_ID, data.accountId);
 
                 BusUtils.post(EditBankLinkActivity.this, new BankLinkLoaded());
             }

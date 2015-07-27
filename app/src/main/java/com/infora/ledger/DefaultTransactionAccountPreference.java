@@ -14,6 +14,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 
 import com.infora.ledger.data.LedgerAccountsLoader;
+import com.infora.ledger.support.SpinnerSelector;
 
 /**
  * Created by mye on 7/27/2015.
@@ -63,6 +64,10 @@ public class DefaultTransactionAccountPreference extends DialogPreference {
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 Log.d(TAG, "Loading finished.");
                 accountsAdapter.swapCursor(data);
+                String accountId = getPersistedString(null);
+                if (accountId != null) {
+                    SpinnerSelector.select(ledgerAccountId, LedgerAccountsLoader.COLUMN_ACCOUNT_ID, accountId);
+                }
             }
 
             @Override
@@ -72,5 +77,14 @@ public class DefaultTransactionAccountPreference extends DialogPreference {
         });
 
         return view;
+    }
+
+    @Override
+    protected void onDialogClosed(boolean positiveResult) {
+        if(positiveResult) {
+            Cursor selectedAccount = (Cursor) ledgerAccountId.getSelectedItem();
+            String accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
+            persistString(accountId);
+        }
     }
 }
