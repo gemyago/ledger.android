@@ -15,11 +15,11 @@ public class UkrsibBankTransactionTest extends TestCase {
         UkrsibBankTransaction usbt1 = new UkrsibBankTransaction()
                 .setTrandate(Dates.create(2015, 06 - 1, 12)).setCommitDate(Dates.create(2015, 06 - 1, 16)).setAuthCode("605357")
                 .setDescription("Regular expence\\ATM80524\\UA\\KHARKIV\\GEROI\\GEROIV TRUDA A")
-                .setCurrency("USD").setAmount("-100.00").setAccountAmount("-800.23");
+                .setCurrency("USD").setAmount("-100.93").setAccountAmount("-800.23");
 
         PendingTransaction pendingt1 = usbt1.toPendingTransaction(new BankLink().setAccountId("account-1"));
         assertEquals("account-1", pendingt1.accountId);
-        assertEquals(UkrsibBankTransaction.BIC + "20150612" + usbt1.authCode + "80023", pendingt1.transactionId);
+        assertEquals(UkrsibBankTransaction.BIC + "20150612" + usbt1.authCode + "10093", pendingt1.transactionId);
         assertEquals("800.23", pendingt1.amount);
         assertEquals(usbt1.description, pendingt1.comment);
         assertTrue(Dates.areEqual(usbt1.trandate, pendingt1.timestamp));
