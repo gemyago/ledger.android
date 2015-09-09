@@ -60,18 +60,12 @@ public class BankLinksService {
 
         if(command.linkData == null) throw new IllegalArgumentException("command.linkData can not be null.");
 
-        Calendar lastSyncDate = Calendar.getInstance();
-        lastSyncDate.setTime(command.initialFetchDate);
-        lastSyncDate.add(Calendar.DAY_OF_MONTH, -1);
-        lastSyncDate.set(Calendar.HOUR, 0);
-        lastSyncDate.set(Calendar.MINUTE, 0);
-        lastSyncDate.set(Calendar.SECOND, 0);
-
         BankLink bankLink = new BankLink()
                 .setAccountId(command.accountId)
                 .setAccountName(command.accountName)
                 .setBic(command.bic)
-                .setLastSyncDate(lastSyncDate.getTime())
+                .setLastSyncDate(command.initialFetchDate)
+                .setInitialSyncDate(command.initialFetchDate)
                 .setLinkData(command.linkData, secretProvider.secret());
         try {
             repository.save(bankLink);

@@ -30,6 +30,7 @@ public class BankLinksRepositoryTest extends DatabaseRepositoryTest<BankLink> {
                 .setBic(randomString("bank-"))
                 .setLinkDataValue(randomString("link-"))
                 .setLastSyncDate(randomDate())
+                .setInitialSyncDate(randomDate())
                 .setInProgress(randomBool())
                 .setHasSucceed(randomBool());
     }

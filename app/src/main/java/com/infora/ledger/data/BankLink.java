@@ -15,7 +15,6 @@ import java.util.Date;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
@@ -23,6 +22,7 @@ import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_ID;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_ACCOUNT_NAME;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_BIC;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_HAS_SUCCEED;
+import static com.infora.ledger.BanksContract.BankLinks.COLUMN_INITIAL_SYNC_DATE;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_IN_PROGRESS;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_LAST_SYNC_DATE;
 import static com.infora.ledger.BanksContract.BankLinks.COLUMN_LINK_DATA;
@@ -51,6 +51,9 @@ public class BankLink implements Entity {
 
     @DatabaseField(columnName = COLUMN_LAST_SYNC_DATE)
     public Date lastSyncDate;
+
+    @DatabaseField(columnName = COLUMN_INITIAL_SYNC_DATE)
+    public Date initialSyncDate;
 
     @DatabaseField(columnName = COLUMN_IN_PROGRESS)
     public boolean isInProgress;
@@ -88,6 +91,11 @@ public class BankLink implements Entity {
         return this;
     }
 
+    public BankLink setInitialSyncDate(Date value) {
+        initialSyncDate = value;
+        return this;
+    }
+
     public BankLink setLastSyncDate(Date value) {
         lastSyncDate = value;
         return this;
@@ -113,6 +121,9 @@ public class BankLink implements Entity {
         bic = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BIC));
         linkData = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LINK_DATA));
         lastSyncDate = LedgerDbHelper.parseISO8601(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_SYNC_DATE)));
+        String initialSyncDateString = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_INITIAL_SYNC_DATE));
+        if (initialSyncDateString != null)
+            initialSyncDate = LedgerDbHelper.parseISO8601(initialSyncDateString);
     }
 
     public <T> T getLinkData(Class<T> classOfT, DeviceSecret secret) {
@@ -171,7 +182,7 @@ public class BankLink implements Entity {
         if (!bic.equals(bankLink.bic)) return false;
         //Link data is no longer part of equality since it is encrypted and will be different for the same value
         //if (!linkData.equals(bankLink.linkData)) return false;
-        return Dates.areEqual(lastSyncDate, bankLink.lastSyncDate);
+        return Dates.areEqual(lastSyncDate, bankLink.lastSyncDate) && Dates.areEqual(initialSyncDate, bankLink.initialSyncDate);
 
     }
 
@@ -184,6 +195,7 @@ public class BankLink implements Entity {
         //Link data is no longer part of equality since it is encrypted and will be different for the same value
         //result = 31 * result + linkData.hashCode();
         result = 31 * result + (lastSyncDate != null ? LedgerDbHelper.toISO8601(lastSyncDate).hashCode() : 0);
+        result = 31 * result + (initialSyncDate != null ? LedgerDbHelper.toISO8601(initialSyncDate).hashCode() : 0);
         result = 31 * result + (isInProgress ? 1 : 0);
         result = 31 * result + (hasSucceed ? 1 : 0);
         return result;
@@ -199,6 +211,7 @@ public class BankLink implements Entity {
                 ", bic='" + bic + '\'' +
                 ", linkData='" + linkData + '\'' +
                 ", lastSyncDate='" + (lastSyncDate == null ? null : LedgerDbHelper.toISO8601(lastSyncDate)) + '\'' +
+                ", initialSyncDate='" + (initialSyncDate == null ? null : LedgerDbHelper.toISO8601(initialSyncDate)) + '\'' +
                 ", isInProgress=" + isInProgress +
                 ", hasSucceed=" + hasSucceed +
                 '}';

@@ -18,7 +18,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -63,6 +63,10 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         if (oldVersion < 6) {
             createBankLinksTable(db);
         }
+        if(oldVersion < 7) {
+            db.execSQL("ALTER TABLE " + BanksContract.BankLinks.TABLE_NAME
+                    + " ADD " + BanksContract.BankLinks.COLUMN_INITIAL_SYNC_DATE + " NVARCHAR(50) NULL;");
+        }
     }
 
     private static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -88,6 +92,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
                         BanksContract.BankLinks.COLUMN_BIC + " NVARCHAR(50) NOT NULL," +
                         BanksContract.BankLinks.COLUMN_LINK_DATA + " TEXT NOT NULL," +
                         BanksContract.BankLinks.COLUMN_LAST_SYNC_DATE + " NVARCHAR(50) NOT NULL," +
+                        BanksContract.BankLinks.COLUMN_INITIAL_SYNC_DATE + " NVARCHAR(50) NULL," +
                         BanksContract.BankLinks.COLUMN_IN_PROGRESS + " INTEGER NOT NULL DEFAULT(0)," +
                         BanksContract.BankLinks.COLUMN_HAS_SUCCEED + " INTEGER NOT NULL DEFAULT(0)" +
                         " )"

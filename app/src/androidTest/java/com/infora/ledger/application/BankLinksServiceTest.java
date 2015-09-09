@@ -61,7 +61,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         command.accountId = "account-100";
         command.accountName = "Account 100";
         command.bic = "bank-100";
-        command.initialFetchDate = new Date();
+        command.initialFetchDate = TestHelper.randomDate();
         command.linkData = new MockBankLinkData("login-332", "password-332");
 
         MockSubscriber<BankLinkAdded> subscriber = new MockSubscriber<>(BankLinkAdded.class);
@@ -69,19 +69,13 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
         subject.onEventBackgroundThread(command);
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(command.initialFetchDate);
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-
         assertEquals(1, repository.savedEntities.size());
         assertTrue(repository.savedEntities.contains(new BankLink()
                         .setAccountId("account-100")
                         .setAccountName("Account 100")
                         .setBic("bank-100")
-                        .setLastSyncDate(cal.getTime())
+                        .setLastSyncDate(command.initialFetchDate)
+                        .setInitialSyncDate(command.initialFetchDate)
                         .setLinkData(command.linkData, secret)
         ));
         assertEquals(command.linkData, repository.savedEntities.get(0).getLinkData(MockBankLinkData.class, secret));
