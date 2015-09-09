@@ -38,23 +38,15 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         mockDb = new MockDatabaseContext();
         now = SystemDate.setNow(TestHelper.randomDate());
 
-        Calendar lastSyncDate = Calendar.getInstance();
-        lastSyncDate.setTime(now);
-        lastSyncDate.add(Calendar.DAY_OF_MONTH, -5);
-
         linkData = new PrivatBankLinkData("card-100", "merchant-100", "password-100");
         secret = DeviceSecret.generateNew();
         bankLink = new BankLink()
                 .setAccountId("account-100")
                 .setBic("bic-100")
-                .setLastSyncDate(lastSyncDate.getTime())
+                .setLastSyncDate(Dates.addDays(now, -5))
                 .setLinkData(linkData, secret);
 
-        Calendar dateFrom = Calendar.getInstance();
-        dateFrom.setTime(bankLink.lastSyncDate);
-        dateFrom.add(Calendar.DAY_OF_MONTH, 1);
-
-        mockApi.expectedGetTransactionsRequest = new GetTransactionsRequest(bankLink, dateFrom.getTime(), now);
+        mockApi.expectedGetTransactionsRequest = new GetTransactionsRequest(bankLink, Dates.monthAgo(now), now);
     }
 
     @Override
@@ -93,12 +85,40 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         hook2.assertCommitted();
     }
 
+    public void testFetchLastMonthIfLastFetchDateIsNoOlderThanAMonthAgo() throws Exception {
+        final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
+        SystemDate.setNow(now);
+        bankLink.lastSyncDate = Dates.addDays(now, -5);
+
+        mockApi.expectedGetTransactionsRequest.startDate = Dates.monthAgo(now);
+        mockApi.expectedGetTransactionsRequest.endDate = now;
+        mockApi.bankTransactions.add(new PrivatBankTransaction()
+                .setCard("card-100")
+                .setTrandate("2015-05-23")
+                .setTrantime("21:56:23")
+                .setCardamount("-100.31 UAH")
+                .setTerminal("terminal-1")
+                .setDescription("description-1"));
+
+        mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
+        MockUnitOfWork.Hook hook2 = new MockUnitOfWork.Hook() {
+            @Override
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                MockUnitOfWork.Commit commit = mockUnitOfWork.commits.get(0);
+                assertEquals(1, commit.addedEntities.size());
+            }
+        };
+        mockDb.addUnitOfWorkHook(hook2);
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
+        hook2.assertCommitted();
+    }
+
     public void testFetchTransactionsIfLastFetchDateWasToday() throws Exception {
         final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
         SystemDate.setNow(now);
         bankLink.lastSyncDate = now;
 
-        mockApi.expectedGetTransactionsRequest.startDate = Dates.startOfDay(now);
+        mockApi.expectedGetTransactionsRequest.startDate = Dates.monthAgo(now);
         mockApi.expectedGetTransactionsRequest.endDate = now;
         final BankTransaction t1 = new PrivatBankTransaction()
                 .setCard("card-100")
@@ -134,8 +154,8 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
     public void testFetchTransactionsFromNextDateAfterLastTillNow() throws FetchException {
         final Date now = Dates.set(new Date(), 2015, 4, 30, 2, 1, 30);
         SystemDate.setNow(now);
-        bankLink.lastSyncDate = Dates.addDays(now, -11);
-        Date dateFrom = Dates.addDays(now, -10);
+        bankLink.lastSyncDate = Dates.monthAgo(Dates.addDays(now, -11));
+        Date dateFrom = Dates.addDays(bankLink.lastSyncDate, 1);
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
@@ -177,7 +197,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         final Date now = Dates.set(new Date(), 2015, 4, 30, 2, 1, 30);
         SystemDate.setNow(now);
         bankLink.lastSyncDate = Dates.addDays(now, -11);
-        Date dateFrom = Dates.addDays(now, -10);
+        Date dateFrom = Dates.monthAgo(now);
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;

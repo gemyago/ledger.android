@@ -46,14 +46,12 @@ public class DefaultFetchStrategy implements FetchStrategy {
         Date lastSyncDate = bankLink.lastSyncDate;
         Date startDate;
         Date now = SystemDate.now();
-        if (isSameDay(lastSyncDate, now)) { //New transactions can appear today so fetching today again
-            Log.d(TAG, "Last sync date was '" + lastSyncDate + "' and now is '" + now + "'. Today's transactions will be fetched again.");
-            startDate = Dates.startOfDay(now);
+        if (withingLastMonthFromNow(lastSyncDate, now)) { //Always fetching last month. Some banks may show transactions later.
+            Log.d(TAG, "Last sync date was '" + lastSyncDate + "' and now is '" + now + "'. Fetching transactions from last month.");
+            startDate = Dates.monthAgo(now);
         } else {
-            Calendar startDateCal = Calendar.getInstance();
-            startDateCal.setTime(lastSyncDate);
-            startDateCal.add(Calendar.DAY_OF_MONTH, 1);
-            startDate = startDateCal.getTime();
+            //In the other case fetching from the next day after last
+            startDate = Dates.addDays(lastSyncDate, 1);
         }
 
         GetTransactionsRequest apiRequest = new GetTransactionsRequest(bankLink, startDate, now);
@@ -102,13 +100,8 @@ public class DefaultFetchStrategy implements FetchStrategy {
         }
     }
 
-    private boolean isSameDay(Date date1, Date date2) {
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTime(date1);
-        Calendar cal2 = Calendar.getInstance();
-        cal2.setTime(date2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
-                cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
+    private boolean withingLastMonthFromNow(Date date, Date now) {
+        Date monthAgo = Dates.monthAgo(now);
+        return date.getTime() >= monthAgo.getTime();
     }
 }
