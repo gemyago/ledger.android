@@ -13,7 +13,6 @@ import com.infora.ledger.support.SystemDate;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -46,9 +45,16 @@ public class DefaultFetchStrategy implements FetchStrategy {
         Date lastSyncDate = bankLink.lastSyncDate;
         Date startDate;
         Date now = SystemDate.now();
-        if (withingLastMonthFromNow(lastSyncDate, now)) { //Always fetching last month. Some banks may show transactions later.
+        if (lastSyncDate.equals(bankLink.initialSyncDate)) {
+            Log.d(TAG, "Last sync date and initial sync dates are equal '" + lastSyncDate + "'. This means that this is a very first fetch.");
+            startDate = lastSyncDate;
+        } else if (withingLastMonthFromNow(lastSyncDate, now)) { //Always fetching last month. Some banks may show transactions later.
             Log.d(TAG, "Last sync date was '" + lastSyncDate + "' and now is '" + now + "'. Fetching transactions from last month.");
             startDate = Dates.monthAgo(now);
+            if (bankLink.initialSyncDate != null && startDate.getTime() < bankLink.initialSyncDate.getTime()) {
+                Log.d(TAG, "Initial sync date is not older than a month '" + bankLink.initialSyncDate + "'. Fetching starting from the initial sync date.");
+                startDate = bankLink.initialSyncDate;
+            }
         } else {
             //In the other case fetching from the next day after last
             startDate = Dates.addDays(lastSyncDate, 1);

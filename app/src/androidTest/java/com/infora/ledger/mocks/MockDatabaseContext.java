@@ -43,8 +43,9 @@ public class MockDatabaseContext extends DatabaseContext {
     private final Stack<MockUnitOfWork.Hook> unitOfWorkHooks = new Stack<>();
     public final List<MockUnitOfWork> mockUnitsOfWork;
 
-    public void addUnitOfWorkHook(MockUnitOfWork.Hook hook) {
+    public MockUnitOfWork.Hook addUnitOfWorkHook(MockUnitOfWork.Hook hook) {
         unitOfWorkHooks.add(0, hook);
+        return hook;
     }
 
     @Override

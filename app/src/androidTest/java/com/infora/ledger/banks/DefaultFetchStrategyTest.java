@@ -113,6 +113,62 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         hook2.assertCommitted();
     }
 
+    public void testFetchStartingFromInitialSyncDateIfItIsNoOlderThanAMonth() throws Exception {
+        final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
+        SystemDate.setNow(now);
+        bankLink.lastSyncDate = Dates.addDays(now, -5);
+        bankLink.initialSyncDate = Dates.addDays(now, -10);
+
+        mockApi.expectedGetTransactionsRequest.startDate = bankLink.initialSyncDate;
+        mockApi.expectedGetTransactionsRequest.endDate = now;
+        mockApi.bankTransactions.add(new PrivatBankTransaction()
+                .setCard("card-100")
+                .setTrandate("2015-05-23")
+                .setTrantime("21:56:23")
+                .setCardamount("-100.31 UAH")
+                .setTerminal("terminal-1")
+                .setDescription("description-1"));
+
+        mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
+        MockUnitOfWork.Hook hook2 = mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
+            @Override
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                MockUnitOfWork.Commit commit = mockUnitOfWork.commits.get(0);
+                assertEquals(1, commit.addedEntities.size());
+            }
+        });
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
+        hook2.assertCommitted();
+    }
+
+    public void testFetchStartingFromInitialSyncDateIfItIsEqualToLastSyncDate() throws Exception {
+        final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
+        SystemDate.setNow(now);
+        bankLink.lastSyncDate = Dates.monthAgo(Dates.addDays(now, -5));
+        bankLink.initialSyncDate = bankLink.lastSyncDate;
+
+        mockApi.expectedGetTransactionsRequest.startDate = bankLink.initialSyncDate;
+        mockApi.expectedGetTransactionsRequest.endDate = now;
+        mockApi.bankTransactions.add(new PrivatBankTransaction()
+                .setCard("card-100")
+                .setTrandate("2015-05-23")
+                .setTrantime("21:56:23")
+                .setCardamount("-100.31 UAH")
+                .setTerminal("terminal-1")
+                .setDescription("description-1"));
+
+        mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook());
+        MockUnitOfWork.Hook hook2 = mockDb.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
+            @Override
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                MockUnitOfWork.Commit commit = mockUnitOfWork.commits.get(0);
+                assertEquals(1, commit.addedEntities.size());
+            }
+        });
+        subject.fetchBankTransactions(mockDb, bankLink, secret);
+        hook2.assertCommitted();
+    }
+
     public void testFetchTransactionsIfLastFetchDateWasToday() throws Exception {
         final Date now = Dates.parse("yyyy-MM-dd HH:mm:ss", "2015-05-23 21:50:23");
         SystemDate.setNow(now);
