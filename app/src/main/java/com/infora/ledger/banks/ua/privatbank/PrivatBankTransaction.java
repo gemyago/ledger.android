@@ -49,7 +49,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
         return this;
     }
 
-    public BankTransaction setAmount(String amount) {
+    public PrivatBankTransaction setAmount(String amount) {
         this.amount = amount;
         return this;
     }
@@ -93,7 +93,10 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
     }
 
     public String getTransactionId() {
-        return PRIVATBANK_BIC + card + trandate.replace("-", "") + trantime.replace(":", "") + getAmount().replace(".", "P");
+        String lastDigitsOfCard = card.substring(card.length() - 4, card.length());
+        Matcher amountMatcher = AMOUNT_PATTERN.matcher(amount);
+        amountMatcher.find();
+        return PRIVATBANK_BIC + lastDigitsOfCard + trandate.replace("-", "") + trantime.replace(":", "") + amountMatcher.group(1).replace(".", "P");
     }
 
     @Override

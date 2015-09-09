@@ -48,18 +48,21 @@ public class PrivatBankTransactionTest extends TestCase {
 
     public void testGetTransactionId() {
         PrivatBankTransaction transaction = new PrivatBankTransaction();
-        transaction.card = "443334";
+        transaction.card = "002211233443334";
         transaction.trandate = "2015-05-23";
         transaction.trantime = "21:56:23";
+        transaction.amount = "99.33 USD";
         transaction.cardamount = "100.31 UAH";
-        assertEquals(PrivatBankTransaction.PRIVATBANK_BIC + "44333420150523215623100P31", transaction.getTransactionId());
+        assertEquals(PrivatBankTransaction.PRIVATBANK_BIC + "33342015052321562399P33", transaction.getTransactionId());
     }
 
     public void testToPendingTransaction() {
         BankLink bankLink = new BankLink().setBic("bank-100").setAccountId("account-100");
         PrivatBankTransaction pbTransaction = new PrivatBankTransaction();
+        pbTransaction.card = "112222";
         pbTransaction.trandate = "2015-05-23";
         pbTransaction.trantime = "21:56:23";
+        pbTransaction.amount = "-100.31 UAH";
         pbTransaction.cardamount = "-100.31 UAH";
         pbTransaction.terminal = "terminal 100";
         pbTransaction.description = "description 100";

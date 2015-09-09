@@ -96,6 +96,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1"));
@@ -125,6 +126,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1"));
@@ -153,6 +155,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1"));
@@ -180,6 +183,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
@@ -187,6 +191,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-101")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:24")
+                .setAmount("443.33 UAH")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
@@ -219,6 +224,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
@@ -226,6 +232,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")
+                .setAmount("443.33 UAH")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
@@ -261,6 +268,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
+                .setAmount("-100.31 UAH")
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
@@ -268,6 +276,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")
+                .setAmount("443.33 UAH")
                 .setCardamount("443.33 UAH")
                 .setTerminal("terminal-2")
                 .setDescription("description-2");
