@@ -67,8 +67,8 @@ public class MockLedgerApi implements LedgerApi {
     }
 
     @Override
-    public Void reportPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("date") Date date, @Field("comment") String comment, @Field("accountId") String accountId) {
-        reportedTransactions.add(new ReportPendingTransactionArgs(transactionId, amount, date, comment, accountId));
+    public Void reportPendingTransaction(@Field("aggregate_id") String transactionId, @Field("amount") String amount, @Field("date") Date date, @Field("comment") String comment, @Field("accountId") String accountId, @Field("typeId") int typeId) {
+        reportedTransactions.add(new ReportPendingTransactionArgs(transactionId, amount, date, comment, accountId, typeId));
         return null;
     }
 
@@ -124,13 +124,15 @@ public class MockLedgerApi implements LedgerApi {
         public final String amount;
         public final String comment;
         public final String accountId;
+        public final int typeId;
         private final Date date;
 
-        private ReportPendingTransactionArgs(String transactionId, String amount, Date date, String comment, String accountId) {
+        private ReportPendingTransactionArgs(String transactionId, String amount, Date date, String comment, String accountId, int typeId) {
             this.transactionId = transactionId;
             this.amount = amount;
             this.comment = comment;
             this.accountId = accountId;
+            this.typeId = typeId;
             this.date = date;
         }
 
@@ -156,7 +158,8 @@ public class MockLedgerApi implements LedgerApi {
                     .setAmount(amount)
                     .setTimestamp(date)
                     .setComment(comment)
-                    .setAccountId(accountId);
+                    .setAccountId(accountId)
+                    .setTypeId(typeId);
         }
     }
 }

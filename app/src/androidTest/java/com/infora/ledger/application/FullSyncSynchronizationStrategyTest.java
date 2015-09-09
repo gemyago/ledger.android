@@ -3,6 +3,7 @@ package com.infora.ledger.application;
 import android.content.SyncResult;
 import android.test.AndroidTestCase;
 
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
@@ -16,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.greenrobot.event.EventBus;
+
+import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_EXPENSE;
+import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_INCOME;
 
 /**
  * Created by jenya on 25.03.15.
@@ -54,9 +58,9 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
     public void testSynchronizeReportNew() throws SQLException {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
-        PendingTransaction t1 = readModel.inject(new PendingTransaction("t-1", "100", "t 100", false, false, new Date(), null).setId(1).setAccountId("account-1"));
+        PendingTransaction t1 = readModel.inject(new PendingTransaction("t-1", "100", "t 100", false, false, new Date(), null).setId(1).setAccountId("account-1").setTypeId(TRANSACTION_TYPE_EXPENSE));
         PendingTransaction t2 = readModel.inject(new PendingTransaction("t-2", "101", "t 101", false, false, new Date(), null).setId(2));
-        PendingTransaction t3 = readModel.inject(new PendingTransaction("t-3", "103", "t 103", false, false, new Date(), null).setId(3).setAccountId("account-3"));
+        PendingTransaction t3 = readModel.inject(new PendingTransaction("t-3", "103", "t 103", false, false, new Date(), null).setId(3).setAccountId("account-3").setTypeId(TRANSACTION_TYPE_INCOME));
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
         bus.register(publishedSubscriber);
 

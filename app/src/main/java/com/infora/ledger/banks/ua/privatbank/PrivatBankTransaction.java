@@ -102,6 +102,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
     @Override
     public PendingTransaction toPendingTransaction(BankLink bankLink) {
         return new PendingTransaction()
+                .setTypeId(getTypeId())
                 .setAccountId(bankLink.accountId)
                 .setTransactionId(getTransactionId())
                 .setAmount(getAmount())

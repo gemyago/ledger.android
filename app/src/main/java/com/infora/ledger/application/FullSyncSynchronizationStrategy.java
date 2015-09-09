@@ -63,7 +63,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
                 toDeleteIds.add(localTran.id);
             } else {
                 Log.d(TAG, "Publishing pending transaction: " + localTran.transactionId);
-                api.reportPendingTransaction(localTran.transactionId, localTran.amount, localTran.timestamp, localTran.comment, localTran.accountId);
+                api.reportPendingTransaction(localTran.transactionId, localTran.amount, localTran.timestamp, localTran.comment, localTran.accountId, localTran.typeId);
                 bus.post(new MarkTransactionAsPublishedCommand(localTran.id));
             }
         }

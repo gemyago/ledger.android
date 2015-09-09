@@ -68,10 +68,15 @@ public class PrivatBankTransactionTest extends TestCase {
         pbTransaction.description = "description 100";
 
         PendingTransaction pendingTransaction = pbTransaction.toPendingTransaction(bankLink);
+        assertEquals(TransactionContract.TRANSACTION_TYPE_EXPENSE, pendingTransaction.typeId);
         assertEquals(bankLink.accountId, pendingTransaction.accountId);
         assertEquals(pbTransaction.getTransactionId(), pendingTransaction.transactionId);
         assertEquals(pbTransaction.getAmount(), pendingTransaction.amount);
         assertEquals(pbTransaction.terminal + " " + pbTransaction.description, pendingTransaction.comment);
         assertEquals(pbTransaction.getDate(), pendingTransaction.timestamp);
+
+        pbTransaction.cardamount = "100.31 UAH";
+        pendingTransaction = pbTransaction.toPendingTransaction(bankLink);
+        assertEquals(TransactionContract.TRANSACTION_TYPE_INCOME, pendingTransaction.typeId);
     }
 }

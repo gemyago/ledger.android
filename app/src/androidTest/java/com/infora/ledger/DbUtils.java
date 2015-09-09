@@ -39,6 +39,7 @@ public class DbUtils {
     public static Object[] toArray(PendingTransaction transaction) {
         return new Object[]{
                 transaction.id,
+                transaction.typeId,
                 transaction.accountId,
                 transaction.transactionId,
                 transaction.amount,
@@ -66,6 +67,7 @@ public class DbUtils {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
+            values.put(TransactionContract.COLUMN_TYPE_ID, transaction.typeId);
             values.put(TransactionContract.COLUMN_TRANSACTION_ID, transaction.transactionId);
             values.put(TransactionContract.COLUMN_AMOUNT, transaction.amount);
             values.put(TransactionContract.COLUMN_COMMENT, transaction.comment);

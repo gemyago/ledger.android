@@ -1,5 +1,6 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.support.Dates;
@@ -24,6 +25,11 @@ public class UkrsibBankTransactionTest extends TestCase {
         assertEquals(usbt1.description, pendingt1.comment);
         assertTrue(Dates.areEqual(usbt1.trandate, pendingt1.timestamp));
         assertEquals(UkrsibBankTransaction.BIC, pendingt1.bic);
+        assertEquals(TransactionContract.TRANSACTION_TYPE_EXPENSE, pendingt1.typeId);
+
+        usbt1.setAccountAmount("800.23");
+        pendingt1 = usbt1.toPendingTransaction(new BankLink().setAccountId("account-1"));
+        assertEquals(TransactionContract.TRANSACTION_TYPE_INCOME, pendingt1.typeId);
     }
 
     public void testToPendingTransactionLargeAmount() throws Exception {

@@ -1,5 +1,6 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
@@ -62,6 +63,7 @@ public class UkrsibBankTransaction implements BankTransaction {
 
     @Override
     public PendingTransaction toPendingTransaction(BankLink bankLink) {
+        int typeId = accountAmount.startsWith("-") ? TransactionContract.TRANSACTION_TYPE_EXPENSE : TransactionContract.TRANSACTION_TYPE_INCOME;
         String actualAmount = accountAmount.replace(" ", "").replace("-", "");
         String authCodeOrHashCode = this.authCode == null ? String.valueOf(Math.abs(description.hashCode())) : this.authCode;
         return new PendingTransaction(
@@ -71,7 +73,7 @@ public class UkrsibBankTransaction implements BankTransaction {
                 false,
                 false,
                 trandate,
-                BIC).setAccountId(bankLink.accountId);
+                BIC).setAccountId(bankLink.accountId).setTypeId(typeId);
     }
 
     @Override

@@ -18,7 +18,7 @@ import java.util.Date;
 public class LedgerDbHelper extends SQLiteOpenHelper {
     private static final String TAG = LedgerDbHelper.class.getName();
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
     private static final String DATABASE_NAME = "Ledger";
 
     public LedgerDbHelper(Context context) {
@@ -31,6 +31,7 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE TABLE " + TransactionContract.TABLE_NAME + " (" +
                         TransactionContract.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        TransactionContract.COLUMN_TYPE_ID + " INTEGER NOT NULL DEFAULT(2)," + //Default is expense
                         TransactionContract.COLUMN_ACCOUNT_ID + " NVARCHAR(256) NULL," +
                         TransactionContract.COLUMN_TRANSACTION_ID + " NVARCHAR(256) NOT NULL UNIQUE," +
                         TransactionContract.COLUMN_AMOUNT + " NVARCHAR(50) NOT NULL," +
@@ -66,6 +67,10 @@ public class LedgerDbHelper extends SQLiteOpenHelper {
         if(oldVersion < 7) {
             db.execSQL("ALTER TABLE " + BanksContract.BankLinks.TABLE_NAME
                     + " ADD " + BanksContract.BankLinks.COLUMN_INITIAL_SYNC_DATE + " NVARCHAR(50) NULL;");
+        }
+        if(oldVersion < 8) {
+            db.execSQL("ALTER TABLE " + TransactionContract.TABLE_NAME
+                    + " ADD " + TransactionContract.COLUMN_TYPE_ID + " INTEGER NOT NULL DEFAULT(2);");
         }
     }
 

@@ -17,6 +17,7 @@ import static com.infora.ledger.TransactionContract.COLUMN_IS_DELETED;
 import static com.infora.ledger.TransactionContract.COLUMN_IS_PUBLISHED;
 import static com.infora.ledger.TransactionContract.COLUMN_TIMESTAMP;
 import static com.infora.ledger.TransactionContract.COLUMN_TRANSACTION_ID;
+import static com.infora.ledger.TransactionContract.COLUMN_TYPE_ID;
 import static com.infora.ledger.TransactionContract.TABLE_NAME;
 
 
@@ -27,6 +28,9 @@ import static com.infora.ledger.TransactionContract.TABLE_NAME;
 public class PendingTransaction implements Entity {
     @DatabaseField(columnName = COLUMN_ID, generatedId = true)
     public int id;
+
+    @DatabaseField(columnName = COLUMN_TYPE_ID)
+    public int typeId;
 
     @DatabaseField(columnName = COLUMN_ACCOUNT_ID)
     public String accountId;
@@ -98,6 +102,11 @@ public class PendingTransaction implements Entity {
         return this;
     }
 
+    public PendingTransaction setTypeId(int typeId) {
+        this.typeId = typeId;
+        return this;
+    }
+
     public PendingTransaction setTransactionId(String transactionId) {
         this.transactionId = transactionId;
         return this;
@@ -145,6 +154,7 @@ public class PendingTransaction implements Entity {
         PendingTransaction that = (PendingTransaction) o;
 
         if (id != that.id) return false;
+        if (typeId != that.typeId) return false;
         if (isPublished != that.isPublished) return false;
         if (isDeleted != that.isDeleted) return false;
         if (accountId != null ? !accountId.equals(that.accountId) : that.accountId != null)
@@ -161,6 +171,7 @@ public class PendingTransaction implements Entity {
     @Override
     public int hashCode() {
         int result = id;
+        result = 31 * result + typeId;
         result = 31 * result + (accountId != null ? accountId.hashCode() : 0);
         result = 31 * result + transactionId.hashCode();
         result = 31 * result + amount.hashCode();
@@ -176,6 +187,7 @@ public class PendingTransaction implements Entity {
     public String toString() {
         return "PendingTransaction{" +
                 "id=" + id +
+                ", typeId='" + typeId + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", transactionId='" + transactionId + '\'' +
                 ", amount='" + amount + '\'' +

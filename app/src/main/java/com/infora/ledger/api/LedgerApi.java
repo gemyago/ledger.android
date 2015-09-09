@@ -33,7 +33,8 @@ public interface LedgerApi {
             @Field("amount") String amount,
             @Field("date") Date date,
             @Field("comment") String comment,
-            @Field("account_id") String accountId);
+            @Field("account_id") String accountId,
+            @Field("type_id") int typeId);
 
     @FormUrlEncoded
     @PUT("/pending-transactions/{id}")

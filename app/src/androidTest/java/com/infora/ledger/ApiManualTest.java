@@ -17,6 +17,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_EXPENSE;
+import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_INCOME;
+
 /**
  * Created by jenya on 12.03.15.
  */
@@ -24,7 +27,7 @@ public class ApiManualTest extends AndroidTestCase {
     /**
      * Before running tests please specify api endpoint url
      */
-    private String endpointUrl = "TODO: SPECIFY";
+    private String endpointUrl = "https://staging.my-ledger.com";
 
     private ApiAdapter adapter;
     private LedgerApi ledgerApi;
@@ -53,17 +56,28 @@ public class ApiManualTest extends AndroidTestCase {
         adapter.authenticateApi(ledgerApi, account);
         List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         LedgerAccountDto accountDto = accounts.get(0);
-        String transactionId = UUID.randomUUID().toString();
+        String expenseTranId = UUID.randomUUID().toString();
+        String incomeTranId = UUID.randomUUID().toString();
         Date date = new Date();
-        ledgerApi.reportPendingTransaction(transactionId, "100.00", date, "Comment for transaction 100", accountDto.id);
+        ledgerApi.reportPendingTransaction(expenseTranId, "100.00", date, "Comment for transaction 100", accountDto.id, TRANSACTION_TYPE_EXPENSE);
+        ledgerApi.reportPendingTransaction(incomeTranId, "100.00", date, "Comment for transaction 100", accountDto.id, TransactionContract.TRANSACTION_TYPE_INCOME);
         List<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto pendingTransaction : pendingTransactions) {
-            if (pendingTransaction.transactionId == transactionId) {
+            if (pendingTransaction.transactionId == expenseTranId) {
                 assertEquals("100.00", pendingTransaction.amount);
                 assertEquals("Comment for transaction 100", pendingTransaction.comment);
                 assertEquals(accountDto.id, pendingTransaction.account_id);
                 assertEquals(accounts.get(0).id, pendingTransaction.account_id);
-                break;
+                assertEquals(TRANSACTION_TYPE_EXPENSE, pendingTransaction.type_id);
+                continue;
+            }
+            if (pendingTransaction.transactionId == incomeTranId) {
+                assertEquals("100.00", pendingTransaction.amount);
+                assertEquals("Comment for transaction 100", pendingTransaction.comment);
+                assertEquals(accountDto.id, pendingTransaction.account_id);
+                assertEquals(accounts.get(0).id, pendingTransaction.account_id);
+                assertEquals(TransactionContract.TRANSACTION_TYPE_INCOME, pendingTransaction.type_id);
+                continue;
             }
         }
     }
@@ -73,8 +87,8 @@ public class ApiManualTest extends AndroidTestCase {
         List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         String t1id = UUID.randomUUID().toString();
         String t2id = UUID.randomUUID().toString();
-        ledgerApi.reportPendingTransaction(t1id, "100.00", new Date(), "Comment for transaction 100", accounts.get(0).id);
-        ledgerApi.reportPendingTransaction(t2id, "100.01", new Date(), "Comment for transaction 101", accounts.get(1).id);
+        ledgerApi.reportPendingTransaction(t1id, "100.00", new Date(), "Comment for transaction 100", accounts.get(0).id, TRANSACTION_TYPE_EXPENSE);
+        ledgerApi.reportPendingTransaction(t2id, "100.01", new Date(), "Comment for transaction 101", accounts.get(1).id, TRANSACTION_TYPE_INCOME);
         List<PendingTransactionDto> pendingTransactions = ledgerApi.getPendingTransactions();
         assertFalse("There should be some pending transactions for testing purposes", pendingTransactions.isEmpty());
         for (PendingTransactionDto pendingTransaction : pendingTransactions) {
@@ -83,9 +97,11 @@ public class ApiManualTest extends AndroidTestCase {
             assertNotNull(pendingTransaction.comment);
             if (pendingTransaction.transactionId == t1id) {
                 assertEquals(accounts.get(0).id, pendingTransaction.account_id);
+                assertEquals(TRANSACTION_TYPE_EXPENSE, pendingTransaction.type_id);
             }
             if (pendingTransaction.transactionId == t2id) {
                 assertEquals(accounts.get(1).id, pendingTransaction.account_id);
+                assertEquals(TRANSACTION_TYPE_INCOME, pendingTransaction.type_id);
             }
         }
     }
@@ -106,9 +122,9 @@ public class ApiManualTest extends AndroidTestCase {
 
     public void testRejectPendingTransactions() {
         adapter.authenticateApi(ledgerApi, account);
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
-        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
+        ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
 
         List<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto transaction : transactions) {
