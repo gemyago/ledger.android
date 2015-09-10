@@ -7,6 +7,7 @@ public class Privat24BankLinkData {
     public String login;
     public String password;
     public String cookie;
+    public String cardid;
 
     public Privat24BankLinkData setLogin(String login) {
         this.login = login;
@@ -20,6 +21,11 @@ public class Privat24BankLinkData {
 
     public Privat24BankLinkData setCookie(String cookie) {
         this.cookie = cookie;
+        return this;
+    }
+
+    public Privat24BankLinkData setCardid(String cardid) {
+        this.cardid = cardid;
         return this;
     }
 }

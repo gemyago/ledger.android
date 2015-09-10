@@ -24,8 +24,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.converter.GsonConverter;
-
 /**
  * Created by mye on 9/10/2015.
  */
@@ -114,6 +112,19 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
         return new Gson().fromJson(cardsJson, listType);
     }
 
+    @Override
+    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
+        Log.d(TAG, "Getting transactions");
+        Privat24BankLinkData linkData = request.bankLink.getLinkData(Privat24BankLinkData.class, secret);
+        JsonObject response = getJsonWithCookieRefresh(linkData, createApiUrlBuilder()
+                .addQueryParameter("card", linkData.cardid)
+                .addQueryParameter("weeks", "4") //TODO: Implement logic to calculate weeks number
+                .addPathSegment("iapi2").addPathSegment("stats")
+                .build());
+        Log.d(TAG, "Transactions JSON: \n" + response.toString());
+        return null;
+    }
+
     private JsonObject getJsonWithCookieRefresh(Privat24BankLinkData linkData, HttpUrl url) throws IOException, PrivatBankException {
         JsonObject data = getJson(url
                 .newBuilder()
@@ -149,11 +160,6 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
             Log.e(TAG, "Failed to parse JSON: \n" + bodyString);
             throw ex;
         }
-    }
-
-    @Override
-    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
-        return null;
     }
 
     private void validateStatus(Response httpResponse) throws IOException {

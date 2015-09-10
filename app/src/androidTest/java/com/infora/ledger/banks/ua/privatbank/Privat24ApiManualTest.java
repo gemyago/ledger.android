@@ -38,7 +38,8 @@ public class Privat24ApiManualTest extends AndroidTestCase {
         linkData = new Privat24BankLinkData()
                 .setLogin("TODO")
                 .setPassword("TODO")
-                .setCookie("TODO: Set from logs after testAuthenticateWithOtp");
+                .setCookie("TODO: Set from logs after testAuthenticateWithOtp")
+                .setCardid("TODO: Set from logs after testGetCards");
         api = new Privat24Api("db201de4-90be-4003-b210-010e56f96c83", linkData.login, linkData.password);
         secret = DeviceSecret.generateNew();
         bankLink = new BankLink().setLinkData(linkData, secret);
@@ -65,23 +66,23 @@ public class Privat24ApiManualTest extends AndroidTestCase {
     /**
      * This test must be run strictly after testAuthenticateWithOtp and cookie is assigned.
      */
+    public void testGetCards() throws IOException, FetchException {
+        List<PrivatBankCard> cards = api.getCards(bankLink, secret);
+        LogUtil.d(this, "Fetched cards " + cards.size());
+        for (PrivatBankCard card : cards) {
+            LogUtil.d(this, card.toString());
+        }
+    }
+
+    /**
+     * This test must be run strictly after testGetCards and cardid assigned.
+     */
     public void testGetTransactions() throws IOException, FetchException {
         Date now = new Date();
         List<PrivatBankTransaction> transactions = api.getTransactions(new GetTransactionsRequest(bankLink, Dates.monthAgo(now), now), secret);
         LogUtil.d(this, "Fetched transactions " + transactions.size());
         for (BankTransaction transaction : transactions) {
             LogUtil.d(this, transaction.toString());
-        }
-    }
-
-    /**
-     * This test must be run strictly after testAuthenticateWithOtp and cookie is assigned.
-     */
-    public void testGetCards() throws IOException, FetchException {
-        List<PrivatBankCard> cards = api.getCards(bankLink, secret);
-        LogUtil.d(this, "Fetched cards " + cards.size());
-        for (PrivatBankCard card : cards) {
-            LogUtil.d(this, card.toString());
         }
     }
 }
