@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * Created by mye on 9/10/2015.
  */
-public class Privat24Api implements BankApi<PrivatBankTransaction> {
+public class Privat24Api implements BankApi<Privat24Transaction> {
     private static String TAG = Privat24Api.class.getName();
 
     private final OkHttpClient client;
@@ -113,7 +114,7 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
     }
 
     @Override
-    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
+    public List<Privat24Transaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
         Log.d(TAG, "Getting transactions");
         Privat24BankLinkData linkData = request.bankLink.getLinkData(Privat24BankLinkData.class, secret);
         JsonObject response = getJsonWithCookieRefresh(linkData, createApiUrlBuilder()
@@ -121,8 +122,8 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
                 .addQueryParameter("weeks", "4") //TODO: Implement logic to calculate weeks number
                 .addPathSegment("iapi2").addPathSegment("stats")
                 .build());
-        Log.d(TAG, "Transactions JSON: \n" + response.toString());
-        return null;
+        final Type listType = new TypeToken<ArrayList<Privat24Transaction>>() {}.getType();
+        return new Gson().fromJson(response.getAsJsonArray("orders").toString(), listType);
     }
 
     private JsonObject getJsonWithCookieRefresh(Privat24BankLinkData linkData, HttpUrl url) throws IOException, PrivatBankException {
