@@ -3,20 +3,28 @@ package com.infora.ledger.banks.ua.privatbank;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
+import com.infora.ledger.data.BankLink;
 import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit.converter.GsonConverter;
 
 /**
  * Created by mye on 9/10/2015.
@@ -96,6 +104,58 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
         return response.get("cookie").getAsString();
     }
 
+    public List<PrivatBankCard> getCards(BankLink link, DeviceSecret secret) throws IOException, FetchException {
+        Log.d(TAG, "Getting cards");
+        Privat24BankLinkData linkData = link.getLinkData(Privat24BankLinkData.class, secret);
+        JsonObject response = getJsonWithCookieRefresh(linkData, createApiUrlBuilder()
+                .addPathSegment("iapi2").addPathSegment("props_full").build());
+        Type listType = new TypeToken<ArrayList<PrivatBankCard>>() {}.getType();
+        String cardsJson = response.getAsJsonArray("cards").toString();
+        return new Gson().fromJson(cardsJson, listType);
+    }
+
+    private JsonObject getJsonWithCookieRefresh(Privat24BankLinkData linkData, HttpUrl url) throws IOException, PrivatBankException {
+        JsonObject data = getJson(url
+                .newBuilder()
+                .addQueryParameter("cookie", linkData.cookie)
+                .build());
+        if(data.get("st").getAsString().equals("fail") && data.get("err").getAsString().equals("CODE104: need auth")) {
+            Log.d(TAG, "The cookie has expired. Authenticating to get a new cookie");
+            data = getJson(createApiUrlBuilder()
+                    .addQueryParameter("cookie", linkData.cookie)
+                    .addQueryParameter("pass", pass)
+                    .addPathSegment("iapi2").addPathSegment("chpass").build());
+            String status = data.get("st").getAsString();
+            if(!status.equals("ok")) throw new PrivatBankException("Unexpected status: " + status);
+            Log.d(TAG, "New cookie retrieved.");
+            linkData.cookie = data.get("cookie").getAsString();
+
+            data = getJson(url
+                    .newBuilder()
+                    .addQueryParameter("cookie", linkData.cookie)
+                    .build());
+        }
+        return data;
+    }
+
+    private JsonObject getJson(HttpUrl url) throws IOException {
+        Request httpRequest = new Request.Builder().url(url).get().build();
+        Response httpResponse = client.newCall(httpRequest).execute();
+        validateStatus(httpResponse);
+        String bodyString = httpResponse.body().string();
+        try {
+            return new JsonParser().parse(bodyString).getAsJsonObject();
+        } catch (JsonSyntaxException ex) {
+            Log.e(TAG, "Failed to parse JSON: \n" + bodyString);
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
+        return null;
+    }
+
     private void validateStatus(Response httpResponse) throws IOException {
         Log.d(TAG, "Request completed with status: " + httpResponse.code() + ".");
         if (!httpResponse.isSuccessful()) {
@@ -113,12 +173,7 @@ public class Privat24Api implements BankApi<PrivatBankTransaction> {
                 .addQueryParameter("device", "Android+SDK+built+for+x86%7Cunknown");
     }
 
-    @Override
-    public List<PrivatBankTransaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
-        return null;
-    }
-
-    public void failWithUnexpectedNextCmd(JsonObject data, String expected_cmd) throws PrivatBankException {
+    private void failWithUnexpectedNextCmd(JsonObject data, String expected_cmd) throws PrivatBankException {
         if(!data.has("nextCmd")) {
             Log.d(TAG, "Unexpected data: " + data);
             throw new PrivatBankException("Unexpected data. The nextCmd not found.");
