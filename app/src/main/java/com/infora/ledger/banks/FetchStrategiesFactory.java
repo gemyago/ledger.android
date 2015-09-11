@@ -1,9 +1,9 @@
 package com.infora.ledger.banks;
 
-import com.infora.ledger.banks.ua.privatbank.PrivatBankApi;
+import com.infora.ledger.banks.ua.privatbank.Privat24ApiAdapterForDefaultFetchStrategy;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
-import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankApi;
+import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -20,7 +20,7 @@ public class FetchStrategiesFactory {
     }
 
     public FetchStrategy getStrategy(String bic) {
-        if(!fetchStrategies.containsKey(bic))
+        if (!fetchStrategies.containsKey(bic))
             throw new IllegalArgumentException("Can not locate fetch strategy. Unknown BIC: " + bic);
         final Callable<FetchStrategy> strategyFactory = fetchStrategies.get(bic);
         try {
@@ -35,7 +35,7 @@ public class FetchStrategiesFactory {
         factory.fetchStrategies.put(PrivatBankTransaction.PRIVATBANK_BIC, new Callable<FetchStrategy>() {
             @Override
             public FetchStrategy call() throws Exception {
-                return new DefaultFetchStrategy(new PrivatBankApi());
+                return new DefaultFetchStrategy(new Privat24ApiAdapterForDefaultFetchStrategy());
             }
         });
         factory.fetchStrategies.put(UkrsibBankTransaction.BIC, new Callable<FetchStrategy>() {
