@@ -79,7 +79,7 @@ public class Privat24ApiManualTest extends AndroidTestCase {
      */
     public void testGetTransactions() throws IOException, FetchException {
         Date now = new Date();
-        List<PrivatBankTransaction> transactions = api.getTransactions(new GetTransactionsRequest(bankLink, Dates.monthAgo(now), now), secret);
+        List<Privat24Transaction> transactions = api.getTransactions(new GetTransactionsRequest(bankLink, Dates.monthAgo(now), now), secret);
         LogUtil.d(this, "Fetched transactions " + transactions.size());
         for (BankTransaction transaction : transactions) {
             LogUtil.d(this, transaction.toString());
