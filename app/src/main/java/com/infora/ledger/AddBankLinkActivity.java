@@ -140,10 +140,13 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
     private <TFragment extends BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-        if (fragment == null) {
-            Fragment oldFragment = getSupportFragmentManager().findFragmentByTag(BANK_LINK_FRAGMENT);
-            if (oldFragment != null) t.remove(oldFragment);
-        } else {
+        TFragment oldFragment = (TFragment) getSupportFragmentManager().findFragmentByTag(BANK_LINK_FRAGMENT);
+        if (oldFragment != null) {
+            oldFragment.onBeforeRemove(this);
+            t.remove(oldFragment);
+        }
+        if (fragment != null) {
+            fragment.onBeforeAdd(this);
             t.replace(R.id.bank_link_fragment_container, fragment, BANK_LINK_FRAGMENT);
         }
         t.commit();

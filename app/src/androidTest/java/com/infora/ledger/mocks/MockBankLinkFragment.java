@@ -1,5 +1,7 @@
 package com.infora.ledger.mocks;
 
+import android.app.Activity;
+
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -13,6 +15,20 @@ import java.util.concurrent.Callable;
 public class MockBankLinkFragment extends BankLinkFragment<MockBankLinkData> {
     private MockBankLinkData mockBankLinkData;
     public String bic;
+
+    public boolean beforeAddCalled;
+
+    @Override
+    public void onBeforeAdd(Activity parent) {
+        beforeAddCalled = true;
+    }
+
+    public boolean beforeRemoveCalled;
+
+    @Override
+    public void onBeforeRemove(Activity parent) {
+        beforeRemoveCalled = true;
+    }
 
     @Override
     public MockBankLinkData getBankLinkData() {

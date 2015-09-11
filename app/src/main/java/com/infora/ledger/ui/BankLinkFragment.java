@@ -1,5 +1,6 @@
 package com.infora.ledger.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -17,6 +18,14 @@ public abstract class BankLinkFragment<TLinkData> extends Fragment {
     public abstract TLinkData getBankLinkData();
 
     private boolean isViewCreated;
+
+    public void onBeforeAdd(Activity parent) {
+
+    }
+
+    public void onBeforeRemove(Activity parent) {
+
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
