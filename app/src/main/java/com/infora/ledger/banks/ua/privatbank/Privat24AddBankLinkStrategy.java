@@ -11,7 +11,9 @@ import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtpFailed;
 import com.infora.ledger.banks.ua.privatbank.messages.CancelAddingBankLink;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.UnitOfWork;
 import com.infora.ledger.support.ObfuscatedString;
 
 import java.io.IOException;
@@ -28,12 +30,12 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
     private static final String TAG = Privat24AddBankLinkStrategy.class.getName();
 
     private Privat24Api.Factory apiFactory;
-    private DatabaseRepository<BankLink> repository;
     private int linkId;
     private DeviceSecret deviceSecret;
     private Privat24Api api;
     private EventBus bus;
     private String operationId;
+    private DatabaseContext db;
 
     public Privat24Api.Factory getApiFactory() {
         return apiFactory == null ? (apiFactory = new Privat24Api.Factory()) : apiFactory;
@@ -43,21 +45,25 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
         this.apiFactory = apiFactory;
     }
 
-    public void addBankLink(EventBus bus, DatabaseRepository<BankLink> repository, BankLink bankLink, DeviceSecret deviceSecret) {
+    public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
         Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
         linkData.uniqueId = UUID.randomUUID().toString();
         bankLink.setLinkData(linkData, deviceSecret);
+        UnitOfWork unitOfWork = db.newUnitOfWork();
+        unitOfWork.addNew(bankLink);
         try {
-            repository.save(bankLink);
+
             api = getApiFactory().createApi(linkData.uniqueId, linkData.login, linkData.password);
             operationId = api.authenticateWithPhoneAndPass();
+            unitOfWork.commit();
+
             bus.post(new AskPrivat24Otp(bankLink.id, operationId));
 
             //Registering to handle AuthenticateWithOtp command
             bus.register(this);
 
             this.bus = bus;
-            this.repository = repository;
+            this.db = db;
             this.linkId = bankLink.id;
             this.deviceSecret = deviceSecret;
         } catch (SQLException e) {
@@ -76,10 +82,11 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
         validateLinkId(command.linkId);
         if (!operationId.equals(command.operationId))
             throw new IllegalArgumentException("Wrong operationId. Expected: '" + operationId + "', was: '" + command.operationId + "'.");
+        UnitOfWork unitOfWork = db.newUnitOfWork();
         try {
             String cookie = api.authenticateWithOtp(command.operationId, command.otp);
             Log.d(TAG, "Authenticated with OTP. Saving retrieved cookie...");
-            BankLink bankLink = repository.getById(linkId);
+            BankLink bankLink = unitOfWork.getById(BankLink.class, linkId);
             Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
             linkData.cookie = cookie;
             bankLink.setLinkData(linkData, deviceSecret);
@@ -94,8 +101,7 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
                     break;
                 }
             }
-            repository.save(bankLink);
-
+            unitOfWork.commit();
             Log.d(TAG, "Bank link added.");
             bus.unregister(this);
             bus.post(new BankLinkAdded(bankLink.accountId, bankLink.bic));
@@ -109,6 +115,7 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
     public void onEventBackgroundThread(CancelAddingBankLink command) {
         validateLinkId(command.linkId);
         Log.d(TAG, "Canceling adding bank link '" + command.linkId + "'. This means simply deleting it.");
+        DatabaseRepository<BankLink> repository = db.createRepository(BankLink.class);
         try {
             //TODO: Handle errors correctly
             repository.deleteAll(new long[]{command.linkId});

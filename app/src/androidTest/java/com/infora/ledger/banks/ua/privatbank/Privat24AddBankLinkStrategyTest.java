@@ -9,9 +9,12 @@ import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.banks.ua.privatbank.messages.CancelAddingBankLink;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.Entity;
+import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockPrivat24Api;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.MockUnitOfWork;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +27,18 @@ import de.greenrobot.event.EventBus;
  */
 public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     private EventBus bus;
-    private MockDatabaseRepository<BankLink> repository;
+
     private Privat24AddBankLinkStrategy subject;
     private DeviceSecret deviceSecret;
     private MockPrivat24Api api;
+    private MockDatabaseContext db;
+    private MockUnitOfWork.Hook defaultUnitOfWorkHook;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
-        repository = new MockDatabaseRepository(BankLink.class);
+        db = new MockDatabaseContext();
         subject = new Privat24AddBankLinkStrategy();
         api = new MockPrivat24Api();
         subject.setApiFactory(new Privat24Api.Factory() {
@@ -44,10 +49,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         });
         deviceSecret = DeviceSecret.generateNew();
 
-        repository.onSaving = new MockDatabaseRepository.SaveAction<BankLink>() {
+        defaultUnitOfWorkHook = new MockUnitOfWork.Hook() {
             @Override
-            public void save(BankLink bankLink) {
-                bankLink.id = 44321;
+            public <TEntity extends Entity> void onAddNew(TEntity entity) {
+                ((BankLink) (entity)).id = 44321;
             }
         };
         api.onAuthenticateWithPhoneAndPass = new Callable<String>() {
@@ -59,14 +64,16 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testAddBankLink() {
-        repository.onSaving = new MockDatabaseRepository.SaveAction<BankLink>() {
+        MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
             @Override
-            public void save(BankLink bankLink) {
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                BankLink bankLink = (BankLink) mockUnitOfWork.commits.get(0).addedEntities.get(0);
                 bankLink.id = 3322;
                 Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
                 assertNotNull(linkData.uniqueId);
+
             }
-        };
+        });
         BankLink bankLink = new BankLink();
         bankLink.setLinkData(new Privat24BankLinkData(), deviceSecret);
 
@@ -80,10 +87,9 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
             }
         };
 
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        hook.assertCommitted();
 
-        assertEquals(1, repository.savedEntities.size());
-        assertTrue(repository.savedEntities.contains(bankLink));
         assertEquals(3322, askOtpHandler.getEvent().linkId);
         assertEquals("41399320", askOtpHandler.getEvent().operationId);
 
@@ -91,9 +97,11 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testAuthenticateWithOtp() {
+        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        defaultUnitOfWorkHook.assertCommitted();
 
         api.onAuthenticateWithOtp = new MockPrivat24Api.AuthenticateWithOtpCall() {
             @Override
@@ -117,17 +125,26 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
             }
         };
 
-        repository.savedEntities.clear();
-        repository.entityToGetById = bankLink;
+        MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
+            @Override
+            public <TEntity extends Entity> TEntity onGetById(Class<TEntity> classOfEntity, int id) {
+                if(id == bankLink.id) return (TEntity) bankLink;
+                return null;
+            }
+
+            @Override
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                Privat24BankLinkData savedLinkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
+                assertEquals("cookie-133234", savedLinkData.cookie);
+                assertEquals("card-8867", savedLinkData.cardid);
+            }
+        });
+
         MockSubscriber<BankLinkAdded> addedHandler = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(addedHandler);
         subject.onEventBackgroundThread(new AuthenticateWithOtp(44321, "operation-1", "9911"));
+        hook.assertCommitted();
 
-        assertEquals(1, repository.savedEntities.size());
-        BankLink savedLink = repository.savedEntities.get(0);
-        Privat24BankLinkData savedLinkData = savedLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
-        assertEquals("cookie-133234", savedLinkData.cookie);
-        assertEquals("card-8867", savedLinkData.cardid);
 
         BankLinkAdded addedEvt = addedHandler.getEvent();
         assertNotNull(addedEvt);
@@ -138,9 +155,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testAuthenticateWithOtpWrongLinkId() {
+        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
 
         boolean raised = false;
         try {
@@ -153,9 +171,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testAuthenticateWithOtpWrongOperationId() {
+        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
 
         boolean raised = false;
         try {
@@ -167,9 +186,13 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testCancelAddingBankLink() {
+        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
+        MockDatabaseRepository<BankLink> repository = new MockDatabaseRepository<>(BankLink.class);
+        db.addMockRepo(BankLink.class, repository);
+
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
         subject.onEventBackgroundThread(new CancelAddingBankLink(bankLink.id));
 
         assertEquals(1, repository.deletedIds.length);
@@ -179,9 +202,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testCancelAddingBankLinkWrongLinkId() {
+        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
 
         boolean raised = false;
         try {

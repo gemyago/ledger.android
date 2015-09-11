@@ -32,7 +32,7 @@ public class MockUnitOfWork extends UnitOfWork {
 
     @Override
     public <TEntity extends Entity> TEntity getById(Class<TEntity> classOfEntity, int id) throws SQLException {
-        return null;
+        return hook.onGetById(classOfEntity, id);
     }
 
     @Override
@@ -72,6 +72,10 @@ public class MockUnitOfWork extends UnitOfWork {
     public static class Hook {
         private boolean committed;
 
+        public <TEntity extends Entity> TEntity onGetById(Class<TEntity> classOfEntity, int id) {
+            return null;
+        }
+
         public <TEntity extends Entity> void onAddNew(TEntity entity) {
 
         }
@@ -80,7 +84,7 @@ public class MockUnitOfWork extends UnitOfWork {
 
         }
 
-        public void onCommitting(MockUnitOfWork mockUnitOfWork) {
+        public void onCommitting(MockUnitOfWork mockUnitOfWork) throws SQLException {
             committed = true;
         }
         public void onCommitted(MockUnitOfWork mockUnitOfWork) {

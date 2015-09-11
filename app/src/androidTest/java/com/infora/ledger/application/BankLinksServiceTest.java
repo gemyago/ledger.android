@@ -19,6 +19,7 @@ import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;
@@ -74,7 +75,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
             public AddBankLinkStrategy getStrategy(String bic) {
                 if(bic == command.bic) return new AddBankLinkStrategy() {
                     @Override
-                    public void addBankLink(EventBus bus, DatabaseRepository<BankLink> repository, BankLink bankLink, DeviceSecret deviceSecret) {
+                    public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
                         assertEquals(new BankLink()
                                         .setAccountId("account-100")
                                         .setAccountName("Account 100")

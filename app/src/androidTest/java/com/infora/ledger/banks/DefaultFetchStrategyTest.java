@@ -14,6 +14,7 @@ import com.infora.ledger.mocks.MockUnitOfWork;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,7 +60,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         MockUnitOfWork.Hook hook1 = new MockUnitOfWork.Hook() {
             @Override
-            public void onCommitting(MockUnitOfWork mockUnitOfWork) {
+            public void onCommitting(MockUnitOfWork mockUnitOfWork) throws SQLException {
                 assertEquals(1, mockUnitOfWork.attachedEntities.size());
                 assertTrue(mockUnitOfWork.attachedEntities.contains(bankLink));
                 assertTrue(bankLink.isInProgress);
@@ -70,7 +71,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
         mockDb.addUnitOfWorkHook(hook1);
         MockUnitOfWork.Hook hook2 = new MockUnitOfWork.Hook() {
             @Override
-            public void onCommitting(MockUnitOfWork mockUnitOfWork) {
+            public void onCommitting(MockUnitOfWork mockUnitOfWork) throws SQLException {
                 assertEquals(1, mockUnitOfWork.attachedEntities.size());
                 assertTrue(mockUnitOfWork.attachedEntities.contains(bankLink));
                 assertFalse(bankLink.isInProgress);

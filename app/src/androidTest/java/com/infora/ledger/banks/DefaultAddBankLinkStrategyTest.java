@@ -4,8 +4,9 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.mocks.MockDatabaseRepository;
+import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.MockUnitOfWork;
 
 import junit.framework.TestCase;
 
@@ -19,28 +20,36 @@ import de.greenrobot.event.EventBus;
 public class DefaultAddBankLinkStrategyTest extends TestCase {
 
     private EventBus bus;
-    private MockDatabaseRepository repository;
     private AddBankLinkStrategy subject;
     private DeviceSecret deviceSecret;
+    private MockDatabaseContext db;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
-        repository = new MockDatabaseRepository(BankLink.class);
+        db = new MockDatabaseContext();
         subject = new DefaultAddBankLinkStrategy();
         deviceSecret = DeviceSecret.generateNew();
     }
 
     public void testAddBankLink() {
-        BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
+        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
 
         MockSubscriber<BankLinkAdded> addedHandler = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(addedHandler);
 
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
-        assertEquals(1, repository.savedEntities.size());
-        assertTrue(repository.savedEntities.contains(bankLink));
+        MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
+            @Override
+            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
+                assertEquals(1, mockUnitOfWork.commits.size());
+                assertEquals(1, mockUnitOfWork.commits.get(0).addedEntities.size());
+                assertTrue(mockUnitOfWork.commits.get(0).addedEntities.contains(bankLink));
+            }
+        });
+
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        hook.assertCommitted();
 
         BankLinkAdded addedEvent = addedHandler.getEvent();
         assertEquals("account-1", addedEvent.accountId);
@@ -50,13 +59,20 @@ public class DefaultAddBankLinkStrategyTest extends TestCase {
     public void testFailedToAddBankLink() {
         BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
 
+        final SQLException saveException = new SQLException("Failed to add bank link");
+        db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
+            @Override
+            public void onCommitting(MockUnitOfWork mockUnitOfWork) throws SQLException {
+                throw saveException;
+            }
+        });
+
         MockSubscriber<AddBankLinkFailed> failedHandler = new MockSubscriber<>(AddBankLinkFailed.class);
         bus.register(failedHandler);
-        repository.saveException = new SQLException("Failed to add bank link");
 
-        subject.addBankLink(bus, repository, bankLink, deviceSecret);
+        subject.addBankLink(bus, db, bankLink, deviceSecret);
 
         AddBankLinkFailed failedEvent = failedHandler.getEvent();
-        assertSame(repository.saveException, failedEvent.exception);
+        assertSame(saveException, failedEvent.exception);
     }
 }
