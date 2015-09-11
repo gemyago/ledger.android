@@ -4,12 +4,13 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.api.DeviceSecret;
+import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
+import com.infora.ledger.banks.AddBankLinkStrategy;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
-import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
@@ -18,6 +19,7 @@ import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
@@ -26,7 +28,6 @@ import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
 
 import de.greenrobot.event.EventBus;
@@ -57,7 +58,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     }
 
     public void testAddBankLinkCommand() {
-        AddBankLinkCommand command = new AddBankLinkCommand();
+        final AddBankLinkCommand command = new AddBankLinkCommand();
         command.accountId = "account-100";
         command.accountName = "Account 100";
         command.bic = "bank-100";
@@ -67,22 +68,30 @@ public class BankLinksServiceTest extends AndroidTestCase {
         MockSubscriber<BankLinkAdded> subscriber = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(subscriber);
 
+        final boolean[] strategyUsed = {false};
+        subject.setAddStrategies(new AddBankLinkStrategiesFactory() {
+            @Override
+            public AddBankLinkStrategy getStrategy(String bic) {
+                if(bic == command.bic) return new AddBankLinkStrategy() {
+                    @Override
+                    public void addBankLink(EventBus bus, DatabaseRepository<BankLink> repository, BankLink bankLink, DeviceSecret deviceSecret) {
+                        assertEquals(new BankLink()
+                                        .setAccountId("account-100")
+                                        .setAccountName("Account 100")
+                                        .setBic("bank-100")
+                                        .setLastSyncDate(command.initialFetchDate)
+                                        .setInitialSyncDate(command.initialFetchDate)
+                                        .setLinkData(command.linkData, secret)
+                        , bankLink);
+                        strategyUsed[0] = true;
+                    }
+                };
+                throw new RuntimeException("Not supported");
+            }
+        });
+
         subject.onEventBackgroundThread(command);
-
-        assertEquals(1, repository.savedEntities.size());
-        assertTrue(repository.savedEntities.contains(new BankLink()
-                        .setAccountId("account-100")
-                        .setAccountName("Account 100")
-                        .setBic("bank-100")
-                        .setLastSyncDate(command.initialFetchDate)
-                        .setInitialSyncDate(command.initialFetchDate)
-                        .setLinkData(command.linkData, secret)
-        ));
-        assertEquals(command.linkData, repository.savedEntities.get(0).getLinkData(MockBankLinkData.class, secret));
-
-        assertEquals(1, subscriber.getEvents().size());
-        assertEquals("account-100", subscriber.getEvent().accountId);
-        assertEquals("bank-100", subscriber.getEvent().bic);
+        assertTrue("The strategy was not used", strategyUsed[0]);
     }
 
     public void testAddBankLinkCommandWithNullLinkData() {
@@ -96,27 +105,6 @@ public class BankLinksServiceTest extends AndroidTestCase {
             assertEquals("command.linkData can not be null.", ex.getMessage());
         }
         assertTrue(exceptionThrown);
-    }
-
-    public void testAddBankLinkCommandFailed() {
-        AddBankLinkCommand command = new AddBankLinkCommand();
-        command.accountId = "account-100";
-        command.accountName = "Account 100";
-        command.bic = "bank-100";
-        command.initialFetchDate = new Date();
-        command.linkData = new MockBankLinkData("login-332", "password-332");
-
-        MockSubscriber<AddBankLinkFailed> subscriber = new MockSubscriber<>(AddBankLinkFailed.class);
-        bus.register(subscriber);
-
-        SQLException saveFailure = new SQLException("Some failure");
-        repository.saveException = saveFailure;
-        subject.onEventBackgroundThread(command);
-
-        assertEquals(0, repository.savedEntities.size());
-
-        assertEquals(1, subscriber.getEvents().size());
-        assertEquals(saveFailure, subscriber.getEvent().exception);
     }
 
     public void testUpdateBankLinkCommand() {

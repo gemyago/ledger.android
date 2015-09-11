@@ -2,6 +2,8 @@ package com.infora.ledger.application;
 
 import android.util.Log;
 
+import com.infora.ledger.api.DeviceSecret;
+import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.FetchStrategiesFactory;
 import com.infora.ledger.banks.FetchStrategy;
@@ -9,8 +11,6 @@ import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
-import com.infora.ledger.application.events.AddBankLinkFailed;
-import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.BankTransactionsFetched;
@@ -23,7 +23,6 @@ import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import de.greenrobot.event.EventBus;
 
@@ -38,6 +37,7 @@ public class BankLinksService {
     private DatabaseRepository<BankLink> repository;
 
     private FetchStrategiesFactory fetchStrategies;
+    private AddBankLinkStrategiesFactory addStrategies;
 
     public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
         this.bus = bus;
@@ -54,26 +54,30 @@ public class BankLinksService {
         this.fetchStrategies = fetchStrategies;
     }
 
+    public AddBankLinkStrategiesFactory getAddStrategies() {
+        return addStrategies == null ? (addStrategies = AddBankLinkStrategiesFactory.createDefault()) : addStrategies;
+    }
+
+    public void setAddStrategies(AddBankLinkStrategiesFactory addStrategies) {
+        this.addStrategies = addStrategies;
+    }
+
     public void onEventBackgroundThread(AddBankLinkCommand command) {
         Log.d(TAG, "Inserting new bank link for bank: " + command.bic + ", account: " + command.accountName);
         secretProvider.ensureDeviceRegistered();
 
         if(command.linkData == null) throw new IllegalArgumentException("command.linkData can not be null.");
 
+        DeviceSecret secret = secretProvider.secret();
         BankLink bankLink = new BankLink()
                 .setAccountId(command.accountId)
                 .setAccountName(command.accountName)
                 .setBic(command.bic)
                 .setLastSyncDate(command.initialFetchDate)
                 .setInitialSyncDate(command.initialFetchDate)
-                .setLinkData(command.linkData, secretProvider.secret());
-        try {
-            repository.save(bankLink);
-            bus.post(new BankLinkAdded(command.accountId, command.bic));
-        } catch (SQLException e) {
-            Log.e(TAG, "Failed to save the bank link.", e);
-            bus.post(new AddBankLinkFailed(e));
-        }
+                .setLinkData(command.linkData, secret);
+
+        getAddStrategies().getStrategy(command.bic).addBankLink(bus, repository, bankLink, secret);
     }
 
     public void onEventBackgroundThread(UpdateBankLinkCommand command) {
