@@ -9,6 +9,16 @@ public class PrivatBankCard {
     public String cardid;
     public String number;
 
+    public PrivatBankCard setCardid(String cardid) {
+        this.cardid = cardid;
+        return this;
+    }
+
+    public PrivatBankCard setNumber(String number) {
+        this.number = number;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "PrivatBankCard{" +

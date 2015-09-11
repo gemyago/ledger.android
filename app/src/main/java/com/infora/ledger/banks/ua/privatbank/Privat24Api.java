@@ -192,4 +192,10 @@ public class Privat24Api implements BankApi<Privat24Transaction> {
             throw new PrivatBankException("Unexpected next cmd.");
         }
     }
+
+    public static class Factory {
+        public Privat24Api createApi(String uniqueId, String phone, String pass) {
+            return new Privat24Api(uniqueId, phone, pass);
+        }
+    }
 }

@@ -22,9 +22,13 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
 
     public SQLException saveException;
 
+
+    public SaveAction<TEntity> onSaving;
+
     @Override
     public TEntity save(TEntity entity) throws SQLException {
         if (saveException != null) throw saveException;
+        if(onSaving != null) onSaving.save(entity);
         savedEntities.add(entity);
         return entity;
     }
@@ -49,5 +53,9 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
     @Override
     public void deleteAll(long[] ids) {
         deletedIds = ids;
+    }
+
+    public interface SaveAction<TEntity> {
+        void save(TEntity entity);
     }
 }
