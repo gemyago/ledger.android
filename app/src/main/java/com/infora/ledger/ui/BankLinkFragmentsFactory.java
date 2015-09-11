@@ -1,5 +1,6 @@
 package com.infora.ledger.ui;
 
+import com.infora.ledger.Privat24BankLinkFragment;
 import com.infora.ledger.PrivatBankLinkFragment;
 import com.infora.ledger.UkrsibBankLinkFragment;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
@@ -49,7 +50,7 @@ public class BankLinkFragmentsFactory {
                 .register(PrivatBankTransaction.PRIVATBANK_BIC, new Callable<BankLinkFragment>() {
                     @Override
                     public BankLinkFragment call() throws Exception {
-                        return new PrivatBankLinkFragment();
+                        return new Privat24BankLinkFragment();
                     }
                 })
                 .register(UkrsibBankTransaction.BIC, new Callable<BankLinkFragment>() {
