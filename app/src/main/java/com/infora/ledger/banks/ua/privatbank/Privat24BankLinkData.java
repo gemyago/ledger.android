@@ -6,8 +6,9 @@ package com.infora.ledger.banks.ua.privatbank;
 public class Privat24BankLinkData {
     public String login;
     public String password;
-    public String cookie;
+    public String cardNumber; //Last 4 digits of the card
     public String cardid;
+    public String cookie;
 
     public Privat24BankLinkData setLogin(String login) {
         this.login = login;
@@ -16,6 +17,11 @@ public class Privat24BankLinkData {
 
     public Privat24BankLinkData setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    public Privat24BankLinkData setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
         return this;
     }
 
