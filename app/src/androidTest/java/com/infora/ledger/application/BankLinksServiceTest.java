@@ -146,7 +146,8 @@ public class BankLinksServiceTest extends AndroidTestCase {
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, bankLink.accountId, bankLink.accountName, linkData)
                 .setFetchFromDate(fetchFromDate));
         assertEquals(1, repository.savedEntities.size());
-        assertEquals(Dates.addDays(fetchFromDate, -1), bankLink.lastSyncDate);
+        assertEquals(fetchFromDate, bankLink.initialSyncDate);
+        assertEquals(fetchFromDate, bankLink.lastSyncDate);
     }
 
     public void testUpdateBankLinkCommandFailed() {

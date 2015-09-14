@@ -89,9 +89,9 @@ public class BankLinksService {
             bankLink.accountName = command.accountName;
             bankLink.setLinkData(command.bankLinkData, secretProvider.secret());
             if (command.fetchStartingFrom != null) {
-                Log.d(TAG, "Fetch starting from assigned to: " + command.fetchStartingFrom + ". Setting lastSyncDate to previous day.");
-                //Transactions are fetched from lastSyncDate + 1.day so setting it to the previous day
-                bankLink.lastSyncDate = Dates.addDays(command.fetchStartingFrom, -1);
+                Log.d(TAG, "Fetch starting from assigned to: " + command.fetchStartingFrom + ". Setting lastSyncDate and initialSyncDate.");
+                bankLink.initialSyncDate = command.fetchStartingFrom;
+                bankLink.lastSyncDate = command.fetchStartingFrom;
             }
             repository.save(bankLink);
             bus.post(new BankLinkUpdated(command.id));
