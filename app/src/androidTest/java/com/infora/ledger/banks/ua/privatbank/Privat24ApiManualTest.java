@@ -6,6 +6,7 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24Api;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;

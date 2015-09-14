@@ -2,7 +2,7 @@ package com.infora.ledger.mocks;
 
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.FetchException;
-import com.infora.ledger.banks.ua.privatbank.Privat24Api;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24Api;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankCard;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.data.BankLink;

@@ -1,6 +1,6 @@
 package com.infora.ledger.banks;
 
-import com.infora.ledger.banks.ua.privatbank.Privat24ApiAdapterForDefaultFetchStrategy;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24ApiAdapterForDefaultFetchStrategy;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankApi;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;

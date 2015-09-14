@@ -6,6 +6,7 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.AddBankLinkStrategy;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24Api;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtpFailed;

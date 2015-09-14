@@ -1,11 +1,9 @@
-package com.infora.ledger.banks.ua.privatbank;
+package com.infora.ledger.banks.ua.privatbank.api;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -14,6 +12,10 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
+import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
+import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankCard;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
@@ -25,7 +27,6 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
