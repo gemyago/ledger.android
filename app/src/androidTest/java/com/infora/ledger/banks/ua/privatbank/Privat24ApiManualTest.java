@@ -78,8 +78,27 @@ public class Privat24ApiManualTest extends AndroidTestCase {
      * This test must be run strictly after testGetCards and cardid assigned.
      */
     public void testGetTransactions() throws IOException, FetchException {
-        Date now = new Date();
-        List<Privat24Transaction> transactions = api.getTransactions(new GetTransactionsRequest(bankLink, Dates.monthAgo(now), now), secret);
+        Date endDate = new Date();
+        Date startDate = Dates.monthAgo(endDate);
+        LogUtil.d(this, "Fetching transactions. Start date: " + startDate + ", end date: " + endDate);
+        List<Privat24Transaction> transactions = api.getTransactions(new GetTransactionsRequest(bankLink, startDate, endDate), secret);
+        LogUtil.d(this, "Fetched transactions " + transactions.size());
+        for (BankTransaction transaction : transactions) {
+            LogUtil.d(this, transaction.toString());
+        }
+
+        startDate = Dates.addDays(endDate, -10);
+        LogUtil.d(this, "Fetching transactions. Start date: " + startDate + ", end date: " + endDate);
+        transactions = api.getTransactions(new GetTransactionsRequest(bankLink, startDate, endDate), secret);
+        LogUtil.d(this, "Fetched transactions " + transactions.size());
+        for (BankTransaction transaction : transactions) {
+            LogUtil.d(this, transaction.toString());
+        }
+
+        endDate = Dates.monthAgo(endDate);
+        startDate = Dates.addDays(endDate, -10);
+        LogUtil.d(this, "Fetching transactions. Start date: " + startDate + ", end date: " + endDate);
+        transactions = api.getTransactions(new GetTransactionsRequest(bankLink, startDate, endDate), secret);
         LogUtil.d(this, "Fetched transactions " + transactions.size());
         for (BankTransaction transaction : transactions) {
             LogUtil.d(this, transaction.toString());

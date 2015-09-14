@@ -15,6 +15,8 @@ import com.infora.ledger.banks.BankApi;
 import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.GetTransactionsRequest;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.support.Dates;
+import com.infora.ledger.support.SystemDate;
 import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -23,6 +25,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -115,15 +118,32 @@ public class Privat24Api implements BankApi<Privat24Transaction> {
 
     @Override
     public List<Privat24Transaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
-        Log.d(TAG, "Getting transactions");
+        //One extra week because there may be a few days diff but not whole week
+        int weeks = Dates.weeksBetween(request.startDate, SystemDate.now()) + 1;
+
+        Log.d(TAG, "Getting transactions for the past " + weeks + " weeks");
+
+
         Privat24BankLinkData linkData = request.bankLink.getLinkData(Privat24BankLinkData.class, secret);
         JsonObject response = getJsonWithCookieRefresh(linkData, createApiUrlBuilder()
                 .addQueryParameter("card", linkData.cardid)
-                .addQueryParameter("weeks", "4") //TODO: Implement logic to calculate weeks number
+                .addQueryParameter("weeks", String.valueOf(weeks))
                 .addPathSegment("iapi2").addPathSegment("stats")
                 .build());
         final Type listType = new TypeToken<ArrayList<Privat24Transaction>>() {}.getType();
-        return new Gson().fromJson(response.getAsJsonArray("orders").toString(), listType);
+        List<Privat24Transaction> transactions = new Gson().fromJson(response.getAsJsonArray("orders").toString(), listType);
+
+        //Filtering fetched transactions by actual dates
+        String startDateString = Privat24Transaction.DateFormat.format(Dates.startOfDay(request.startDate));
+        String endDateString = Privat24Transaction.DateFormat.format(Dates.endOfDay(request.endDate));
+        ArrayList<Privat24Transaction> result = new ArrayList<>();
+        for (Privat24Transaction transaction : transactions) {
+            if (transaction.date.compareTo(startDateString) >= 0 && transaction.date.compareTo(endDateString) <= 0) {
+                result.add(transaction);
+            }
+        }
+        Log.d(TAG, transactions.size() + " fetched, " + result.size() + " filtered.");
+        return result;
     }
 
     private JsonObject getJsonWithCookieRefresh(Privat24BankLinkData linkData, HttpUrl url) throws IOException, PrivatBankException {
