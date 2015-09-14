@@ -1,5 +1,6 @@
 package com.infora.ledger.banks.ua.privatbank.api;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.google.gson.JsonObject;
@@ -76,9 +77,9 @@ public class Privat24BaseApi {
     protected HttpUrl.Builder createApiUrlBuilder() {
         return new HttpUrl.Builder().scheme("https").host("napi.privatbank.ua")
                 .addQueryParameter("appkey", "tj6rtymr67yjrt76tyherhdbryj6r46")
-                .addQueryParameter("versionOS", "4.4.2")
+                .addQueryParameter("versionOS", Build.VERSION.RELEASE)
                 .addQueryParameter("version", "5.04.03")
                 .addQueryParameter("imei", imei)
-                .addQueryParameter("device", "Android+SDK+built+for+x86%7Cunknown");
+                .addQueryParameter("device", Build.MODEL + "%7C" + Build.MANUFACTURER);
     }
 }
