@@ -29,7 +29,7 @@ public class Privat24ApiManualTest extends AndroidTestCase {
     @Override
     protected void runTest() throws Throwable {
         boolean shouldRun = false;
-        //shouldRun = true; //Uncomment this line to run tests
+        shouldRun = true; //Uncomment this line to run tests
         if (shouldRun) {
             super.runTest();
         }
@@ -39,12 +39,13 @@ public class Privat24ApiManualTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         linkData = new Privat24BankLinkData()
-                .setLogin("TODO")
-                .setPassword("TODO")
-                .setCardid("TODO: Set from logs after testGetCards");
-        String imei = "db201de4-90be-4003-b210-010e56f96c83";
+                .setLogin("TODO: Set before test")
+                .setPassword("TODO: Set before test")
+                .setCardid("TODO: Set before test");
+        String cookie = "TODO: Should be set from logs after testAuthenticateWithPass";
+        String imei = "db201de4-90be-4003-b210-010e56f96c85";
         authApi = new Privat24AuthApi(imei);
-        bankApi = new Privat24BankApi(imei, "TODO: Set cookie after authenticateWithPass");
+        bankApi = new Privat24BankApi(imei, cookie);
         secret = DeviceSecret.generateNew();
         bankLink = new BankLink().setLinkData(linkData, secret);
     }
@@ -62,18 +63,22 @@ public class Privat24ApiManualTest extends AndroidTestCase {
      * Should be run after the testAuthenticateWithPhoneAndPass with the id copied from logs and the OTP from SMS
      */
     public void testAuthenticateWithOtp() throws IOException, PrivatBankException {
-        String cookie = authApi.authenticateWithOtp("conv_380677132298_18938871063", "9848");
+        String cookie = authApi.authenticateWithOtp("conv_380677132298_22342214401", "6152");
         assertNotNull(cookie, "The cookie was null");
         LogUtil.d(this, "Authentication with the OTP successful. The cookie: " + cookie);
     }
 
     /**
-     * Should be run after the testAuthenticateWithPhoneAndPass with the id copied from logs and the OTP from SMS
+     * Should be run after the testAuthenticateWithPass with the id copied from logs and the OTP from SMS
      */
     public void testAuthenticateWithPass() throws IOException, PrivatBankException {
         String cookie = authApi.authenticateWithPass(linkData.password);
         assertNotNull(cookie, "The cookie was null");
         LogUtil.d(this, "Authentication with the password successful. The cookie: " + cookie);
+    }
+
+    public void testExpireSessions() throws IOException, PrivatBankException {
+        authApi.expireSessions();
     }
 
     /**

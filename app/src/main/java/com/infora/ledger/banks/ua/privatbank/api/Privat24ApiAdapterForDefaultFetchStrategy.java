@@ -20,6 +20,8 @@ public class Privat24ApiAdapterForDefaultFetchStrategy implements BankApi<Privat
         Privat24AuthApi authApi = new Privat24AuthApi(linkData.uniqueId);
         String cookie = authApi.authenticateWithPass(linkData.password);
         Privat24BankApi api = new Privat24BankApi(linkData.uniqueId, cookie);
-        return api.getTransactions(request, secret);
+        List<Privat24Transaction> transactions = api.getTransactions(request, secret);
+        authApi.expireSessions();
+        return transactions;
     }
 }

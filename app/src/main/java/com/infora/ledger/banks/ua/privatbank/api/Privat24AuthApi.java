@@ -91,6 +91,12 @@ public class Privat24AuthApi extends Privat24BaseApi {
         return data.get("cookie").getAsString();
     }
 
+    public void expireSessions() throws IOException {
+        Log.d(TAG, "Expiring sessions...");
+        getJson(createApiUrlBuilder()
+                .addPathSegment("iapi2").addPathSegment("unpass").build());
+    }
+
     public static class Factory {
         public Privat24AuthApi createApi(String uniqueId) {
             return new Privat24AuthApi(uniqueId);
