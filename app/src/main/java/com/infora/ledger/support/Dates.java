@@ -65,6 +65,10 @@ public class Dates {
         return cal.getTime();
     }
 
+    public static int weeksBetween(Date start, Date end) {
+        return (int) ((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 7));
+    }
+
     private static Calendar getCalendar(Date original) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(original);

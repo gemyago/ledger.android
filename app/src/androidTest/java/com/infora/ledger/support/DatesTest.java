@@ -33,4 +33,12 @@ public class DatesTest extends TestCase {
         endOfDay.set(Calendar.MILLISECOND, 0);
         assertEquals(endOfDay.getTime(), Dates.endOfDay(date));
     }
+
+    public void testWeeksBetween() {
+        Date start = Dates.create(2013, 12, 5);
+        assertEquals(1, Dates.weeksBetween(start, Dates.addDays(start, 7)));
+        assertEquals(2, Dates.weeksBetween(start, Dates.addDays(start, 7 * 2)));
+        assertEquals(10, Dates.weeksBetween(start, Dates.addDays(start, 7 * 10)));
+        assertEquals(100, Dates.weeksBetween(start, Dates.addDays(start, 7 * 100)));
+    }
 }
