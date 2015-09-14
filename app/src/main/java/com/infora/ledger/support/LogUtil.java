@@ -13,4 +13,8 @@ public class LogUtil {
     public static void e(Object owner, String message, Throwable e) {
         Log.e(owner.getClass().getCanonicalName(), message, e);
     }
+
+    public static void e(Object owner, String message) {
+        Log.e(owner.getClass().getCanonicalName(), message);
+    }
 }
