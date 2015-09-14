@@ -16,7 +16,6 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
-import com.infora.ledger.banks.ua.privatbank.messages.CancelAddingBankLink;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -103,13 +102,13 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String otpPassword = input.getText().toString();
-                BusUtils.post(getActivity(), new AuthenticateWithOtp(cmd.linkId, cmd.operationId, otpPassword));
+                BusUtils.post(getActivity(), new AuthenticateWithOtp(cmd.operationId, otpPassword));
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                BusUtils.post(getActivity(), new CancelAddingBankLink(cmd.linkId));
+
             }
         });
 

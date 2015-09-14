@@ -8,11 +8,8 @@ import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
-import com.infora.ledger.banks.ua.privatbank.messages.CancelAddingBankLink;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.Entity;
 import com.infora.ledger.mocks.MockDatabaseContext;
-import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockPrivat24AuthApi;
 import com.infora.ledger.mocks.MockPrivat24BankApi;
 import com.infora.ledger.mocks.MockSubscriber;
@@ -20,7 +17,6 @@ import com.infora.ledger.mocks.MockUnitOfWork;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,7 +31,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     private MockPrivat24AuthApi authApi;
     private MockPrivat24BankApi bankApi;
     private MockDatabaseContext db;
-    private MockUnitOfWork.Hook defaultUnitOfWorkHook;
 
     @Override
     public void setUp() throws Exception {
@@ -59,12 +54,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         });
         deviceSecret = DeviceSecret.generateNew();
 
-        defaultUnitOfWorkHook = new MockUnitOfWork.Hook() {
-            @Override
-            public <TEntity extends Entity> void onAddNew(TEntity entity) {
-                ((BankLink) (entity)).id = 44321;
-            }
-        };
         authApi.onAuthenticateWithPhoneAndPass = new MockPrivat24AuthApi.AuthenticateWithPhoneAndPassCall() {
             @Override
             public String call(String phone, String pass) {
@@ -74,18 +63,8 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     }
 
     public void testAddBankLink() {
-        MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
-            @Override
-            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
-                BankLink bankLink = (BankLink) mockUnitOfWork.commits.get(0).addedEntities.get(0);
-                bankLink.id = 3322;
-                Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
-                assertNotNull(linkData.uniqueId);
-
-            }
-        });
         BankLink bankLink = new BankLink();
-        bankLink.setLinkData(new Privat24BankLinkData().setLogin("login-100").setPassword("pass-100"), deviceSecret);
+        bankLink.setLinkData(new Privat24BankLinkData().setLogin("login-100").setPassword("pass-100").setCardNumber("1122"), deviceSecret);
 
         MockSubscriber<AskPrivat24Otp> askOtpHandler = new MockSubscriber<>(AskPrivat24Otp.class);
         bus.register(askOtpHandler);
@@ -100,20 +79,20 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         };
 
         subject.addBankLink(bus, db, bankLink, deviceSecret);
-        hook.assertCommitted();
 
-        assertEquals(3322, askOtpHandler.getEvent().linkId);
         assertEquals("41399320", askOtpHandler.getEvent().operationId);
 
         assertTrue(bus.isRegistered(subject));
     }
 
     public void testAuthenticateWithOtp() {
-        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
+        bankLink.setLinkData(new Privat24BankLinkData()
+                .setLogin("login-100")
+                .setPassword("password-100")
+                .setCardNumber("8867")
+                , deviceSecret);
         subject.addBankLink(bus, db, bankLink, deviceSecret);
-        defaultUnitOfWorkHook.assertCommitted();
 
         authApi.onAuthenticateWithOtp = new MockPrivat24AuthApi.AuthenticateWithOtpCall() {
             @Override
@@ -137,23 +116,23 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
 
         MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
             @Override
-            public <TEntity extends Entity> TEntity onGetById(Class<TEntity> classOfEntity, int id) {
-                if(id == bankLink.id) return (TEntity) bankLink;
-                return null;
-            }
-
-            @Override
             public void onCommitted(MockUnitOfWork mockUnitOfWork) {
-                Privat24BankLinkData savedLinkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
+                assertEquals(1, mockUnitOfWork.commits.size());
+                assertEquals(1, mockUnitOfWork.commits.get(0).addedEntities.size());
+                BankLink addedLink = (BankLink) mockUnitOfWork.commits.get(0).addedEntities.get(0);
+                assertSame(bankLink, addedLink);
+                Privat24BankLinkData savedLinkData = addedLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
+                assertEquals(bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret).uniqueId, savedLinkData.uniqueId);
+                assertEquals("password-100", savedLinkData.password);
+                assertEquals("8867", savedLinkData.cardNumber);
                 assertEquals("card-8867", savedLinkData.cardid);
             }
         });
 
         MockSubscriber<BankLinkAdded> addedHandler = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(addedHandler);
-        subject.onEventBackgroundThread(new AuthenticateWithOtp(44321, "operation-1", "9911"));
+        subject.onEventBackgroundThread(new AuthenticateWithOtp("operation-1", "9911"));
         hook.assertCommitted();
-
 
         BankLinkAdded addedEvt = addedHandler.getEvent();
         assertNotNull(addedEvt);
@@ -163,66 +142,17 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         assertFalse(bus.isRegistered(subject));
     }
 
-    public void testAuthenticateWithOtpWrongLinkId() {
-        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
-        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
-
-        boolean raised = false;
-        try {
-            subject.onEventBackgroundThread(new AuthenticateWithOtp(00001, "operation-1", "9911"));
-        } catch (IllegalArgumentException ex) {
-            raised = true;
-        }
-
-        assertTrue("The exception has not been raised.", raised);
-    }
-
     public void testAuthenticateWithOtpWrongOperationId() {
-        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
+        bankLink.setLinkData(new Privat24BankLinkData().setLogin("l-1").setPassword("p-1").setCardNumber("8867"), deviceSecret);
         subject.addBankLink(bus, db, bankLink, deviceSecret);
 
         boolean raised = false;
         try {
-            subject.onEventBackgroundThread(new AuthenticateWithOtp(bankLink.id, "wrong-operation-100", "9911"));
+            subject.onEventBackgroundThread(new AuthenticateWithOtp("wrong-operation-100", "9911"));
         } catch (IllegalArgumentException ex) {
             raised = true;
         }
-        assertTrue("The exception has not been raised.", raised);
-    }
-
-    public void testCancelAddingBankLink() {
-        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
-        MockDatabaseRepository<BankLink> repository = new MockDatabaseRepository<>(BankLink.class);
-        db.addMockRepo(BankLink.class, repository);
-
-        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
-        subject.onEventBackgroundThread(new CancelAddingBankLink(bankLink.id));
-
-        assertEquals(1, repository.deletedIds.length);
-        assertEquals(bankLink.id, repository.deletedIds[0]);
-
-        assertFalse("The bus has not been unregistered.", bus.isRegistered(subject));
-    }
-
-    public void testCancelAddingBankLinkWrongLinkId() {
-        db.addUnitOfWorkHook(defaultUnitOfWorkHook);
-        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
-
-        boolean raised = false;
-        try {
-            subject.onEventBackgroundThread(new CancelAddingBankLink(bankLink.id + 100));
-        } catch (IllegalArgumentException ex) {
-            raised = true;
-        }
-
         assertTrue("The exception has not been raised.", raised);
     }
 }
