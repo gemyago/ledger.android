@@ -4,15 +4,11 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,6 +47,10 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     private Button addButton;
     private TextView initialFetchDateText;
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+
+    public AddBankLinkActivity() {
+        super(BankLinkFragment.Mode.Add);
+    }
 
     public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
         return bankLinkFragmentsFactory == null ?

@@ -9,6 +9,8 @@ import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
+import com.infora.ledger.support.ObfuscatedString;
+import com.infora.ledger.ui.BankLinkFragment;
 
 /**
  * Created by jenya on 01.06.15.
@@ -27,24 +29,27 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
         super.setUp();
         startActivity(new Intent(getInstrumentation().getTargetContext(), DummyBankLinkFragmentTestActivity.class), null, null);
         getActivity().fragment = fragment = new Privat24BankLinkFragment();
+        fragment.setMode(BankLinkFragment.Mode.Edit);
         getInstrumentation().callActivityOnStart(getActivity());
         getActivity().getSupportFragmentManager().executePendingTransactions();
         secret = DeviceSecret.generateNew();
     }
 
     public void testGetBankLinkData() {
-        EditText login = (EditText) fragment.getView().findViewById(R.id.privat24_login);
-        EditText password = (EditText) fragment.getView().findViewById(R.id.privat24_password);
-        EditText card = (EditText) fragment.getView().findViewById(R.id.privat24_card_number);
+        Privat24BankLinkData linkData = new Privat24BankLinkData()
+                .setUniqueId("uid-100")
+                .setLogin("login-100")
+                .setPassword("login-100-password")
+                .setCardNumber("card100")
+                .setCardid("card-100");
+        fragment.setBankLinkData(new BankLink().setLinkData(linkData, secret), secret);
 
-        login.setText("login-100");
-        password.setText("login-100-password");
-        card.setText("card100");
-
-        Privat24BankLinkData linkData = fragment.getBankLinkData();
-        assertEquals("login-100", linkData.login);
-        assertEquals("login-100-password", linkData.password);
-        assertEquals("card100", linkData.cardNumber);
+        Privat24BankLinkData actualLinkData = fragment.getBankLinkData();
+        assertEquals("uid-100", actualLinkData.uniqueId);
+        assertEquals("login-100", actualLinkData.login);
+        assertEquals("login-100-password", actualLinkData.password);
+        assertEquals("card-100", actualLinkData.cardid);
+        assertEquals("card100", actualLinkData.cardNumber);
     }
 
     public void testSetBankLinkData() {
@@ -56,9 +61,13 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
                 .setLogin("login-100").setPassword("login-100-password").setCardNumber("card100");
         fragment.setBankLinkData(new BankLink().setLinkData(linkData, secret), secret);
 
+        assertFalse(login.isEnabled());
+        assertFalse(password.isEnabled());
+        assertFalse(card.isEnabled());
+
         assertEquals("login-100", login.getText().toString());
-        assertEquals("login-100-password", password.getText().toString());
-        assertEquals("card100", card.getText().toString());
+        assertEquals(ObfuscatedString.value("login-100-password"), ObfuscatedString.value(password.getText().toString()));
+        assertEquals(ObfuscatedString.value("card100"), ObfuscatedString.value(card.getText().toString()));
     }
 
     public void testClearLinkData() {

@@ -14,10 +14,19 @@ import com.infora.ledger.data.BankLink;
 public abstract class BankLinkFragment<TLinkData> extends Fragment {
     private BankLink assignedBankLink;
     private DeviceSecret assignedSecret;
+    private Mode mode;
 
     public abstract TLinkData getBankLinkData();
 
     private boolean isViewCreated;
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
 
     public void onBeforeAdd(Activity parent) {
 
@@ -49,4 +58,8 @@ public abstract class BankLinkFragment<TLinkData> extends Fragment {
     public abstract void clearLinkData();
 
     protected abstract void assignValues(BankLink bankLink, DeviceSecret secret);
+
+    public enum Mode {
+        Add, Edit
+    }
 }

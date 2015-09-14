@@ -18,6 +18,7 @@ import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
 
 import de.greenrobot.event.EventBus;
@@ -28,6 +29,23 @@ import de.greenrobot.event.EventBus;
 public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkData> {
 
     private static final String TAG = Privat24BankLinkFragment.class.getName();
+
+    private ModeState modeState;
+
+    @Override
+    public void setMode(Mode mode) {
+        switch (mode) {
+            case Add:
+                modeState = new AddModeState();
+                break;
+            case Edit:
+                modeState = new EditModeState();
+                break;
+            default:
+                throw new IllegalArgumentException("The mode '" + mode + "' is not supported.");
+        }
+        super.setMode(mode);
+    }
 
     @Override
     public void onBeforeAdd(Activity parent) {
@@ -60,24 +78,12 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
 
     @Override
     public Privat24BankLinkData getBankLinkData() {
-        EditText login = (EditText) getView().findViewById(R.id.privat24_login);
-        EditText password = (EditText) getView().findViewById(R.id.privat24_password);
-        EditText card = (EditText) getView().findViewById(R.id.privat24_card_number);
-        return new Privat24BankLinkData()
-                .setLogin(login.getText().toString())
-                .setPassword(password.getText().toString())
-                .setCardNumber(card.getText().toString());
+        return modeState.getBankLinkData(getView());
     }
 
     @Override
     public void assignValues(BankLink bankLink, DeviceSecret secret) {
-        EditText login = (EditText) getView().findViewById(R.id.privat24_login);
-        EditText password = (EditText) getView().findViewById(R.id.privat24_password);
-        EditText card = (EditText) getView().findViewById(R.id.privat24_card_number);
-        Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, secret);
-        login.setText(linkData.login);
-        password.setText(linkData.password);
-        card.setText(linkData.cardNumber);
+        modeState.assignValues(getView(), bankLink.getLinkData(Privat24BankLinkData.class, secret));
     }
 
     @Override
@@ -113,5 +119,57 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         });
 
         builder.show();
+    }
+
+    private interface ModeState {
+        Privat24BankLinkData getBankLinkData(View view);
+
+        void assignValues(View view, Privat24BankLinkData linkData);
+    }
+
+    private static class AddModeState implements ModeState {
+        @Override
+        public Privat24BankLinkData getBankLinkData(View view) {
+            EditText login = (EditText) view.findViewById(R.id.privat24_login);
+            EditText password = (EditText) view.findViewById(R.id.privat24_password);
+            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
+            return new Privat24BankLinkData()
+                    .setLogin(login.getText().toString())
+                    .setPassword(password.getText().toString())
+                    .setCardNumber(card.getText().toString());
+        }
+
+        @Override
+        public void assignValues(View view, Privat24BankLinkData linkData) {
+            EditText login = (EditText) view.findViewById(R.id.privat24_login);
+            EditText password = (EditText) view.findViewById(R.id.privat24_password);
+            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
+            login.setText(linkData.login);
+            password.setText(linkData.password);
+            card.setText(linkData.cardNumber);
+        }
+    }
+
+    private static class EditModeState implements ModeState {
+        private Privat24BankLinkData linkData;
+
+        @Override
+        public Privat24BankLinkData getBankLinkData(View view) {
+            return linkData;
+        }
+
+        @Override
+        public void assignValues(View view, Privat24BankLinkData linkData) {
+            EditText login = (EditText) view.findViewById(R.id.privat24_login);
+            EditText password = (EditText) view.findViewById(R.id.privat24_password);
+            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
+            login.setText(linkData.login);
+            login.setEnabled(false);
+            password.setText(ObfuscatedString.value(linkData.password));
+            password.setEnabled(false);
+            card.setText(ObfuscatedString.value(linkData.cardNumber));
+            card.setEnabled(false);
+            this.linkData = linkData;
+        }
     }
 }

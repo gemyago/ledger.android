@@ -5,8 +5,6 @@ import android.content.AsyncTaskLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +17,6 @@ import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.LedgerAccountsLoader;
@@ -35,7 +32,6 @@ import com.infora.ledger.ui.DatePickerFragment;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * Created by jenya on 01.06.15.
@@ -56,6 +52,10 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
     private DeviceSecretProvider deviceSecretProvider;
     private EditText bic;
+
+    public EditBankLinkActivity() {
+        super(BankLinkFragment.Mode.Edit);
+    }
 
     public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
         return bankLinkFragmentsFactory == null ?

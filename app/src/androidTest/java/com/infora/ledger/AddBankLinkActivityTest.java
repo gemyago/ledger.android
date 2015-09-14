@@ -6,16 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.infora.ledger.api.DeviceSecret;
@@ -23,8 +19,6 @@ import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.mocks.MockBankLinkData;
@@ -33,6 +27,7 @@ import com.infora.ledger.mocks.MockLedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
@@ -150,6 +145,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         MockBankLinkFragment fragment1 = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
         assertEquals(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment1.getBankLinkData());
         assertTrue(fragment1.beforeAddCalled);
+        assertEquals(BankLinkFragment.Mode.Add, fragment1.getMode());
 
         bic.setSelection(2);
         bic.getOnItemSelectedListener().onItemSelected(null, null, 2, 2);
@@ -160,6 +156,7 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         MockBankLinkFragment fragment2 = (MockBankLinkFragment) fragmentManager.findFragmentByTag("bank-link-fragment");
         assertEquals(fragmentsFactory.get(selectedBic).getBankLinkData(), fragment2.getBankLinkData());
         assertTrue(fragment2.beforeAddCalled);
+        assertEquals(BankLinkFragment.Mode.Add, fragment2.getMode());
     }
 
     public void testAddBankLink() {

@@ -28,6 +28,7 @@ import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;
+import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 import com.infora.ledger.ui.DatePickerFragment;
 
@@ -112,6 +113,8 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
 
         MockBankLinkFragment bankLinkFragment = (MockBankLinkFragment) getActivity()
                 .getSupportFragmentManager().findFragmentByTag(EditBankLinkActivity.BANK_LINK_FRAGMENT);
+        assertTrue(bankLinkFragment.beforeAddCalled);
+        assertEquals(BankLinkFragment.Mode.Edit, bankLinkFragment.getMode());
         MockBankLinkData bankLinkData = bankLinkFragment.getBankLinkData();
         assertEquals(bankLink.getLinkData(MockBankLinkData.class, secret), bankLinkData);
         assertEquals(bankLink.bic, ((EditText) getActivity().findViewById(R.id.bic)).getText().toString());

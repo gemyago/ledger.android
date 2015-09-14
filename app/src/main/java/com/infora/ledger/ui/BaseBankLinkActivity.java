@@ -9,8 +9,13 @@ import com.infora.ledger.R;
 /**
  * Created by mye on 9/14/2015.
  */
-public class BaseBankLinkActivity extends AppCompatActivity {
+public abstract class BaseBankLinkActivity extends AppCompatActivity {
     protected BankLinkFragment bankLinkFragment;
+    private BankLinkFragment.Mode mode;
+
+    protected BaseBankLinkActivity(BankLinkFragment.Mode mode) {
+        this.mode = mode;
+    }
 
     protected <TFragment extends BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
@@ -20,6 +25,7 @@ public class BaseBankLinkActivity extends AppCompatActivity {
             t.remove(oldFragment);
         }
         if (fragment != null) {
+            fragment.setMode(mode);
             fragment.onBeforeAdd(this);
             t.replace(R.id.bank_link_fragment_container, fragment, AddBankLinkActivity.BANK_LINK_FRAGMENT);
         }
