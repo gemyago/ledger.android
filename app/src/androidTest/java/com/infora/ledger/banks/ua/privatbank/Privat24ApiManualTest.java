@@ -29,7 +29,7 @@ public class Privat24ApiManualTest extends AndroidTestCase {
     @Override
     protected void runTest() throws Throwable {
         boolean shouldRun = false;
-        shouldRun = true; //Uncomment this line to run tests
+        //shouldRun = true; //Uncomment this line to run tests
         if (shouldRun) {
             super.runTest();
         }

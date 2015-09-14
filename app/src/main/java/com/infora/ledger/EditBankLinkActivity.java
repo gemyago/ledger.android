@@ -29,6 +29,7 @@ import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.support.SpinnerSelector;
 import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
+import com.infora.ledger.ui.BaseBankLinkActivity;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.sql.SQLException;
@@ -39,7 +40,7 @@ import java.util.Objects;
 /**
  * Created by jenya on 01.06.15.
  */
-public class EditBankLinkActivity extends AppCompatActivity {
+public class EditBankLinkActivity extends BaseBankLinkActivity {
     public static final String BANK_LINK_FRAGMENT = "bank-link-fragment";
     private static final String TAG = EditBankLinkActivity.class.getName();
     private static final int LEDGER_ACCOUNTS_LOADER = 1;
@@ -48,7 +49,6 @@ public class EditBankLinkActivity extends AppCompatActivity {
     private SimpleCursorAdapter spinnerAdapter;
     private DatabaseRepository<BankLink> bankLinksRepo;
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
-    private BankLinkFragment bankLinkFragment;
     private Button updateButton;
     private Spinner accountsSpinner;
     private long bankLinkId;
@@ -219,11 +219,9 @@ public class EditBankLinkActivity extends AppCompatActivity {
             public void onLoadFinished(Loader<BankLink> loader, BankLink data) {
                 Log.d(TAG, "Bank link data bic='" + data.bic + "' loaded.");
                 bic.setText(data.bic);
-                bankLinkFragment = getBankLinkFragmentsFactory().get(data.bic);
-                bankLinkFragment.setBankLinkData(data, getDeviceSecretProvider().secret());
-                FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-                t.replace(R.id.bank_link_fragment_container, bankLinkFragment, BANK_LINK_FRAGMENT);
-                t.commit();
+                BankLinkFragment fragment = getBankLinkFragmentsFactory().get(data.bic);
+                fragment.setBankLinkData(data, getDeviceSecretProvider().secret());
+                setBankLinkFragment(fragment);
 
                 SpinnerSelector.select(accountsSpinner, LedgerAccountsLoader.COLUMN_ACCOUNT_ID, data.accountId);
 

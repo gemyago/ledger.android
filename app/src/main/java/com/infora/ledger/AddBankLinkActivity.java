@@ -26,6 +26,7 @@ import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
+import com.infora.ledger.ui.BaseBankLinkActivity;
 import com.infora.ledger.ui.DatePickerFragment;
 
 import java.text.DateFormat;
@@ -36,7 +37,7 @@ import java.util.Set;
 /**
  * Created by jenya on 31.05.15.
  */
-public class AddBankLinkActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = AddBankLinkActivity.class.getName();
     private static final int LEDGER_ACCOUNTS_LOADER = 1;
     public static final String BANK_LINK_FRAGMENT = "bank-link-fragment";
@@ -47,8 +48,6 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
     private Date initialFetchDate;
     private Spinner bic;
     private Spinner ledgerAccountId;
-    private BankLinkFragment bankLinkFragment;
-    private LinearLayout bankLinkFragmentContainer;
     private Button addButton;
     private TextView initialFetchDateText;
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
@@ -84,7 +83,6 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
 
         bic = (Spinner) findViewById(R.id.bic);
         ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        bankLinkFragmentContainer = (LinearLayout) findViewById(R.id.bank_link_fragment_container);
         addButton = (Button) findViewById(R.id.action_add_bank_link);
         initialFetchDateText = (TextView) findViewById(R.id.initial_fetch_date);
 
@@ -136,21 +134,6 @@ public class AddBankLinkActivity extends AppCompatActivity implements LoaderMana
                 setBankLinkFragment(null);
             }
         });
-    }
-
-    private <TFragment extends BankLinkFragment> void setBankLinkFragment(TFragment fragment) {
-        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-        TFragment oldFragment = (TFragment) getSupportFragmentManager().findFragmentByTag(BANK_LINK_FRAGMENT);
-        if (oldFragment != null) {
-            oldFragment.onBeforeRemove(this);
-            t.remove(oldFragment);
-        }
-        if (fragment != null) {
-            fragment.onBeforeAdd(this);
-            t.replace(R.id.bank_link_fragment_container, fragment, BANK_LINK_FRAGMENT);
-        }
-        t.commit();
-        bankLinkFragment = fragment;
     }
 
     @Override
