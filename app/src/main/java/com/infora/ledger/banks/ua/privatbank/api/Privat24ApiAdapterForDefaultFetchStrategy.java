@@ -17,7 +17,9 @@ public class Privat24ApiAdapterForDefaultFetchStrategy implements BankApi<Privat
     @Override
     public List<Privat24Transaction> getTransactions(GetTransactionsRequest request, DeviceSecret secret) throws IOException, FetchException {
         Privat24BankLinkData linkData = request.bankLink.getLinkData(Privat24BankLinkData.class, secret);
-        Privat24Api api = new Privat24Api(linkData.uniqueId, linkData.login, linkData.password);
+        Privat24AuthApi authApi = new Privat24AuthApi(linkData.uniqueId);
+        String cookie = authApi.authenticateWithPass(linkData.password);
+        Privat24BankApi api = new Privat24BankApi(linkData.uniqueId, cookie);
         return api.getTransactions(request, secret);
     }
 }

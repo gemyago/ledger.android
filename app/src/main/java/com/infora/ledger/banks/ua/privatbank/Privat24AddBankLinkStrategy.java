@@ -6,7 +6,8 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.AddBankLinkStrategy;
-import com.infora.ledger.banks.ua.privatbank.api.Privat24Api;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
+import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtpFailed;
@@ -30,20 +31,28 @@ import de.greenrobot.event.EventBus;
 public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
     private static final String TAG = Privat24AddBankLinkStrategy.class.getName();
 
-    private Privat24Api.Factory apiFactory;
+    private Privat24BankApi.Factory bankApiFactory;
+    private Privat24AuthApi.Factory authApiFactory;
     private int linkId;
     private DeviceSecret deviceSecret;
-    private Privat24Api api;
     private EventBus bus;
     private String operationId;
     private DatabaseContext db;
 
-    public Privat24Api.Factory getApiFactory() {
-        return apiFactory == null ? (apiFactory = new Privat24Api.Factory()) : apiFactory;
+    public Privat24BankApi.Factory getBankApiFactory() {
+        return bankApiFactory == null ? (bankApiFactory = new Privat24BankApi.Factory()) : bankApiFactory;
     }
 
-    public void setApiFactory(Privat24Api.Factory apiFactory) {
-        this.apiFactory = apiFactory;
+    public void setBankApiFactory(Privat24BankApi.Factory bankApiFactory) {
+        this.bankApiFactory = bankApiFactory;
+    }
+
+    public Privat24AuthApi.Factory getAuthApiFactory() {
+        return authApiFactory == null ? (authApiFactory = new Privat24AuthApi.Factory()) : authApiFactory;
+    }
+
+    public void setAuthApiFactory(Privat24AuthApi.Factory authApiFactory) {
+        this.authApiFactory = authApiFactory;
     }
 
     public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
@@ -53,12 +62,11 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
         UnitOfWork unitOfWork = db.newUnitOfWork();
         unitOfWork.addNew(bankLink);
         try {
-
-            api = getApiFactory().createApi(linkData.uniqueId, linkData.login, linkData.password);
-            operationId = api.authenticateWithPhoneAndPass();
+            Privat24AuthApi authApi = getAuthApiFactory().createApi(linkData.uniqueId);
+            operationId = authApi.authenticateWithPhoneAndPass(linkData.login, linkData.password);
             unitOfWork.commit();
 
-            bus.post(new AskPrivat24Otp(bankLink.id, operationId));
+            bus.post(new AskPrivat24Otp(bankLink.id, this.operationId));
 
             //Registering to handle AuthenticateWithOtp command
             bus.register(this);
@@ -85,15 +93,15 @@ public class Privat24AddBankLinkStrategy implements AddBankLinkStrategy {
             throw new IllegalArgumentException("Wrong operationId. Expected: '" + operationId + "', was: '" + command.operationId + "'.");
         UnitOfWork unitOfWork = db.newUnitOfWork();
         try {
-            String cookie = api.authenticateWithOtp(command.operationId, command.otp);
-            Log.d(TAG, "Authenticated with OTP. Saving retrieved cookie...");
+            Log.d(TAG, "Authenticating with OTP...");
             BankLink bankLink = unitOfWork.getById(BankLink.class, linkId);
             Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
-            linkData.cookie = cookie;
-            bankLink.setLinkData(linkData, deviceSecret);
+            Privat24AuthApi authApi = getAuthApiFactory().createApi(linkData.uniqueId);
+            String cookie = authApi.authenticateWithOtp(command.operationId, command.otp);
 
             Log.d(TAG, "Getting card id of the card: " + ObfuscatedString.value(linkData.cardNumber));
-            List<PrivatBankCard> cards = api.getCards(bankLink, deviceSecret);
+            Privat24BankApi bankApi = getBankApiFactory().createApi(linkData.uniqueId, cookie);
+            List<PrivatBankCard> cards = bankApi.getCards();
             for (PrivatBankCard card : cards) {
                 if (card.number.equals(linkData.cardNumber)) {
                     Log.d(TAG, "Card found. Card id assigned.");

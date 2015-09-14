@@ -9,7 +9,6 @@ public class Privat24BankLinkData {
     public String password;
     public String cardNumber; //Last 4 digits of the card
     public String cardid;
-    public String cookie;
 
     /**
      * Will be used instead of imei when using privat24 api.
@@ -33,11 +32,6 @@ public class Privat24BankLinkData {
 
     public Privat24BankLinkData setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
-        return this;
-    }
-
-    public Privat24BankLinkData setCookie(String cookie) {
-        this.cookie = cookie;
         return this;
     }
 

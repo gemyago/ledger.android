@@ -90,4 +90,10 @@ public class Privat24AuthApi extends Privat24BaseApi {
         Log.d(TAG, "New cookie retrieved.");
         return data.get("cookie").getAsString();
     }
+
+    public static class Factory {
+        public Privat24AuthApi createApi(String uniqueId) {
+            return new Privat24AuthApi(uniqueId);
+        }
+    }
 }
