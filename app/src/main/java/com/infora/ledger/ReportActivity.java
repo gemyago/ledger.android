@@ -43,17 +43,10 @@ public class ReportActivity extends ActionBarActivity {
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private SimpleCursorAdapter reportedTransactionsAdapter;
 
-    @Bind(R.id.reported_transactions_list)
-    ListView lvReportedTransactions;
-
-    @Bind(R.id.comment)
-    EditText comment;
-
-    @Bind(R.id.amount)
-    EditText amount;
-
-    @Bind(R.id.report)
-    Button report;
+    @Bind(R.id.reported_transactions_list) ListView lvReportedTransactions;
+    @Bind(R.id.comment) EditText comment;
+    @Bind(R.id.amount) EditText amount;
+    @Bind(R.id.report) Button report;
 
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
