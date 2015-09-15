@@ -1,7 +1,6 @@
 package com.infora.ledger.application;
 
 import android.accounts.Account;
-import android.content.ContentResolver;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
@@ -50,7 +49,7 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         };
         syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
             @Override
-            public void perform(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
+            public void perform(LedgerApi api, Bundle options, SyncResult syncResult) {
                 assertSame(mockApi, api);
                 assertSame(options, extras);
                 assertSame(testSyncResult, syncResult);
@@ -74,7 +73,7 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         };
         syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
             @Override
-            public void perform(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
+            public void perform(LedgerApi api, Bundle options, SyncResult syncResult) {
                 assertFalse("Should not be performed", true);
             }
         };
@@ -95,7 +94,7 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         };
         syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
             @Override
-            public void perform(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) {
+            public void perform(LedgerApi api, Bundle options, SyncResult syncResult) {
                 Response response = new Response("localhost", 500, "Internal server error", new ArrayList<Header>(), null);
                 throw RetrofitError.httpError("test", response, null, null);
             }

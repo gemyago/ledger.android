@@ -51,7 +51,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         for (PendingTransactionDto dto : remoteTransactions) {
             readModel.inject(dto.toTransaction());
         }
-        subject.synchronize(api, null, null, syncResult);
+        subject.synchronize(api, null, syncResult);
         assertEquals(0, api.getReportedTransactions().size());
     }
 
@@ -64,7 +64,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
         bus.register(publishedSubscriber);
 
-        subject.synchronize(api, null, null, syncResult);
+        subject.synchronize(api, null, syncResult);
 
         assertEquals(3, api.getReportedTransactions().size());
 
@@ -90,7 +90,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
 
-        subject.synchronize(api, null, null, syncResult);
+        subject.synchronize(api, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
 
@@ -111,7 +111,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
                 .injectAnd(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(1))
                 .inject(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1).setAccountId("account-3"));
 
-        subject.synchronize(api, null, null, syncResult);
+        subject.synchronize(api, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
         assertEquals(2, api.getAdjustTransactions().size());
@@ -139,7 +139,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         MockSubscriber<DeleteTransactionsCommand> deleteSubscriber = new MockSubscriber<>(DeleteTransactionsCommand.class);
         bus.register(deleteSubscriber);
 
-        subject.synchronize(api, null, null, syncResult);
+        subject.synchronize(api, null, syncResult);
 
         assertEquals(1, deleteSubscriber.getEvents().size());
         assertEquals(3, deleteSubscriber.getEvent().getIds().length);

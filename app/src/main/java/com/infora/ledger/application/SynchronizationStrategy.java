@@ -12,5 +12,5 @@ import java.sql.SQLException;
  * Created by jenya on 25.03.15.
  */
 public interface SynchronizationStrategy {
-    void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) throws SQLException;
+    void synchronize(LedgerApi api, Bundle options, SyncResult syncResult) throws SQLException;
 }

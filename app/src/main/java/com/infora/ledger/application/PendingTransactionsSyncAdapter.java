@@ -78,7 +78,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
             return;
         }
         try {
-            syncStrategy.synchronize(api, resolver, extras, syncResult);
+            syncStrategy.synchronize(api, extras, syncResult);
         } catch (RetrofitError e) {
             syncResult.stats.numIoExceptions++;
             Log.e(TAG, "Synchronization aborted due to some network error.", e);

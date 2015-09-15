@@ -33,7 +33,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
         this.readModel = readModel;
     }
 
-    public void synchronize(LedgerApi api, ContentResolver resolver, Bundle options, SyncResult syncResult) throws SQLException {
+    public void synchronize(LedgerApi api, Bundle options, SyncResult syncResult) throws SQLException {
         Log.i(TAG, "Starting full synchronization...");
 
         Log.d(TAG, "Retrieving pending transactions from the server...");
