@@ -49,8 +49,9 @@ public class LedgerApplication extends Application {
         return databaseContext == null ? (databaseContext = new DatabaseContext(this)) : databaseContext;
     }
 
-    public void setBus(EventBus bus) {
+    public LedgerApplication setBus(EventBus bus) {
         this.bus = bus;
+        return this;
     }
 
     public void onCreate() {
@@ -60,7 +61,7 @@ public class LedgerApplication extends Application {
 
         deviceSecretProvider = new DeviceSecretProvider(this, getAccountManager());
 
-        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(getContentResolver(), bus);
+        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(this);
         bus.register(pendingTransactionsService);
 
         BankLinksService bankLinksService = new BankLinksService(bus, getDatabaseContext(), getDeviceSecretProvider());

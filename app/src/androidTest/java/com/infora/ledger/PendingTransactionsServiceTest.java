@@ -1,6 +1,9 @@
 package com.infora.ledger;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
@@ -39,7 +42,18 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         resolver = getMockContentResolver();
         provider = getProvider();
         bus = new EventBus();
-        subject = new PendingTransactionsService(resolver, bus);
+        final LedgerApplication app = new LedgerApplication() {
+            @Override
+            public ContentResolver getContentResolver() {
+                return resolver;
+            }
+        }.setBus(bus);
+        subject = new PendingTransactionsService(new ContextWrapper(app) {
+            @Override
+            public Context getApplicationContext() {
+                return app;
+            }
+        });
     }
 
     public void testReportPendingTransaction() {

@@ -3,6 +3,7 @@ package com.infora.ledger.application;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.support.BusUtils;
 
 import de.greenrobot.event.EventBus;
 
@@ -25,9 +27,9 @@ public class PendingTransactionsService {
     private ContentResolver resolver;
     private EventBus bus;
 
-    public PendingTransactionsService(ContentResolver resolver, EventBus bus) {
-        this.resolver = resolver;
-        this.bus = bus;
+    public PendingTransactionsService(Context context) {
+        this.resolver = context.getContentResolver();
+        this.bus = BusUtils.getBus(context);
     }
 
     public void onEventBackgroundThread(ReportTransactionCommand command) {
