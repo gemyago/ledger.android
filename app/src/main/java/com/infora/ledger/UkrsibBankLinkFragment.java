@@ -13,16 +13,24 @@ import com.infora.ledger.banks.ua.urksibbank.UkrsibBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.ui.BankLinkFragment;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by jenya on 01.06.15.
  */
 public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData> {
 
-    private EditText login;
-    private EditText password;
-    private EditText account;
-    private CheckBox fetchAccountTransactions;
-    private EditText card;
+    @Bind(R.id.ukrsib_bank_login)
+    EditText login;
+    @Bind(R.id.ukrsib_bank_password)
+    EditText password;
+    @Bind(R.id.ukrsib_bank_account_number)
+    EditText account;
+    @Bind(R.id.ukrsib_bank_fetch_account_transactions)
+    CheckBox fetchAccountTransactions;
+    @Bind(R.id.ukrsib_bank_card_number)
+    EditText card;
 
     @Nullable
     @Override
@@ -32,11 +40,7 @@ public class UkrsibBankLinkFragment extends BankLinkFragment<UkrsibBankLinkData>
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        login = (EditText) getView().findViewById(R.id.ukrsib_bank_login);
-        password = (EditText) getView().findViewById(R.id.ukrsib_bank_password);
-        account = (EditText) getView().findViewById(R.id.ukrsib_bank_account_number);
-        fetchAccountTransactions = (CheckBox) getView().findViewById(R.id.ukrsib_bank_fetch_account_transactions);
-        card = (EditText) getView().findViewById(R.id.ukrsib_bank_card_number);
+        ButterKnife.bind(this, view);
         super.onViewCreated(view, savedInstanceState);
     }
 

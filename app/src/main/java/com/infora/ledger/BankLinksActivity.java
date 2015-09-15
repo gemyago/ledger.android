@@ -28,6 +28,9 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by jenya on 30.05.15.
  */
@@ -36,13 +39,15 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     private static final int BANK_LINKS_LOADER_ID = 1;
     public static final String BANK_LINK_ID_EXTRA = "BANK_LINK_ID";
     private SimpleCursorAdapter bankLinksAdapter;
-    private ListView lvBankLinks;
+    @Bind(R.id.bank_links_list)
+    ListView lvBankLinks;
     ListView.MultiChoiceModeListener bankLinksChoiceListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bank_links);
+        ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         bankLinksAdapter = new SimpleCursorAdapter(this, R.layout.banks_links_list,
@@ -50,7 +55,6 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
                 new String[]{BankLinks.COLUMN_BIC, BankLinks.COLUMN_ACCOUNT_NAME},
                 new int[]{R.id.bank_link_data, R.id.ledger_account_name}, 0);
 
-        lvBankLinks = (ListView) findViewById(R.id.bank_links_list);
         lvBankLinks.setAdapter(bankLinksAdapter);
         lvBankLinks.setEmptyView(findViewById(android.R.id.empty));
         lvBankLinks.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);

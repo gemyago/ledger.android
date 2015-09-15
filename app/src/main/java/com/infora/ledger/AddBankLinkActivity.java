@@ -30,6 +30,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by jenya on 31.05.15.
  */
@@ -42,11 +45,16 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
 
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private Date initialFetchDate;
-    private Spinner bic;
-    private Spinner ledgerAccountId;
-    private Button addButton;
-    private TextView initialFetchDateText;
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+
+    @Bind(R.id.bic)
+    Spinner bic;
+    @Bind(R.id.ledger_account_id)
+    Spinner ledgerAccount;
+    @Bind(R.id.action_add_bank_link)
+    Button addButton;
+    @Bind(R.id.initial_fetch_date)
+    TextView initialFetchDateText;
 
     public AddBankLinkActivity() {
         super(BankLinkFragment.Mode.Add);
@@ -79,12 +87,8 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_bank_link);
+        ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        bic = (Spinner) findViewById(R.id.bic);
-        ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
-        addButton = (Button) findViewById(R.id.action_add_bank_link);
-        initialFetchDateText = (TextView) findViewById(R.id.initial_fetch_date);
 
         initBanksSpinner(bic);
 
@@ -95,7 +99,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
                 new int[]{android.R.id.text1},
                 0);
         LogUtil.d(this, "assigning adapter");
-        ledgerAccountId.setAdapter(accountsAdapter);
+        ledgerAccount.setAdapter(accountsAdapter);
         LogUtil.d(this, "initializing loader");
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, this);
         Calendar c = Calendar.getInstance();
@@ -151,7 +155,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     public void addBankLink(View view) {
         AddBankLinkCommand command = new AddBankLinkCommand<>();
 
-        Cursor selectedAccount = (Cursor) ledgerAccountId.getSelectedItem();
+        Cursor selectedAccount = (Cursor) ledgerAccount.getSelectedItem();
         if (selectedAccount != null) {
             command.accountId = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID));
             command.accountName = selectedAccount.getString(selectedAccount.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME));
@@ -185,7 +189,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
         Log.d(TAG, "Bank link created. Resetting UI.");
 
         setBankLinkFragment(null);
-        ledgerAccountId.setSelection(0);
+        ledgerAccount.setSelection(0);
         bic.setSelection(0);
         addButton.setEnabled(true);
 

@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -34,22 +35,38 @@ import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class ReportActivity extends ActionBarActivity {
     private static final String TAG = ReportActivity.class.getName();
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private SimpleCursorAdapter reportedTransactionsAdapter;
-    private ListView lvReportedTransactions;
+
+    @Bind(R.id.reported_transactions_list)
+    ListView lvReportedTransactions;
+
+    @Bind(R.id.comment)
+    EditText comment;
+
+    @Bind(R.id.amount)
+    EditText amount;
+
+    @Bind(R.id.report)
+    Button report;
 
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
+        ButterKnife.bind(this);
+
         reportedTransactionsAdapter = new SimpleCursorAdapter(this, R.layout.transactions_list,
                 null,
                 new String[]{TransactionContract.COLUMN_AMOUNT, TransactionContract.COLUMN_COMMENT},
                 new int[]{R.id.amount, R.id.comment}, 0);
-        lvReportedTransactions = (ListView) findViewById(R.id.reported_transactions_list);
+
         lvReportedTransactions.setAdapter(reportedTransactionsAdapter);
         getLoaderManager().initLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
 
@@ -81,7 +98,6 @@ public class ReportActivity extends ActionBarActivity {
             }
         });
 
-        EditText comment = (EditText) findViewById(R.id.comment);
         final int imeActionReport = getResources().getInteger(R.integer.ime_action_report);
         comment.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -145,29 +161,23 @@ public class ReportActivity extends ActionBarActivity {
     }
 
     public void reportNewTransaction(View view) {
-        EditText etAmount = ((EditText) findViewById(R.id.amount));
-        EditText etComment = ((EditText) findViewById(R.id.comment));
-        String amount = etAmount.getText().toString();
-        if (amount.isEmpty()) {
+        String amountValue = amount.getText().toString();
+        if (amountValue.isEmpty()) {
             Toast.makeText(this, getString(R.string.amount_is_required), Toast.LENGTH_SHORT).show();
             return;
         }
-        String comment = etComment.getText().toString();
+        String commentValue = comment.getText().toString();
         findViewById(R.id.report).setEnabled(false);
         String accountId = SharedPreferencesUtil.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, null);
-        BusUtils.post(this, new ReportTransactionCommand(accountId, amount, comment));
+        BusUtils.post(this, new ReportTransactionCommand(accountId, amountValue, commentValue));
     }
 
     @EventHandler
     public void onEventMainThread(TransactionReportedEvent event) {
-        View btnReport = findViewById(R.id.report);
-        EditText etAmount = ((EditText) findViewById(R.id.amount));
-        EditText etComment = ((EditText) findViewById(R.id.comment));
-
-        btnReport.setEnabled(true);
-        etAmount.setText("");
-        etAmount.requestFocus();
-        etComment.setText("");
+        report.setEnabled(true);
+        amount.setText("");
+        amount.requestFocus();
+        comment.setText("");
 
         Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
     }

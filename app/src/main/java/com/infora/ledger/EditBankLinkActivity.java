@@ -33,6 +33,9 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by jenya on 01.06.15.
  */
@@ -45,13 +48,17 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
     private SimpleCursorAdapter spinnerAdapter;
     private DatabaseRepository<BankLink> bankLinksRepo;
     private LedgerAccountsLoader.Factory accountsLoaderFactory;
-    private Button updateButton;
-    private Spinner accountsSpinner;
     private long bankLinkId;
     private Date fetchStartingFrom;
     private BankLinkFragmentsFactory bankLinkFragmentsFactory;
     private DeviceSecretProvider deviceSecretProvider;
-    private EditText bic;
+
+    @Bind(R.id.action_update_bank_link)
+    Button updateButton;
+    @Bind(R.id.ledger_account_id)
+    Spinner accountsSpinner;
+    @Bind(R.id.bic)
+    EditText bic;
 
     public EditBankLinkActivity() {
         super(BankLinkFragment.Mode.Edit);
@@ -95,24 +102,18 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_bank_link);
+        ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        Spinner ledgerAccountId = (Spinner) findViewById(R.id.ledger_account_id);
         spinnerAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_spinner_item,
                 null,
                 new String[]{LedgerAccountsLoader.COLUMN_NAME},
                 new int[]{android.R.id.text1},
                 0);
-        ledgerAccountId.setAdapter(spinnerAdapter);
+        accountsSpinner.setAdapter(spinnerAdapter);
         LogUtil.d(this, "initializing loaders");
         getLoaderManager().initLoader(LEDGER_ACCOUNTS_LOADER, null, createAccountsLoaderCallbacks());
-
         bankLinkId = getIntent().getLongExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, 0);
-        bic = (EditText) findViewById(R.id.bic);
-        updateButton = (Button) findViewById(R.id.action_update_bank_link);
-        accountsSpinner = (Spinner) findViewById(R.id.ledger_account_id);
-
     }
 
     @Override
