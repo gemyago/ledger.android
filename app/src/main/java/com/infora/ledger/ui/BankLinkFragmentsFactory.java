@@ -1,7 +1,6 @@
 package com.infora.ledger.ui;
 
 import com.infora.ledger.Privat24BankLinkFragment;
-import com.infora.ledger.PrivatBankLinkFragment;
 import com.infora.ledger.UkrsibBankLinkFragment;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
@@ -10,6 +9,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.inject.Inject;
+
 /**
  * Created by mye on 7/7/2015.
  */
@@ -17,7 +18,7 @@ public class BankLinkFragmentsFactory {
 
     private final HashMap<String, Callable<BankLinkFragment>> fragmentsMap;
 
-    public BankLinkFragmentsFactory() {
+    @Inject public BankLinkFragmentsFactory() {
         fragmentsMap = new HashMap<>();
     }
 

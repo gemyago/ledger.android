@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.infora.ledger.application.commands.AddBankLinkCommand;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.data.LedgerAccountsLoader;
@@ -30,8 +31,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 31.05.15.
@@ -43,9 +47,11 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
 
     private SimpleCursorAdapter accountsAdapter;
 
-    private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private Date initialFetchDate;
-    private BankLinkFragmentsFactory bankLinkFragmentsFactory;
+
+    @Inject BankLinkFragmentsFactory bankLinkFragmentsFactory;
+    @Inject EventBus bus;
+    @Inject LedgerAccountsLoader.Factory accountsLoaderFactory;
 
     @Bind(R.id.bic)
     Spinner bic;
@@ -60,25 +66,6 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
         super(BankLinkFragment.Mode.Add);
     }
 
-    public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
-        return bankLinkFragmentsFactory == null ?
-                (bankLinkFragmentsFactory = BankLinkFragmentsFactory.createDefault()) : bankLinkFragmentsFactory;
-    }
-
-    public void setBankLinkFragmentsFactory(BankLinkFragmentsFactory bankLinkFragmentsFactory) {
-        this.bankLinkFragmentsFactory = bankLinkFragmentsFactory;
-    }
-
-    private LedgerAccountsLoader.Factory getAccountsLoaderFactory() {
-        return accountsLoaderFactory == null ?
-                (accountsLoaderFactory = new LedgerAccountsLoader.Factory()) : accountsLoaderFactory;
-    }
-
-    public void setAccountsLoaderFactory(LedgerAccountsLoader.Factory accountsLoaderFactory) {
-        this.accountsLoaderFactory = accountsLoaderFactory;
-    }
-
-
     public Date getInitialFetchDate() {
         return initialFetchDate;
     }
@@ -88,6 +75,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_bank_link);
         ButterKnife.bind(this);
+        DiUtils.injector(this).inject(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initBanksSpinner(bic);
@@ -111,8 +99,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     }
 
     private void initBanksSpinner(Spinner bicsSpinner) {
-        BankLinkFragmentsFactory fragmentsFactory = getBankLinkFragmentsFactory();
-        Set<String> knownBicsSet = fragmentsFactory.knownBics();
+        Set<String> knownBicsSet = bankLinkFragmentsFactory.knownBics();
         String[] knownBics = new String[knownBicsSet.size()];
         knownBicsSet.toArray(knownBics);
         String[] bicItems = new String[knownBicsSet.size() + 1];
@@ -126,8 +113,8 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String selectedBic = bicAdapter.getItem(i).toString();
                 Log.d(TAG, "Bank selected bic='" + selectedBic + "'. Assigning bank link fragment.");
-                if (getBankLinkFragmentsFactory().isKnown(selectedBic)) {
-                    setBankLinkFragment(getBankLinkFragmentsFactory().get(selectedBic));
+                if (bankLinkFragmentsFactory.isKnown(selectedBic)) {
+                    setBankLinkFragment(bankLinkFragmentsFactory.get(selectedBic));
                 } else {
                     setBankLinkFragment(null);
                 }
@@ -143,13 +130,13 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     @Override
     protected void onStart() {
         super.onStart();
-        BusUtils.register(this);
+        bus.register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        BusUtils.unregister(this);
+        bus.unregister(this);
     }
 
     public void addBankLink(View view) {
@@ -176,7 +163,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
         command.linkData = bankLinkFragment.getBankLinkData();
         addButton.setEnabled(false);
         Log.d(TAG, "Posting command to create bank link");
-        BusUtils.post(this, command);
+        bus.post(command);
     }
 
     public void changeInitialFetchDate(View view) {
@@ -213,7 +200,7 @@ public class AddBankLinkActivity extends BaseBankLinkActivity implements LoaderM
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         LogUtil.d(this, "Creating loader");
-        return getAccountsLoaderFactory().createLoader(this).withSelectionPrompt();
+        return accountsLoaderFactory.createLoader(this).withSelectionPrompt();
     }
 
     @Override

@@ -6,53 +6,39 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getName();
 
     static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
     static final int REQUEST_CODE_UPDATE_PLAY_SERVICES = 1001;
 
-    private GooglePlayServicesUtilWrapper googlePlayServicesUtilWrapper;
-    private EventBus bus;
-
-    public GooglePlayServicesUtilWrapper getGooglePlayServicesUtil() {
-        return googlePlayServicesUtilWrapper == null ?
-                (googlePlayServicesUtilWrapper = new GooglePlayServicesUtilWrapper()) :
-                googlePlayServicesUtilWrapper;
-    }
-
-    public void setGooglePlayServicesUtilWrapper(GooglePlayServicesUtilWrapper googlePlayServicesUtilWrapper) {
-        this.googlePlayServicesUtilWrapper = googlePlayServicesUtilWrapper;
-    }
+    @Inject GooglePlayServicesUtilWrapper googlePlayServicesUtil;
+    @Inject EventBus bus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-    }
-
-    public EventBus getBus() {
-        if (this.bus == null) this.bus = ((LedgerApplication) getApplicationContext()).getBus();
-        return this.bus;
-    }
-
-    public void setBus(EventBus bus) {
-        this.bus = bus;
+        DiUtils.injector(this).inject(this);
     }
 
     public void signIn(View view) {
-        int playServicesCheckResult = getGooglePlayServicesUtil().isGooglePlayServicesAvailable(this);
+        int playServicesCheckResult = googlePlayServicesUtil.isGooglePlayServicesAvailable(this);
         switch (playServicesCheckResult) {
             case 0:
                 String[] accountTypes = new String[]{"com.google"};
@@ -62,7 +48,7 @@ public class LoginActivity extends ActionBarActivity {
                 break;
             default:
                 Log.e(TAG, "Play services are not available. Code: " + playServicesCheckResult);
-                Dialog errorDialog = getGooglePlayServicesUtil().getErrorDialog(playServicesCheckResult, this, REQUEST_CODE_UPDATE_PLAY_SERVICES);
+                Dialog errorDialog = googlePlayServicesUtil.getErrorDialog(playServicesCheckResult, this, REQUEST_CODE_UPDATE_PLAY_SERVICES);
                 errorDialog.show();
                 break;
         }
@@ -73,7 +59,7 @@ public class LoginActivity extends ActionBarActivity {
         if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
             if (resultCode == RESULT_OK) {
                 String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                getBus().post(new CreateSystemAccountCommand(email));
+                bus.post(new CreateSystemAccountCommand(email));
                 startActivity(Intent.makeMainActivity(new ComponentName(this, ReportActivity.class)));
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "The account wasn't picked.", Toast.LENGTH_SHORT).show();
@@ -82,5 +68,4 @@ public class LoginActivity extends ActionBarActivity {
             Log.d(TAG, "Services update result");
         }
     }
-
 }

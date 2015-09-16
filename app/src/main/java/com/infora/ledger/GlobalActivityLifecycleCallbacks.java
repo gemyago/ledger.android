@@ -7,27 +7,23 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.support.AccountManagerWrapper;
+
+import javax.inject.Inject;
 
 /**
  * Created by jenya on 21.03.15.
  */
 public class GlobalActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
     private static final String TAG = GlobalActivityLifecycleCallbacks.class.getName();
+    private final Context context;
 
-    private Context context;
-    private AccountManagerWrapper accountManager;
+    @Inject AccountManagerWrapper accountManager;
 
     public GlobalActivityLifecycleCallbacks(Context context) {
         this.context = context;
-    }
-
-    public AccountManagerWrapper getAccountManager() {
-        return accountManager == null ? (accountManager = new AccountManagerWrapper(context)) : accountManager;
-    }
-
-    public void setAccountManager(AccountManagerWrapper accountManager) {
-        this.accountManager = accountManager;
+        DiUtils.injector(context).inject(this);
     }
 
     @Override
@@ -43,7 +39,7 @@ public class GlobalActivityLifecycleCallbacks implements Application.ActivityLif
     @Override
     public void onActivityResumed(Activity activity) {
         if (activity instanceof LoginActivity) return;
-        if (getAccountManager().getApplicationAccounts().length > 0) {
+        if (accountManager.getApplicationAccounts().length > 0) {
             Log.d(TAG, "Application account present. Account selection is not required.");
         } else {
             Log.d(TAG, "Application account not present. Starting login activity to select the account.");

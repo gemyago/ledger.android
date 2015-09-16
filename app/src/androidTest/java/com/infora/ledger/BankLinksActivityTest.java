@@ -23,6 +23,8 @@ import com.infora.ledger.support.BusUtils;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -30,7 +32,7 @@ import de.greenrobot.event.EventBus;
  */
 public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<BankLinksActivity> {
 
-    private EventBus bus;
+    @Inject EventBus bus;
     private DatabaseRepository<BankLink> repo;
 
     public BankLinksActivityTest() {
@@ -46,7 +48,7 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        bus = new EventBus();
+
         final RenamingDelegatingContext renamingContext = new RenamingDelegatingContext(
                 getInstrumentation().getTargetContext(), "bank-links-activity-test") {
             MockLedgerApplication mockLedgerApplication;
@@ -54,17 +56,17 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
             @Override
             public Context getApplicationContext() {
                 if (mockLedgerApplication == null)
-                    mockLedgerApplication = new MockLedgerApplication(this, bus);
+                    mockLedgerApplication = new MockLedgerApplication(this);
                 return mockLedgerApplication;
             }
         };
         MockLedgerApplication app = (MockLedgerApplication) renamingContext.getApplicationContext();
         app.withMockContentProvider(BanksContentProvider.AUTHORITY, new BanksContentProvider());
+        app.injector().inject(this);
         setApplication(app);
         setActivityContext(renamingContext);
 
         startActivity(new Intent(), null, null);
-        BusUtils.setBus(getActivity(), bus);
 
         repo = new DatabaseContext(getActivity()).createRepository(BankLink.class);
         DbUtils.deleteAllDatabases(getActivity());

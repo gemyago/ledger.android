@@ -5,7 +5,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.database.MatrixCursor;
-import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -26,6 +25,7 @@ import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockLedgerAccountsLoader;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragment;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
@@ -37,6 +37,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -44,8 +46,8 @@ import de.greenrobot.event.EventBus;
  */
 public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<AddBankLinkActivity> {
 
-    private EventBus bus;
-    private BankLinkFragmentsFactory fragmentsFactory;
+    @Inject EventBus bus;
+    @Inject BankLinkFragmentsFactory fragmentsFactory;
     private DeviceSecret secret;
 
     public AddBankLinkActivityTest() {
@@ -63,21 +65,9 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
 
-        fragmentsFactory = new BankLinkFragmentsFactory();
         secret = DeviceSecret.generateNew();
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new BankLink().setLinkData(new MockBankLinkData("login-1", "password-1"), secret), secret);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new BankLink().setLinkData(new MockBankLinkData("login-2", "password-2"), secret), secret);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new BankLink().setLinkData(new MockBankLinkData("login-3", "password-3"), secret), secret);
 
         Instrumentation instrumentation = new Instrumentation() {
-            @Override
-            public void callActivityOnCreate(Activity activity, Bundle icicle) {
-                AddBankLinkActivity addActivity = (AddBankLinkActivity) activity;
-                addActivity.setAccountsLoaderFactory(createAccountsLoaderFactory());
-                addActivity.setBankLinkFragmentsFactory(fragmentsFactory);
-                super.callActivityOnCreate(activity, icicle);
-            }
-
             @Override
             public Context getTargetContext() {
                 return baseContext;
@@ -85,7 +75,19 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         };
         injectInstrumentation(instrumentation);
         bus = new EventBus();
-        final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
+        final MockLedgerApplication app = new MockLedgerApplication(baseContext)
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        module.ledgerAccountsLoaderFactory = createAccountsLoaderFactory();
+                        module.bankLinkFragmentsFactory = new BankLinkFragmentsFactory();
+                    }
+                });
+        app.injector().inject(this);
+
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", new BankLink().setLinkData(new MockBankLinkData("login-1", "password-1"), secret), secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", new BankLink().setLinkData(new MockBankLinkData("login-2", "password-2"), secret), secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", new BankLink().setLinkData(new MockBankLinkData("login-3", "password-3"), secret), secret);
+
         setActivityContext(app);
         startActivity(new Intent(), null, null);
     }
@@ -129,8 +131,8 @@ public class AddBankLinkActivityTest extends android.test.ActivityUnitTestCase<A
         Set<String> knownBics = fragmentsFactory.knownBics();
         assertEquals(knownBics.size() + 1, adapter.getCount());
         assertEquals("", adapter.getItem(0));
-        for (int i = 1; i < adapter.getCount() ; i++) {
-             assertTrue(knownBics.contains(adapter.getItem(i)));
+        for (int i = 1; i < adapter.getCount(); i++) {
+            assertTrue(knownBics.contains(adapter.getItem(i)));
         }
     }
 

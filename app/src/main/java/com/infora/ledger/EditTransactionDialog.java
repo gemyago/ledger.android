@@ -1,6 +1,5 @@
 package com.infora.ledger;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -13,9 +12,13 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
-import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.application.di.DiUtils;
 
 import java.util.Objects;
+
+import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 11.04.15.
@@ -46,14 +49,14 @@ public class EditTransactionDialog extends DialogFragment {
                         Log.d(TAG, "Posting adjust comment");
                         String newAmount = etAmount.getText().toString();
                         String newComment = etComment.getText().toString();
-                        if(Objects.equals(newAmount, amount) && Objects.equals(newComment, comment)) {
+                        if (Objects.equals(newAmount, amount) && Objects.equals(newComment, comment)) {
                             Log.d(TAG, "No changes.");
                             return;
                         }
                         AdjustTransactionCommand cmd = new AdjustTransactionCommand(transactionId,
                                 newAmount,
                                 newComment);
-                        BusUtils.post(getActivity(), cmd);
+                        ((LedgerApplication)getActivity().getApplicationContext()).bus.post(cmd);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

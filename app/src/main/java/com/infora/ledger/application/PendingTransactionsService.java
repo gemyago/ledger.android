@@ -27,9 +27,9 @@ public class PendingTransactionsService {
     private ContentResolver resolver;
     private EventBus bus;
 
-    public PendingTransactionsService(Context context) {
+    public PendingTransactionsService(Context context, EventBus bus) {
         this.resolver = context.getContentResolver();
-        this.bus = BusUtils.getBus(context);
+        this.bus = bus;
     }
 
     public void onEventBackgroundThread(ReportTransactionCommand command) {

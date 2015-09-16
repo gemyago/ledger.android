@@ -21,15 +21,18 @@ import android.widget.Toast;
 import com.infora.ledger.BanksContract.BankLinks;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
+
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 30.05.15.
@@ -39,8 +42,8 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     private static final int BANK_LINKS_LOADER_ID = 1;
     public static final String BANK_LINK_ID_EXTRA = "BANK_LINK_ID";
     private SimpleCursorAdapter bankLinksAdapter;
-    @Bind(R.id.bank_links_list)
-    ListView lvBankLinks;
+    @Bind(R.id.bank_links_list) ListView lvBankLinks;
+    @Inject EventBus bus;
     ListView.MultiChoiceModeListener bankLinksChoiceListener;
 
     @Override
@@ -48,6 +51,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bank_links);
         ButterKnife.bind(this);
+        DiUtils.injector(this).inject(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         bankLinksAdapter = new SimpleCursorAdapter(this, R.layout.banks_links_list,
@@ -77,13 +81,13 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     @Override
     protected void onStart() {
         super.onStart();
-        BusUtils.register(this);
+        bus.register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        BusUtils.unregister(this);
+        bus.unregister(this);
     }
 
 
@@ -123,7 +127,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
 
         if (id == R.id.action_fetch_all_bank_links) {
             for (int i = 0; i < bankLinksAdapter.getCount(); i++) {
-                 BusUtils.post(this, new FetchBankTransactionsCommand((int) bankLinksAdapter.getItemId(i)));
+                bus.post(new FetchBankTransactionsCommand((int) bankLinksAdapter.getItemId(i)));
             }
             return true;
         }
@@ -143,7 +147,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         bankLinksAdapter.swapCursor(data);
-        BusUtils.post(this, new BankLinksLoaded());
+        bus.post(new BankLinksLoaded());
     }
 
     @Override
@@ -177,14 +181,13 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
             long[] checkedItemIds = lvBankLinks.getCheckedItemIds();
             switch (item.getItemId()) {
                 case R.id.menu_delete:
-                    BusUtils.post(BankLinksActivity.this, new DeleteBankLinksCommand(checkedItemIds));
+                    bus.post(new DeleteBankLinksCommand(checkedItemIds));
                     mode.finish();
                     break;
                 case R.id.menu_fetch_bank_transactions:
                     mode.finish();
-                    for (int i = 0; i < checkedItemIds.length; i++) {
-                        long checkedItemId = checkedItemIds[i];
-                        BusUtils.post(BankLinksActivity.this, new FetchBankTransactionsCommand((int) checkedItemId));
+                    for (long checkedItemId : checkedItemIds) {
+                        bus.post(new FetchBankTransactionsCommand((int) checkedItemId));
                     }
                     break;
                 default:

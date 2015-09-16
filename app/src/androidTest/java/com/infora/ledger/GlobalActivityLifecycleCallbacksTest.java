@@ -2,10 +2,14 @@ package com.infora.ledger;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.Instrumentation;
+import android.content.Context;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 
 import com.infora.ledger.mocks.MockAccountManagerWrapper;
+import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 
 /**
  * Created by jenya on 21.03.15.
@@ -21,10 +25,15 @@ public class GlobalActivityLifecycleCallbacksTest extends ActivityUnitTestCase<L
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        final MockLedgerApplication app = new MockLedgerApplication(getInstrumentation().getTargetContext());
+        app.withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+            @Override public void init(TestApplicationModule module) {
+                module.accountManagerWrapper = accountManager = new MockAccountManagerWrapper(app);
+            }
+        });
+        setActivityContext(app);
         startActivity(new Intent(), null, null);
         subject = new GlobalActivityLifecycleCallbacks(getActivity());
-        accountManager = new MockAccountManagerWrapper(getActivity());
-        subject.setAccountManager(accountManager);
     }
 
     @Override

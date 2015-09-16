@@ -1,33 +1,28 @@
 package com.infora.ledger.application;
 
 import android.accounts.Account;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.infora.ledger.LedgerApplication;
-import com.infora.ledger.SettingsFragment;
 import com.infora.ledger.api.ApiAdapter;
-import com.infora.ledger.api.ApiAuthenticator;
-import com.infora.ledger.api.AuthenticityToken;
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.AccountManagerWrapper;
-import com.infora.ledger.support.SharedPreferencesUtil;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
+import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 import retrofit.RetrofitError;
 
 /**
@@ -39,6 +34,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private ContentResolver resolver;
     private SynchronizationStrategy syncStrategy;
     private ApiAdapter apiAdapter;
+    @Inject EventBus bus;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -61,8 +57,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private void onInit(Context context) {
         Log.d(TAG, "Initializing sync adapter...");
         resolver = context.getContentResolver();
-        LedgerApplication app = (LedgerApplication) context.getApplicationContext();
-        syncStrategy = new FullSyncSynchronizationStrategy(app.getBus(), new TransactionsReadModel(context));
+        DiUtils.injector(context).inject(this);
+        syncStrategy = new FullSyncSynchronizationStrategy(bus, new TransactionsReadModel(context));
         apiAdapter = ApiAdapter.createAdapter(context, new AccountManagerWrapper(context));
     }
 

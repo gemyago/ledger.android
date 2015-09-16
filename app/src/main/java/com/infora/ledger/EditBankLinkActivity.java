@@ -15,13 +15,13 @@ import android.widget.Toast;
 
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.BankLinkUpdated;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.LedgerAccountsLoader;
-import com.infora.ledger.data.DatabaseContext;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.support.SpinnerSelector;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -33,8 +33,11 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 01.06.15.
@@ -47,30 +50,20 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
 
     private SimpleCursorAdapter spinnerAdapter;
     private DatabaseRepository<BankLink> bankLinksRepo;
-    private LedgerAccountsLoader.Factory accountsLoaderFactory;
     private long bankLinkId;
     private Date fetchStartingFrom;
-    private BankLinkFragmentsFactory bankLinkFragmentsFactory;
-    private DeviceSecretProvider deviceSecretProvider;
 
-    @Bind(R.id.action_update_bank_link)
-    Button updateButton;
-    @Bind(R.id.ledger_account_id)
-    Spinner accountsSpinner;
-    @Bind(R.id.bic)
-    EditText bic;
+    @Inject EventBus bus;
+    @Inject LedgerAccountsLoader.Factory accountsLoaderFactory;
+    @Inject BankLinkFragmentsFactory bankLinkFragmentsFactory;
+    @Inject DeviceSecretProvider deviceSecretProvider;
+
+    @Bind(R.id.action_update_bank_link) Button updateButton;
+    @Bind(R.id.ledger_account_id) Spinner accountsSpinner;
+    @Bind(R.id.bic) EditText bic;
 
     public EditBankLinkActivity() {
         super(BankLinkFragment.Mode.Edit);
-    }
-
-    public BankLinkFragmentsFactory getBankLinkFragmentsFactory() {
-        return bankLinkFragmentsFactory == null ?
-                (bankLinkFragmentsFactory = BankLinkFragmentsFactory.createDefault()) : bankLinkFragmentsFactory;
-    }
-
-    public void setBankLinkFragmentsFactory(BankLinkFragmentsFactory bankLinkFragmentsFactory) {
-        this.bankLinkFragmentsFactory = bankLinkFragmentsFactory;
     }
 
     public DatabaseRepository<BankLink> getBankLinksRepo() {
@@ -81,28 +74,11 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
         this.bankLinksRepo = bankLinksRepo;
     }
 
-    private LedgerAccountsLoader.Factory getAccountsLoaderFactory() {
-        return accountsLoaderFactory == null ?
-                (accountsLoaderFactory = new LedgerAccountsLoader.Factory()) : accountsLoaderFactory;
-    }
-
-    public void setAccountsLoaderFactory(LedgerAccountsLoader.Factory accountsLoaderFactory) {
-        this.accountsLoaderFactory = accountsLoaderFactory;
-    }
-
-    public DeviceSecretProvider getDeviceSecretProvider() {
-        return deviceSecretProvider == null ?
-                (deviceSecretProvider = ((LedgerApplication)getApplication()).getDeviceSecretProvider()) : deviceSecretProvider;
-    }
-
-    public void setDeviceSecretProvider(DeviceSecretProvider deviceSecretProvider) {
-        this.deviceSecretProvider = deviceSecretProvider;
-    }
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_bank_link);
         ButterKnife.bind(this);
+        DiUtils.injector(this).inject(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         spinnerAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_spinner_item,
@@ -119,13 +95,13 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        BusUtils.register(this);
+        bus.register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        BusUtils.unregister(this);
+        bus.unregister(this);
     }
 
     public void updateBankLink(View view) {
@@ -135,8 +111,8 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
                 selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_ACCOUNT_ID)),
                 selectedItem.getString(selectedItem.getColumnIndexOrThrow(LedgerAccountsLoader.COLUMN_NAME)),
                 bankLinkFragment.getBankLinkData());
-        if(fetchStartingFrom != null) command.setFetchFromDate(fetchStartingFrom);
-        BusUtils.post(this, command);
+        if (fetchStartingFrom != null) command.setFetchFromDate(fetchStartingFrom);
+        bus.post(command);
         updateButton.setEnabled(false);
     }
 
@@ -171,13 +147,13 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 Log.d(TAG, "Creating accounts loader.");
-                return getAccountsLoaderFactory().createLoader(EditBankLinkActivity.this);
+                return accountsLoaderFactory.createLoader(EditBankLinkActivity.this);
             }
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 spinnerAdapter.swapCursor(data);
-                BusUtils.post(EditBankLinkActivity.this, new AccountsLoaded());
+                bus.post(new AccountsLoaded());
 
                 getLoaderManager().initLoader(LEDGER_BANK_LINK_LOADER, null, createBankLinkLoader(bankLinkId));
             }
@@ -205,7 +181,7 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
                     public BankLink loadInBackground() {
                         Log.d(TAG, "Loading bank link data.");
                         try {
-                            getDeviceSecretProvider().ensureDeviceRegistered();
+                            deviceSecretProvider.ensureDeviceRegistered();
                             return getBankLinksRepo().getById(bankLinkId);
                         } catch (SQLException e) {
                             //TODO: Implement error handling.
@@ -220,13 +196,13 @@ public class EditBankLinkActivity extends BaseBankLinkActivity {
             public void onLoadFinished(Loader<BankLink> loader, BankLink data) {
                 Log.d(TAG, "Bank link data bic='" + data.bic + "' loaded.");
                 bic.setText(data.bic);
-                BankLinkFragment fragment = getBankLinkFragmentsFactory().get(data.bic);
-                fragment.setBankLinkData(data, getDeviceSecretProvider().secret());
+                BankLinkFragment fragment = bankLinkFragmentsFactory.get(data.bic);
+                fragment.setBankLinkData(data, deviceSecretProvider.secret());
                 setBankLinkFragment(fragment);
 
                 SpinnerSelector.select(accountsSpinner, LedgerAccountsLoader.COLUMN_ACCOUNT_ID, data.accountId);
 
-                BusUtils.post(EditBankLinkActivity.this, new BankLinkLoaded());
+                bus.post(new BankLinkLoaded());
             }
 
             @Override

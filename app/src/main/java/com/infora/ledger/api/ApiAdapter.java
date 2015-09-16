@@ -96,7 +96,7 @@ public class ApiAdapter {
                 authenticityToken = api.authenticateByIdToken(idToken);
             } else {
                 Log.e(TAG, "Authentication failed. Error kind: " + ex.getKind());
-                Log.e(TAG, ex.getMessage());
+                Log.e(TAG, ex.getMessage(), ex);
                 throw ex;
             }
         }

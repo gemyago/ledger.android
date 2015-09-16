@@ -53,7 +53,7 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
             public Context getApplicationContext() {
                 return app;
             }
-        });
+        }, bus);
     }
 
     public void testReportPendingTransaction() {

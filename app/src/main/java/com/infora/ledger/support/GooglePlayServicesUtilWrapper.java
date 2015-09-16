@@ -6,10 +6,16 @@ import android.content.Context;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import javax.inject.Inject;
+
 /**
  * Created by jenya on 21.03.15.
  */
 public class GooglePlayServicesUtilWrapper {
+    @Inject
+    public GooglePlayServicesUtilWrapper() {
+    }
+
     public int isGooglePlayServicesAvailable(Context context) {
         return GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
     }

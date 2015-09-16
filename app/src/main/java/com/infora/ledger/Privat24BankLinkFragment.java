@@ -13,13 +13,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.infora.ledger.api.DeviceSecret;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -31,6 +33,8 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
     private static final String TAG = Privat24BankLinkFragment.class.getName();
 
     private ModeState modeState;
+
+    @Inject EventBus bus;
 
     @Override
     public void setMode(Mode mode) {
@@ -49,14 +53,13 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
 
     @Override
     public void onBeforeAdd(Activity parent) {
-        EventBus bus = BusUtils.getBus(parent);
+        DiUtils.injector(parent).inject(this);
         bus.register(this);
         Log.d(TAG, "Fragment registered to handle events.");
     }
 
     @Override
     public void onBeforeRemove(Activity parent) {
-        EventBus bus = BusUtils.getBus(parent);
         bus.unregister(this);
         Log.d(TAG, "Fragment unregistered from events handling.");
     }
@@ -71,9 +74,10 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
     public void onDetach() {
         super.onDetach();
 
-        EventBus bus = BusUtils.getBus(getActivity());
-        bus.unregister(this);
-        Log.d(TAG, "Fragment unregistered from events handling.");
+        if (bus != null) {
+            bus.unregister(this);
+            Log.d(TAG, "Fragment unregistered from events handling.");
+        }
     }
 
     @Override
@@ -108,7 +112,7 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String otpPassword = input.getText().toString();
-                BusUtils.post(getActivity(), new AuthenticateWithOtp(cmd.operationId, otpPassword));
+                bus.post(new AuthenticateWithOtp(cmd.operationId, otpPassword));
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

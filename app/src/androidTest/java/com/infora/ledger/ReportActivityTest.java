@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContentResolver;
 import android.view.View;
 import android.view.Window;
@@ -20,10 +19,11 @@ import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.util.concurrent.BrokenBarrierException;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -32,7 +32,7 @@ import de.greenrobot.event.EventBus;
  */
 public class ReportActivityTest extends android.test.ActivityUnitTestCase<ReportActivity> {
 
-    private EventBus bus;
+    @Inject EventBus bus;
     private MockPendingTransactionsContentProvider mockProvider;
 
     public ReportActivityTest() {
@@ -52,20 +52,19 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         SharedPreferences.Editor edit = SharedPreferencesUtil.getDefaultSharedPreferences(baseContext).edit();
         edit.remove(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID).commit();
 
-        bus = new EventBus();
-        final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
+        final MockLedgerApplication app = new MockLedgerApplication(baseContext);
+        app.injector().inject(this);
         MockContentResolver mockContentResolver = new MockContentResolver(app);
         mockProvider = new MockPendingTransactionsContentProvider(app);
+        app.withMockContentProvider(TransactionContract.AUTHORITY, mockProvider);
         mockContentResolver.addProvider(TransactionContract.AUTHORITY, mockProvider);
         app.mockContentResolver = mockContentResolver;
         setActivityContext(app);
         startActivity(new Intent(), null, null);
         getActivity().doNotCallRequestSync = true;
     }
-    
+
     public void testRequestSyncOnStart() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>(ReportActivity.RequestSyncCommand.class);
         bus.register(mockSubscriber);
         getInstrumentation().callActivityOnStart(getActivity());
@@ -74,8 +73,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testRequestSyncOnSynchronizeAction() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportActivity.RequestSyncCommand> mockSubscriber = new MockSubscriber<>(ReportActivity.RequestSyncCommand.class);
         bus.register(mockSubscriber);
         getActivity().onOptionsItemSelected(new MockMenuItem(R.id.action_synchronize));
@@ -84,8 +81,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransactionOnReportButtonClick() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
@@ -111,8 +106,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         editor.putString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, "account-100");
         editor.apply();
 
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
@@ -126,8 +119,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransactionOnImeCommentEditorAction() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
@@ -148,8 +139,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransactionEmptyAmount() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
@@ -159,8 +148,6 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testTransactionReportedEvent() {
-        EventBus bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();

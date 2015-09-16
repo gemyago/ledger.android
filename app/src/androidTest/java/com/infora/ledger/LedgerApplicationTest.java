@@ -5,6 +5,8 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
 import com.infora.ledger.mocks.MockAccountManagerWrapper;
+import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 
 /**
  * Created by jenya on 21.03.15.
@@ -17,9 +19,13 @@ public class LedgerApplicationTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        subject = new LedgerApplication();
         accountManager = new MockAccountManagerWrapper(subject);
-        subject.setAccountManager(accountManager);
+        subject = new LedgerApplication();
+        new MockLedgerApplication(getContext()).withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+            @Override public void init(TestApplicationModule module) {
+                module.accountManagerWrapper = accountManager;
+            }
+        }).injector().inject(subject);
     }
 
     public void testCreateSystemAccountCommand() {

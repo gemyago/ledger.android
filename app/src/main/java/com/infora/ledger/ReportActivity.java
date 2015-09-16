@@ -12,6 +12,7 @@ import android.database.CursorWrapper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.KeyEvent;
@@ -29,16 +30,20 @@ import android.widget.Toast;
 
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
-public class ReportActivity extends ActionBarActivity {
+public class ReportActivity extends AppCompatActivity {
     private static final String TAG = ReportActivity.class.getName();
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
     private SimpleCursorAdapter reportedTransactionsAdapter;
@@ -48,12 +53,15 @@ public class ReportActivity extends ActionBarActivity {
     @Bind(R.id.amount) EditText amount;
     @Bind(R.id.report) Button report;
 
+    @Inject EventBus bus;
+
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
         ButterKnife.bind(this);
+        DiUtils.injector(this).inject(this);
 
         reportedTransactionsAdapter = new SimpleCursorAdapter(this, R.layout.transactions_list,
                 null,
@@ -87,7 +95,7 @@ public class ReportActivity extends ActionBarActivity {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
                 Log.d(TAG, "Content changed. Requesting sync...");
-                BusUtils.post(ReportActivity.this, new RequestSyncCommand());
+                bus.post(new RequestSyncCommand());
             }
         });
 
@@ -114,16 +122,16 @@ public class ReportActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        BusUtils.register(this);
+        bus.register(this);
 
         Log.d(TAG, "Requesting sync on start...");
-        BusUtils.post(this, new RequestSyncCommand());
+        bus.post(new RequestSyncCommand());
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        BusUtils.unregister(this);
+        bus.unregister(this);
     }
 
     @Override
@@ -137,7 +145,7 @@ public class ReportActivity extends ActionBarActivity {
         if (id == R.id.action_synchronize) {
             RequestSyncCommand cmd = new RequestSyncCommand();
             cmd.isManual = true;
-            BusUtils.post(this, cmd);
+            bus.post(cmd);
             return true;
         }
         if (id == R.id.action_bank_links) {
@@ -156,7 +164,7 @@ public class ReportActivity extends ActionBarActivity {
         String commentValue = comment.getText().toString();
         findViewById(R.id.report).setEnabled(false);
         String accountId = SharedPreferencesUtil.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, null);
-        BusUtils.post(this, new ReportTransactionCommand(accountId, amountValue, commentValue));
+        bus.post(new ReportTransactionCommand(accountId, amountValue, commentValue));
     }
 
     @EventHandler
@@ -213,7 +221,7 @@ public class ReportActivity extends ActionBarActivity {
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             Log.d(TAG, "Finished loading transactions.");
             reportedTransactionsAdapter.swapCursor(data);
-            BusUtils.post(ReportActivity.this, new TransactionsLoaded());
+            bus.post(new TransactionsLoaded());
         }
 
         @Override
@@ -241,7 +249,7 @@ public class ReportActivity extends ActionBarActivity {
             switch (item.getItemId()) {
                 case R.id.menu_delete:
                     long[] checkedItemIds = lvReportedTransactions.getCheckedItemIds();
-                    BusUtils.post(ReportActivity.this, new DeleteTransactionsCommand(checkedItemIds));
+                    bus.post(new DeleteTransactionsCommand(checkedItemIds));
                     mode.finish();
                     break;
                 default:

@@ -5,7 +5,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -26,6 +25,7 @@ import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -35,6 +35,8 @@ import com.infora.ledger.ui.DatePickerFragment;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -42,11 +44,11 @@ import de.greenrobot.event.EventBus;
  */
 public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<EditBankLinkActivity> {
 
-    private EventBus bus;
+    @Inject EventBus bus;
     private MockDatabaseRepository mockBankLinksRepo;
     private BankLink bankLink;
     private LedgerAccountDto selectedAccount;
-    private BankLinkFragmentsFactory fragmentsFactory;
+    @Inject BankLinkFragmentsFactory fragmentsFactory;
     private DeviceSecret secret;
 
     public EditBankLinkActivityTest() {
@@ -65,22 +67,9 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         final Context baseContext = getInstrumentation().getTargetContext();
         secret = DeviceSecret.generateNew();
 
-        fragmentsFactory = new BankLinkFragmentsFactory();
         MockBankLinkData bic1Data = new MockBankLinkData("login-1", "password-1");
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null, secret);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null, secret);
-        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", null, secret);
 
         Instrumentation instrumentation = new Instrumentation() {
-            @Override
-            public void callActivityOnCreate(Activity activity, Bundle icicle) {
-                EditBankLinkActivity theActivity = (EditBankLinkActivity) activity;
-                theActivity.setAccountsLoaderFactory(createAccountsLoaderFactory());
-                theActivity.setBankLinkFragmentsFactory(fragmentsFactory);
-                theActivity.setDeviceSecretProvider(new MockDeviceSecretProvider(secret));
-                super.callActivityOnCreate(activity, icicle);
-            }
-
             @Override
             public Context getTargetContext() {
                 return baseContext;
@@ -88,8 +77,15 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
         };
         injectInstrumentation(instrumentation);
         bus = new EventBus();
-        final MockLedgerApplication app = new MockLedgerApplication(baseContext, bus);
-        setActivityContext(app);
+        final MockLedgerApplication app = new MockLedgerApplication(baseContext)
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        module.ledgerAccountsLoaderFactory = createAccountsLoaderFactory();
+                        module.deviceSecretProvider = new MockDeviceSecretProvider(secret);
+                        module.bankLinkFragmentsFactory = new BankLinkFragmentsFactory();
+                    }
+                });
+        app.injector().inject(this);
         selectedAccount = new LedgerAccountDto("account-1", "Account 1");
         bankLink = new BankLink()
                 .setId(332)
@@ -98,8 +94,14 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 .setLinkData(bic1Data, secret);
         mockBankLinksRepo = new MockDatabaseRepository(BankLink.class);
         mockBankLinksRepo.entityToGetById = bankLink;
+
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null, secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null, secret);
+        MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-3", null, secret);
+
         Intent intent = new Intent();
         intent.putExtra(BankLinksActivity.BANK_LINK_ID_EXTRA, (long) bankLink.id);
+        setActivityContext(app);
         startActivity(intent, null, null);
         getActivity().setBankLinksRepo(mockBankLinksRepo);
     }
@@ -121,7 +123,6 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     }
 
     public void testLoadAndSelectAccount() {
-        getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
         BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> bankLinkBarrier = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
         BarrierSubscriber<EditBankLinkActivity.AccountsLoaded> accountsBarrier = new BarrierSubscriber<>(EditBankLinkActivity.AccountsLoaded.class);
         bus.register(bankLinkBarrier);
@@ -139,7 +140,6 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     }
 
     public void testUpdateBankLink() {
-        getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
         BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> bankLinkBarrier = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
         bus.register(bankLinkBarrier);
         LogUtil.d(this, "Calling activity onStart");
@@ -172,7 +172,6 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     }
 
     public void testUpdateBankLinkWithChangedFetchFromDate() {
-        getActivity().setAccountsLoaderFactory(createAccountsLoaderFactory());
         BarrierSubscriber<EditBankLinkActivity.BankLinkLoaded> bankLinkBarrier = new BarrierSubscriber<>(EditBankLinkActivity.BankLinkLoaded.class);
         bus.register(bankLinkBarrier);
         LogUtil.d(this, "Calling activity onStart");

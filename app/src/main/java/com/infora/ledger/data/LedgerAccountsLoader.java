@@ -18,6 +18,8 @@ import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Created by jenya on 01.06.15.
  */
@@ -82,6 +84,9 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
     }
 
     public static class Factory {
+        @Inject public Factory() {
+        }
+
         public LedgerAccountsLoader createLoader(Context context) {
             return new LedgerAccountsLoader(context);
         }

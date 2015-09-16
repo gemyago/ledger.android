@@ -1,6 +1,5 @@
 package com.infora.ledger.support;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.infora.ledger.LedgerApplication;
@@ -10,6 +9,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by jenya on 11.03.15.
  */
+@Deprecated
 public class BusUtils {
     public static void register(Context context) {
         getBus(context).register(context);

@@ -9,8 +9,12 @@ import android.test.ActivityUnitTestCase;
 import android.view.View;
 
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -19,6 +23,7 @@ import de.greenrobot.event.EventBus;
  */
 public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
 
+    @Inject EventBus bus;
     private DummyGooglePlayServicesUtilWrapper gpsUtil;
 
     public LoginActivityTest() {
@@ -29,6 +34,15 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
     protected void setUp() throws Exception {
         super.setUp();
         gpsUtil = new DummyGooglePlayServicesUtilWrapper();
+        MockLedgerApplication app = new MockLedgerApplication(getInstrumentation().getTargetContext())
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override
+                    public void init(TestApplicationModule module) {
+                        module.googlePlayServicesUtilWrapper = gpsUtil;
+                    }
+                });
+        setActivityContext(app);
+        app.injector().inject(this);
     }
 
     @Override
@@ -38,13 +52,10 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
     }
 
     public void testOnActivityResultIfAccountWasPicked() {
-        EventBus bus = new EventBus();
-        final boolean[] commandDispatched = {false};
-
         MockSubscriber<CreateSystemAccountCommand> createSysAccountSubscriber = new MockSubscriber(CreateSystemAccountCommand.class);
         bus.register(createSysAccountSubscriber);
         startActivity(new Intent(), null, null);
-        getActivity().setBus(bus);
+
         Intent data = new Intent();
         data.putExtra(AccountManager.KEY_ACCOUNT_NAME, "test@mail.com");
         getActivity().onActivityResult(LoginActivity.REQUEST_CODE_PICK_ACCOUNT, Activity.RESULT_OK, data);
@@ -58,7 +69,6 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
 
     public void testSignIn() throws Exception {
         startActivity(new Intent(), null, null);
-        getActivity().setGooglePlayServicesUtilWrapper(gpsUtil);
         gpsUtil.setIsGooglePlayServicesAvailable(0);
         View buttonView = getActivity().getWindow().findViewById(R.id.sign_in_button);
         buttonView.callOnClick();

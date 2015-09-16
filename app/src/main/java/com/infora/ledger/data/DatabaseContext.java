@@ -6,13 +6,15 @@ import com.infora.ledger.LedgerApplication;
 
 import java.util.Stack;
 
+import javax.inject.Inject;
+
 /**
  * Created by jenya on 05.06.15.
  */
 public class DatabaseContext {
     private Context context;
 
-    public DatabaseContext(Context context) {
+    @Inject public DatabaseContext(Context context) {
         this.context = context;
     }
 

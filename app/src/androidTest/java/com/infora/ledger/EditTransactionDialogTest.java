@@ -7,10 +7,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.EditText;
 
+import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.mocks.MockDeviceSecretProvider;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.mocks.di.TestApplicationModule;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -19,7 +24,7 @@ import de.greenrobot.event.EventBus;
  */
 public class EditTransactionDialogTest extends ActivityInstrumentationTestCase2<ReportActivity> {
 
-    private EventBus bus;
+    @Inject EventBus bus;
 
     public EditTransactionDialogTest() {
         super(ReportActivity.class);
@@ -28,8 +33,15 @@ public class EditTransactionDialogTest extends ActivityInstrumentationTestCase2<
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        bus = new EventBus();
-        BusUtils.setBus(getActivity(), bus);
+        final DeviceSecret secret = DeviceSecret.generateNew();
+        final MockLedgerApplication app = new MockLedgerApplication(getActivity())
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        module.deviceSecretProvider = new MockDeviceSecretProvider(secret);
+                    }
+                });
+        app.injector().inject(this);
+        app.injector().inject((LedgerApplication) getActivity().getApplication());
     }
 
     private EditTransactionDialog startFragment(PendingTransaction t) {

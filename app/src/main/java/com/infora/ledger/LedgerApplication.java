@@ -7,64 +7,68 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.infora.ledger.application.BankLinksService;
-import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.CreateSystemAccountCommand;
+import com.infora.ledger.application.di.ApplicationModule;
+import com.infora.ledger.application.di.DaggerApplicationComponent;
+import com.infora.ledger.application.di.DependenciesInjector;
+import com.infora.ledger.application.di.InjectorProvider;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 10.03.15.
  */
-public class LedgerApplication extends Application {
+public class LedgerApplication extends Application implements InjectorProvider<DependenciesInjector> {
     private static final String TAG = LedgerApplication.class.getName();
     public static final String PACKAGE = "com.infora.ledger";
     public static final String AUTH_TOKEN_TYPE = PACKAGE;
     public static final String ACCOUNT_TYPE = "ledger.infora-soft.com";
-    private EventBus bus;
 
-    private AccountManagerWrapper accountManager;
-    private DatabaseContext databaseContext;
-    private DeviceSecretProvider deviceSecretProvider;
+    private DependenciesInjector injector;
 
-    public AccountManagerWrapper getAccountManager() {
-        return accountManager == null ? (accountManager = new AccountManagerWrapper(this)) : accountManager;
-    }
+    @Inject EventBus bus;
+    @Inject DatabaseContext databaseContext;
+    @Inject AccountManagerWrapper accountManager;
+    @Inject PendingTransactionsService pendingTransactionsService;
+    @Inject BankLinksService bankLinksService;
 
-    public void setAccountManager(AccountManagerWrapper accountManager) {
-        this.accountManager = accountManager;
-    }
-
+    //TODO: Remove
     public EventBus getBus() {
-        if (bus == null) {
-            Log.d(TAG, "Creating event bus.");
-            return (bus = new EventBus());
-        } else return bus;
+        return bus;
     }
 
-    public DatabaseContext getDatabaseContext() {
-        return databaseContext == null ? (databaseContext = new DatabaseContext(this)) : databaseContext;
-    }
-
+    //TODO: Remove
     public LedgerApplication setBus(EventBus bus) {
         this.bus = bus;
         return this;
     }
 
+    public DependenciesInjector injector() {
+        if (injector == null) {
+            Log.d(TAG, "Initializing application injector...");
+            injector = DaggerApplicationComponent.builder()
+                    .applicationModule(new ApplicationModule(this))
+                    .build();
+        }
+        return injector;
+    }
+
+    public DatabaseContext getDatabaseContext() {
+        return databaseContext;
+    }
+
     public void onCreate() {
         Log.d(TAG, "Initializing application...");
-        EventBus bus = getBus();
+        injector().inject(this);
+
         bus.register(this);
-
-        deviceSecretProvider = new DeviceSecretProvider(this, getAccountManager());
-
-        PendingTransactionsService pendingTransactionsService = new PendingTransactionsService(this);
         bus.register(pendingTransactionsService);
-
-        BankLinksService bankLinksService = new BankLinksService(bus, getDatabaseContext(), getDeviceSecretProvider());
         bus.register(bankLinksService);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
@@ -90,10 +94,6 @@ public class LedgerApplication extends Application {
     public void onEvent(CreateSystemAccountCommand cmd) {
         Log.i(TAG, "Adding new account: " + cmd.getEmail());
         Account account = new Account(cmd.getEmail(), ACCOUNT_TYPE);
-        getAccountManager().addAccountExplicitly(account, null);
-    }
-
-    public DeviceSecretProvider getDeviceSecretProvider() {
-        return deviceSecretProvider;
+        accountManager.addAccountExplicitly(account, null);
     }
 }

@@ -9,6 +9,7 @@ import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
 
@@ -27,6 +28,7 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        setActivityContext(new MockLedgerApplication(getInstrumentation().getTargetContext()));
         startActivity(new Intent(getInstrumentation().getTargetContext(), DummyBankLinkFragmentTestActivity.class), null, null);
         getActivity().fragment = fragment = new Privat24BankLinkFragment();
         fragment.setMode(BankLinkFragment.Mode.Edit);

@@ -9,6 +9,9 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.support.AccountManagerWrapper;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Created by mye on 7/17/2015.
  */
@@ -18,6 +21,7 @@ public class DeviceSecretProvider {
     private final AccountManagerWrapper accountManager;
     private DeviceSecret deviceSecret;
 
+    @Inject @Singleton
     public DeviceSecretProvider(Context context, AccountManagerWrapper accountManager) {
         this.context = context;
         this.accountManager = accountManager;
