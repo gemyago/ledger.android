@@ -24,8 +24,9 @@ public class MockDatabaseContext extends DatabaseContext {
 
     private final Map<Class, DatabaseRepository> mockRepos = new HashMap<>();
 
-    public <TEntity extends Entity> void addMockRepo(Class<TEntity> classOfEntity, MockDatabaseRepository<TEntity> repository) {
+    public <TEntity extends Entity> MockDatabaseContext addMockRepo(Class<TEntity> classOfEntity, MockDatabaseRepository<TEntity> repository) {
         mockRepos.put(classOfEntity, repository);
+        return this;
     }
 
     @Override

@@ -16,7 +16,6 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
     public final ArrayList<TEntity> savedEntities;
     public long[] deletedIds;
     private final Class<TEntity> classOfEntity;
-
     public MockDatabaseRepository(Class<TEntity> classOfEntity) {
         super(classOfEntity, null);
         this.classOfEntity = classOfEntity;
@@ -25,8 +24,8 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
 
     public SQLException saveException;
 
-
     public SaveAction<TEntity> onSaving;
+
 
     @Override
     public TEntity save(TEntity entity) throws SQLException {
@@ -50,9 +49,11 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
         throw new AssertionError("Unknown entity " + classOfEntity + " ' id=" + id + "'.");
     }
 
+    public List<TEntity> all = new ArrayList<>();
+
     @Override
     public List<TEntity> getAll() throws SQLException {
-        return super.getAll();
+        return all;
     }
 
     @Override

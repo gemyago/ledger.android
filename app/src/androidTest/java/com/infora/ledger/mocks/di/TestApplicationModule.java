@@ -35,6 +35,7 @@ public class TestApplicationModule {
     public DeviceSecretProvider deviceSecretProvider;
     public AccountManagerWrapper accountManagerWrapper;
     public TransactionsReadModel transactionsReadModel;
+    public DatabaseContext databaseContext;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -87,5 +88,9 @@ public class TestApplicationModule {
 
     @Provides TransactionsReadModel provideTransactionsReadModel() {
         return transactionsReadModel;
+    }
+
+    @Provides DatabaseContext provideDatabaseContext() {
+        return databaseContext;
     }
 }

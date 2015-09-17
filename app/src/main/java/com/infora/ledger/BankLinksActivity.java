@@ -1,10 +1,11 @@
 package com.infora.ledger;
 
 import android.app.LoaderManager;
-import android.content.CursorLoader;
+import android.content.AsyncTaskLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -26,7 +27,11 @@ import com.infora.ledger.application.events.BankLinksDeletedEvent;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.data.BankLink;
+import com.infora.ledger.data.DatabaseContext;
+import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.support.EventHandler;
+
+import java.sql.SQLException;
 
 import javax.inject.Inject;
 
@@ -44,6 +49,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     private SimpleCursorAdapter bankLinksAdapter;
     @Bind(R.id.bank_links_list) ListView lvBankLinks;
     @Inject EventBus bus;
+    @Inject DatabaseContext db;
     ListView.MultiChoiceModeListener bankLinksChoiceListener;
 
     @Override
@@ -73,7 +79,6 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
                 startActivity(intent);
             }
         });
-
 
         getLoaderManager().initLoader(BANK_LINKS_LOADER_ID, null, this);
     }
@@ -138,7 +143,24 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (BANK_LINKS_LOADER_ID == id) {
-            return new CursorLoader(this, BankLinks.CONTENT_URI, null, null, null, null);
+            return new AsyncTaskLoader<Cursor>(this) {
+                @Override protected void onStartLoading() {
+                    forceLoad();
+                }
+
+                @Override public Cursor loadInBackground() {
+                    DatabaseRepository<BankLink> repo = db.createRepository(BankLink.class);
+                    MatrixCursor result = new MatrixCursor(new String[]{BankLinks._ID, BankLinks.COLUMN_BIC, BankLinks.COLUMN_ACCOUNT_NAME});
+                    try {
+                        for (BankLink link : repo.getAll()) {
+                            result.addRow(new Object[]{link.id, link.bic, link.accountName});
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return result;
+                }
+            };
         } else {
             return null;
         }

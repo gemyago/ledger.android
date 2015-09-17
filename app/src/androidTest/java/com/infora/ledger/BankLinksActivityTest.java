@@ -1,24 +1,21 @@
 package com.infora.ledger;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.test.RenamingDelegatingContext;
 import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.data.BanksContentProvider;
-import com.infora.ledger.data.DatabaseContext;
-import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockActionMode;
+import com.infora.ledger.mocks.MockDatabaseContext;
+import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -33,7 +30,7 @@ import de.greenrobot.event.EventBus;
 public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<BankLinksActivity> {
 
     @Inject EventBus bus;
-    private DatabaseRepository<BankLink> repo;
+    private MockDatabaseRepository<BankLink> repo;
 
     public BankLinksActivityTest() {
         super(BankLinksActivity.class);
@@ -49,33 +46,26 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     public void setUp() throws Exception {
         super.setUp();
 
-        final RenamingDelegatingContext renamingContext = new RenamingDelegatingContext(
-                getInstrumentation().getTargetContext(), "bank-links-activity-test") {
-            MockLedgerApplication mockLedgerApplication;
-
-            @Override
-            public Context getApplicationContext() {
-                if (mockLedgerApplication == null)
-                    mockLedgerApplication = new MockLedgerApplication(this);
-                return mockLedgerApplication;
-            }
-        };
-        MockLedgerApplication app = (MockLedgerApplication) renamingContext.getApplicationContext();
-        app.withMockContentProvider(BanksContentProvider.AUTHORITY, new BanksContentProvider());
+        MockLedgerApplication app = new MockLedgerApplication(getInstrumentation().getTargetContext())
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        module.databaseContext = new MockDatabaseContext()
+                                .addMockRepo(BankLink.class, repo = new MockDatabaseRepository(BankLink.class));
+                    }
+                });
         app.injector().inject(this);
-        setApplication(app);
-        setActivityContext(renamingContext);
-
+        setActivityContext(app);
         startActivity(new Intent(), null, null);
-
-        repo = new DatabaseContext(getActivity()).createRepository(BankLink.class);
-        DbUtils.deleteAllDatabases(getActivity());
     }
 
     public void testBankLinksLoaded() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link1 = new BankLink().setId(101).setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date());
+        BankLink link2 = new BankLink().setId(102).setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date());
+        BankLink link3 = new BankLink().setId(103).setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date());
+
+        repo.all.add(link1);
+        repo.all.add(link2);
+        repo.all.add(link3);
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
@@ -85,14 +75,26 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
         ListView bankLinksList = (ListView) getActivity().findViewById(R.id.bank_links_list);
         assertEquals(3, bankLinksList.getAdapter().getCount());
 
-        assertEquals(link1, new BankLink((Cursor) bankLinksList.getAdapter().getItem(0)));
-        assertEquals(link2, new BankLink((Cursor) bankLinksList.getAdapter().getItem(1)));
-        assertEquals(link3, new BankLink((Cursor) bankLinksList.getAdapter().getItem(2)));
+        Cursor cursor1 = (Cursor) bankLinksList.getAdapter().getItem(0);
+        assertEquals(link1.id, cursor1.getInt(cursor1.getColumnIndexOrThrow(BanksContract.BankLinks._ID)));
+        assertEquals(link1.bic, cursor1.getString(cursor1.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_BIC)));
+        assertEquals(link1.accountName, cursor1.getString(cursor1.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_ACCOUNT_NAME)));
+
+        Cursor cursor2 = (Cursor) bankLinksList.getAdapter().getItem(1);
+        assertEquals(link2.id, cursor2.getInt(cursor2.getColumnIndexOrThrow(BanksContract.BankLinks._ID)));
+        assertEquals(link2.bic, cursor2.getString(cursor2.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_BIC)));
+        assertEquals(link2.accountName, cursor2.getString(cursor2.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_ACCOUNT_NAME)));
+
+        Cursor cursor3 = (Cursor) bankLinksList.getAdapter().getItem(2);
+        assertEquals(link3.id, cursor3.getInt(cursor3.getColumnIndexOrThrow(BanksContract.BankLinks._ID)));
+        assertEquals(link3.bic, cursor3.getString(cursor3.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_BIC)));
+        assertEquals(link3.accountName, cursor3.getString(cursor3.getColumnIndexOrThrow(BanksContract.BankLinks.COLUMN_ACCOUNT_NAME)));
     }
 
     public void testEditBankLink() throws SQLException {
-        repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
         BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(link2);
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
@@ -109,16 +111,19 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testDeleteBankLinks() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link1 = repo.save(new BankLink().setId(100).setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(link1);
+        repo.all.add(new BankLink().setId(101).setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link3 = repo.save(new BankLink().setId(102).setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(link3);
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();
 
-        ListView bankLinksList = (ListView) getActivity().findViewById(R.id.bank_links_list);
+        ListView bankLinksList = getActivity().lvBankLinks;
+        assertEquals(3, bankLinksList.getCount());
         bankLinksList.setItemChecked(0, true);
         bankLinksList.setItemChecked(2, true);
 
@@ -134,9 +139,11 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testFetchTransactions() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        BankLink link3 = repo.save(new BankLink().setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link1 = repo.save(new BankLink().setId(100).setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(link1);
+        repo.all.add(new BankLink().setId(101).setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link3 = repo.save(new BankLink().setId(102).setBic("bank-3").setAccountId("account-3").setAccountName("Account 3").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        repo.all.add(link3);
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
@@ -157,8 +164,11 @@ public class BankLinksActivityTest extends android.test.ActivityUnitTestCase<Ban
     }
 
     public void testFetchAllTransactions() throws SQLException {
-        BankLink link1 = repo.save(new BankLink().setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
-        BankLink link2 = repo.save(new BankLink().setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link1 = repo.save(new BankLink().setId(101).setBic("bank-1").setAccountId("account-1").setAccountName("Account 1").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+        BankLink link2 = repo.save(new BankLink().setId(102).setBic("bank-2").setAccountId("account-2").setAccountName("Account 2").setLinkDataValue("dummy").setLastSyncDate(new Date()));
+
+        repo.all.add(link1);
+        repo.all.add(link2);
 
         BarrierSubscriber<BankLinksActivity.BankLinksLoaded> barrier = new BarrierSubscriber<>(BankLinksActivity.BankLinksLoaded.class);
         bus.register(barrier);
