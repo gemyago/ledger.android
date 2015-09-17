@@ -14,6 +14,8 @@ import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.PendingTransaction;
 
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
 
@@ -33,9 +35,11 @@ public class PendingTransactionsService {
     public void onEventBackgroundThread(ReportTransactionCommand command) throws SQLException {
         Log.d(TAG, "Reporting new transaction");
         PendingTransaction transaction = repo.save(new PendingTransaction()
+                .setTransactionId(UUID.randomUUID().toString())
                 .setAccountId(command.accountId)
                 .setAmount(command.amount)
-                .setComment(command.comment));
+                .setComment(command.comment)
+                .setTimestamp(new Date()));
         bus.post(new TransactionReportedEvent(transaction.id));
     }
 

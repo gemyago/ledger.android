@@ -46,6 +46,8 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         subject.onEventBackgroundThread(new ReportTransactionCommand("account-100", "100.01", "Comment 100.01"));
         assertEquals(1, repo.savedEntities.size());
         PendingTransaction transaction = repo.savedEntities.get(0);
+        assertNotNull(transaction.transactionId);
+        assertNotNull(transaction.timestamp);
         assertEquals("account-100", transaction.accountId);
         assertEquals("100.01", transaction.amount);
         assertEquals("Comment 100.01", transaction.comment);
