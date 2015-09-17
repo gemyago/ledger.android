@@ -1,6 +1,7 @@
 package com.infora.ledger;
 
 import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.CursorWrapper;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -33,9 +35,13 @@ import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 import com.infora.ledger.support.SharedPreferencesUtil;
+
+import java.sql.SQLException;
 
 import javax.inject.Inject;
 
@@ -54,6 +60,7 @@ public class ReportActivity extends AppCompatActivity {
     @Bind(R.id.report) Button report;
 
     @Inject EventBus bus;
+    @Inject TransactionsReadModel transactionsReadModel;
 
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
@@ -209,12 +216,26 @@ public class ReportActivity extends AppCompatActivity {
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            return new CursorLoader(ReportActivity.this,
-                    TransactionContract.CONTENT_URI,
-                    null,
-                    TransactionContract.COLUMN_IS_DELETED + " = 0",
-                    null,
-                    TransactionContract.COLUMN_TIMESTAMP + " DESC");
+            return new AsyncTaskLoader<Cursor>(ReportActivity.this) {
+                @Override protected void onStartLoading() {
+                    forceLoad();
+                }
+
+                @Override public Cursor loadInBackground() {
+                    Log.d(TAG, "Loading transactions....");
+                    final MatrixCursor cursor = new MatrixCursor(new String[]{
+                            TransactionContract.COLUMN_ID, TransactionContract.COLUMN_AMOUNT, TransactionContract.COLUMN_COMMENT
+                    });
+                    try {
+                        for (PendingTransaction transaction : transactionsReadModel.getTransactions()) {
+                            cursor.addRow(new Object[] { transaction.getId(), transaction.amount, transaction.comment });
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return cursor;
+                }
+            };
         }
 
         @Override

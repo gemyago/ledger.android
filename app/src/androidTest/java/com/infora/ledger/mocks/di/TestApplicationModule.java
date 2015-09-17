@@ -1,6 +1,5 @@
 package com.infora.ledger.mocks.di;
 
-import android.accounts.AccountManager;
 import android.app.Application;
 import android.content.Context;
 
@@ -8,10 +7,9 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
-import com.infora.ledger.application.di.ApplicationModule;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
-import com.infora.ledger.mocks.MockAccountManagerWrapper;
+import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
@@ -36,6 +34,7 @@ public class TestApplicationModule {
     public LedgerAccountsLoader.Factory ledgerAccountsLoaderFactory;
     public DeviceSecretProvider deviceSecretProvider;
     public AccountManagerWrapper accountManagerWrapper;
+    public TransactionsReadModel transactionsReadModel;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -46,11 +45,13 @@ public class TestApplicationModule {
         return app;
     }
 
-    @Provides @Singleton PendingTransactionsService providePendingTransactionsService(Context context, EventBus bus) {
+    @Provides @Singleton
+    PendingTransactionsService providePendingTransactionsService(Context context, EventBus bus) {
         return new PendingTransactionsService(context, bus);
     }
 
-    @Provides @Singleton BankLinksService provideBankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
+    @Provides @Singleton
+    BankLinksService provideBankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
         return new BankLinksService(bus, db, secretProvider);
     }
 
@@ -82,5 +83,9 @@ public class TestApplicationModule {
 
     @Provides AccountManagerWrapper provideAccountManagerWrapper() {
         return accountManagerWrapper;
+    }
+
+    @Provides TransactionsReadModel provideTransactionsReadModel() {
+        return transactionsReadModel;
     }
 }

@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Created by jenya on 09.06.15.
  */
@@ -22,7 +24,7 @@ public class TransactionsReadModel {
 
     private final LedgerDbHelper dbHelper;
 
-    public TransactionsReadModel(Context context) {
+    @Inject public TransactionsReadModel(Context context) {
         dbHelper = new LedgerDbHelper(context);
     }
 

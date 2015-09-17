@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.test.mock.MockContentResolver;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
@@ -19,6 +21,8 @@ import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.MockTransactionsReadModel;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
 import java.util.concurrent.BrokenBarrierException;
@@ -33,7 +37,7 @@ import de.greenrobot.event.EventBus;
 public class ReportActivityTest extends android.test.ActivityUnitTestCase<ReportActivity> {
 
     @Inject EventBus bus;
-    private MockPendingTransactionsContentProvider mockProvider;
+    private MockTransactionsReadModel transactionsReadModel;
 
     public ReportActivityTest() {
         super(ReportActivity.class);
@@ -52,16 +56,45 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         SharedPreferences.Editor edit = SharedPreferencesUtil.getDefaultSharedPreferences(baseContext).edit();
         edit.remove(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID).commit();
 
-        final MockLedgerApplication app = new MockLedgerApplication(baseContext);
+        final MockLedgerApplication app = new MockLedgerApplication(baseContext)
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        module.transactionsReadModel = transactionsReadModel = new MockTransactionsReadModel();
+                    }
+                });
         app.injector().inject(this);
-        MockContentResolver mockContentResolver = new MockContentResolver(app);
-        mockProvider = new MockPendingTransactionsContentProvider(app);
-        app.withMockContentProvider(TransactionContract.AUTHORITY, mockProvider);
-        mockContentResolver.addProvider(TransactionContract.AUTHORITY, mockProvider);
-        app.mockContentResolver = mockContentResolver;
         setActivityContext(app);
         startActivity(new Intent(), null, null);
         getActivity().doNotCallRequestSync = true;
+    }
+
+    public void testTransactionsLoaded() {
+        transactionsReadModel
+                .injectAnd(new PendingTransaction(1, "100", "Comment 100"))
+                .injectAnd(new PendingTransaction(2, "101", "Comment 101"))
+                .injectAnd(new PendingTransaction(3, "102", "Comment 102"));
+
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        ListAdapter adapter = getActivity().lvReportedTransactions.getAdapter();
+        assertEquals(3, adapter.getCount());
+        Cursor t1 = (Cursor) adapter.getItem(0);
+        assertEquals(1, t1.getInt(t1.getColumnIndexOrThrow(TransactionContract._ID)));
+        assertEquals("100", t1.getString(t1.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
+        assertEquals("Comment 100", t1.getString(t1.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT)));
+
+        Cursor t2 = (Cursor) adapter.getItem(1);
+        assertEquals(2, t2.getInt(t2.getColumnIndexOrThrow(TransactionContract._ID)));
+        assertEquals("101", t2.getString(t2.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
+        assertEquals("Comment 101", t2.getString(t2.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT)));
+
+        Cursor t3 = (Cursor) adapter.getItem(2);
+        assertEquals(3, t3.getInt(t3.getColumnIndexOrThrow(TransactionContract._ID)));
+        assertEquals("102", t3.getString(t3.getColumnIndexOrThrow(TransactionContract.COLUMN_AMOUNT)));
+        assertEquals("Comment 102", t3.getString(t3.getColumnIndexOrThrow(TransactionContract.COLUMN_COMMENT)));
     }
 
     public void testRequestSyncOnStart() {
@@ -166,11 +199,11 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testDeleteAction() throws BrokenBarrierException, InterruptedException {
-        mockProvider.setQueryResult(
-                new PendingTransaction(1, "100", "Comment 100"),
-                new PendingTransaction(2, "101", "Comment 101"),
-                new PendingTransaction(3, "102", "Comment 102")
-        );
+        transactionsReadModel
+                .injectAnd(new PendingTransaction(1, "100", "Comment 100"))
+                .injectAnd(new PendingTransaction(2, "101", "Comment 101"))
+                .injectAnd(new PendingTransaction(3, "102", "Comment 102"));
+
         BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
         getInstrumentation().callActivityOnStart(getActivity());
