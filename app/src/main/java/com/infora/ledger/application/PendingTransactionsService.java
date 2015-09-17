@@ -2,6 +2,7 @@ package com.infora.ledger.application;
 
 import android.util.Log;
 
+import com.infora.ledger.TransactionContract;
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
@@ -36,6 +37,7 @@ public class PendingTransactionsService {
         Log.d(TAG, "Reporting new transaction");
         PendingTransaction transaction = repo.save(new PendingTransaction()
                 .setTransactionId(UUID.randomUUID().toString())
+                .setTypeId(TransactionContract.TRANSACTION_TYPE_EXPENSE)
                 .setAccountId(command.accountId)
                 .setAmount(command.amount)
                 .setComment(command.comment)
