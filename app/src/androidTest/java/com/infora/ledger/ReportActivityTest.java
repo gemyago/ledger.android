@@ -181,6 +181,12 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testTransactionReportedEvent() {
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+
         MockSubscriber<ReportTransactionCommand> subscriber = new MockSubscriber<>(ReportTransactionCommand.class);
         bus.register(subscriber);
         Window wnd = getActivity().getWindow();
@@ -191,7 +197,10 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         View reportButton = wnd.findViewById(R.id.report);
         reportButton.setEnabled(false);
 
+        barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
         getActivity().onEventMainThread(new TransactionReportedEvent(100));
+        barrier.await();
 
         assertEquals("", amount.getText().toString());
         assertEquals("", comment.getText().toString());

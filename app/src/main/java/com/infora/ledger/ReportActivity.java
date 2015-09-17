@@ -182,6 +182,8 @@ public class ReportActivity extends AppCompatActivity {
         comment.setText("");
 
         Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
+
+        getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
     }
 
     @EventHandler
