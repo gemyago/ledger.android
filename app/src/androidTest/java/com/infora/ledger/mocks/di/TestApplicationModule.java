@@ -10,6 +10,8 @@ import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.TransactionsReadModel;
+import com.infora.ledger.mocks.MockAccountManagerWrapper;
+import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
@@ -83,7 +85,7 @@ public class TestApplicationModule {
     }
 
     @Provides AccountManagerWrapper provideAccountManagerWrapper() {
-        return accountManagerWrapper;
+        return accountManagerWrapper == null ? new MockAccountManagerWrapper(app) : accountManagerWrapper;
     }
 
     @Provides TransactionsReadModel provideTransactionsReadModel() {
@@ -91,6 +93,6 @@ public class TestApplicationModule {
     }
 
     @Provides DatabaseContext provideDatabaseContext() {
-        return databaseContext;
+        return databaseContext == null ? new MockDatabaseContext() : databaseContext;
     }
 }
