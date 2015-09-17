@@ -14,7 +14,9 @@ import android.widget.ListView;
 
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
+import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
@@ -207,6 +209,18 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertTrue("The report button was not enabled", reportButton.isEnabled());
     }
 
+    public void testTransactionAdjusted() {
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getActivity().onEventMainThread(new TransactionAdjusted(100));
+        barrier.await();
+    }
+
     public void testDeleteAction() throws BrokenBarrierException, InterruptedException {
         transactionsReadModel
                 .injectAnd(new PendingTransaction(1, "100", "Comment 100"))
@@ -230,5 +244,17 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertEquals(2, deletedIds.length);
         assertEquals(1, deletedIds[0]);
         assertEquals(3, deletedIds[1]);
+    }
+
+    public void testTransactionsDeletedEvent() {
+        BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getInstrumentation().callActivityOnStart(getActivity());
+        barrier.await();
+
+        barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
+        bus.register(barrier);
+        getActivity().onEventMainThread(new TransactionsDeletedEvent(100));
+        barrier.await();
     }
 }

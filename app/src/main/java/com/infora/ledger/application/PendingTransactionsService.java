@@ -6,6 +6,7 @@ import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.data.DatabaseContext;
@@ -54,6 +55,7 @@ public class PendingTransactionsService {
         transaction.amount = command.amount;
         transaction.comment = command.comment;
         repo.save(transaction);
+        bus.post(new TransactionAdjusted(command.id));
     }
 
     public void onEvent(MarkTransactionAsPublishedCommand command) throws SQLException {

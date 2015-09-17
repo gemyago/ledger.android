@@ -7,6 +7,7 @@ import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
+import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.data.PendingTransaction;
@@ -65,11 +66,15 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     public void testAdjustTransactionCommand() throws SQLException {
         PendingTransaction transaction = new PendingTransaction().setId(10311);
         repo.entitiesToGetById.add(transaction);
+        MockSubscriber<TransactionAdjusted> adjustedSubscriber = new MockSubscriber<>(TransactionAdjusted.class);
+        bus.register(adjustedSubscriber);
         subject.onEventBackgroundThread(new AdjustTransactionCommand(10311, "100.01", "Comment 100.01"));
         assertEquals(1, repo.savedEntities.size());
         assertTrue(repo.savedEntities.contains(transaction));
         assertEquals("100.01", transaction.amount);
         assertEquals("Comment 100.01", transaction.comment);
+        assertEquals(1, adjustedSubscriber.getEvents().size());
+        assertEquals(transaction.id, adjustedSubscriber.getEvent().id);
     }
 
     public void testMarkTransactionAsPublished() throws SQLException {

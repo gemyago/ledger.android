@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.di.DiUtils;
+import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.data.PendingTransaction;
@@ -183,7 +184,11 @@ public class ReportActivity extends AppCompatActivity {
 
         Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
 
-        getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
+        restartTransactionsLoader();
+    }
+
+    public void onEventMainThread(TransactionAdjusted event) {
+        restartTransactionsLoader();
     }
 
     @EventHandler
@@ -191,6 +196,11 @@ public class ReportActivity extends AppCompatActivity {
         int removedLength = event.getIds().length;
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
+        restartTransactionsLoader();
+    }
+
+    private void restartTransactionsLoader() {
+        getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
     }
 
     protected boolean doNotCallRequestSync = false;
