@@ -46,8 +46,8 @@ public class TestApplicationModule {
     }
 
     @Provides @Singleton
-    PendingTransactionsService providePendingTransactionsService(Context context, EventBus bus) {
-        return new PendingTransactionsService(context, bus);
+    PendingTransactionsService providePendingTransactionsService(DatabaseContext db, EventBus bus) {
+        return new PendingTransactionsService(db, bus);
     }
 
     @Provides @Singleton
@@ -60,7 +60,7 @@ public class TestApplicationModule {
     }
 
     @Provides @Singleton
-    public GooglePlayServicesUtilWrapper provideGooglePlayServicesUtilWrapper(Context context) {
+    public GooglePlayServicesUtilWrapper provideGooglePlayServicesUtilWrapper() {
         if (googlePlayServicesUtilWrapper == null) return new GooglePlayServicesUtilWrapper();
         return googlePlayServicesUtilWrapper;
     }

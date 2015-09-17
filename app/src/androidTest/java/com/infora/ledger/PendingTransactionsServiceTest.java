@@ -1,24 +1,21 @@
 package com.infora.ledger;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.test.ProviderTestCase2;
-import android.test.mock.MockContentResolver;
 
+import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
-import com.infora.ledger.application.PendingTransactionsService;
-import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
-import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.application.events.TransactionReportedEvent;
-import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.mocks.MockDatabaseContext;
+import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
+import com.infora.ledger.mocks.MockSubscriber;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,10 +23,8 @@ import de.greenrobot.event.EventBus;
  * Created by jenya on 10.03.15.
  */
 public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendingTransactionsContentProvider> {
-
-    private MockContentResolver resolver;
-    private MockPendingTransactionsContentProvider provider;
     private PendingTransactionsService subject;
+    private MockDatabaseRepository<PendingTransaction> repo;
     private EventBus bus;
 
     public PendingTransactionsServiceTest() {
@@ -39,77 +34,76 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        resolver = getMockContentResolver();
-        provider = getProvider();
         bus = new EventBus();
-        final LedgerApplication app = new LedgerApplication() {
-            @Override
-            public ContentResolver getContentResolver() {
-                return resolver;
-            }
-        }.setBus(bus);
-        subject = new PendingTransactionsService(new ContextWrapper(app) {
-            @Override
-            public Context getApplicationContext() {
-                return app;
-            }
-        }, bus);
+        MockDatabaseContext db = new MockDatabaseContext();
+        repo = new MockDatabaseRepository<>(PendingTransaction.class);
+        db.addMockRepo(PendingTransaction.class, repo);
+        subject = new PendingTransactionsService(db, bus);
     }
 
-    public void testReportPendingTransaction() {
+    public void testReportPendingTransaction() throws SQLException {
         subject.onEventBackgroundThread(new ReportTransactionCommand("account-100", "100.01", "Comment 100.01"));
-        assertEquals(TransactionContract.CONTENT_URI, provider.getInsertArgs().getUri());
-        assertEquals(3, provider.getInsertArgs().getValues().size());
-        assertEquals("account-100", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_ACCOUNT_ID));
-        assertEquals("100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_AMOUNT));
-        assertEquals("Comment 100.01", provider.getInsertArgs().getValues().getAsString(TransactionContract.COLUMN_COMMENT));
+        assertEquals(1, repo.savedEntities.size());
+        PendingTransaction transaction = repo.savedEntities.get(0);
+        assertEquals("account-100", transaction.accountId);
+        assertEquals("100.01", transaction.amount);
+        assertEquals("Comment 100.01", transaction.comment);
     }
 
-    public void testReportPendingTransactionRaisesReportedEvent() {
+    public void testReportPendingTransactionRaisesReportedEvent() throws SQLException {
         MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>(TransactionReportedEvent.class);
         bus.register(subscriber);
-        provider.setInsertedUri(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 100));
+        repo.onSaving = new MockDatabaseRepository.SaveAction<PendingTransaction>() {
+            @Override public void save(PendingTransaction pendingTransaction) {
+                pendingTransaction.id = 100;
+            }
+        };
         subject.onEventBackgroundThread(new ReportTransactionCommand(null, "100.01", "Comment 100.01"));
         assertEquals(100, subscriber.getEvent().getId());
     }
 
-    public void testAdjustTransactionCommand() {
+    public void testAdjustTransactionCommand() throws SQLException {
+        PendingTransaction transaction = new PendingTransaction().setId(10311);
+        repo.entitiesToGetById.add(transaction);
         subject.onEventBackgroundThread(new AdjustTransactionCommand(10311, "100.01", "Comment 100.01"));
-        MockPendingTransactionsContentProvider.UpdateArgs updateArgs = provider.getUpdateArgs();
-        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 10311), updateArgs.uri);
-        assertEquals(2, updateArgs.values.size());
-        assertEquals("100.01", updateArgs.values.getAsString(TransactionContract.COLUMN_AMOUNT));
-        assertEquals("Comment 100.01", updateArgs.values.getAsString(TransactionContract.COLUMN_COMMENT));
+        assertEquals(1, repo.savedEntities.size());
+        assertTrue(repo.savedEntities.contains(transaction));
+        assertEquals("100.01", transaction.amount);
+        assertEquals("Comment 100.01", transaction.comment);
     }
 
-    public void testMarkTransactionAsPublished() {
+    public void testMarkTransactionAsPublished() throws SQLException {
+        PendingTransaction transaction = new PendingTransaction().setId(3321);
+        repo.entitiesToGetById.add(transaction);
         subject.onEvent(new MarkTransactionAsPublishedCommand(3321L));
-        MockPendingTransactionsContentProvider.UpdateArgs updateArgs = provider.getUpdateArgs();
-        assertNotNull(provider.getUpdateArgs());
-        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L), updateArgs.uri);
-        assertEquals(true, (boolean) updateArgs.values.getAsBoolean(TransactionContract.COLUMN_IS_PUBLISHED));
+        assertEquals(1, repo.savedEntities.size());
+        assertTrue(repo.savedEntities.contains(transaction));
+        assertTrue(transaction.isPublished);
     }
 
-    public void testDeleteTransactions() {
+    public void testDeleteTransactions() throws SQLException {
+        PendingTransaction t1 = new PendingTransaction().setId(3321);
+        PendingTransaction t2 = new PendingTransaction().setId(3322);
+        PendingTransaction t3 = new PendingTransaction().setId(3323);
+        repo.entitiesToGetById.add(t1);
+        repo.entitiesToGetById.add(t2);
+        repo.entitiesToGetById.add(t3);
         MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>(TransactionsDeletedEvent.class);
         bus.register(deletedSubscriber);
 
         DeleteTransactionsCommand command = new DeleteTransactionsCommand(3321L, 3322L, 3323L);
         subject.onEventBackgroundThread(command);
-        ArrayList<MockPendingTransactionsContentProvider.UpdateArgs> allUpdateArgs = provider.getAllUpdateArgs();
-        assertEquals(3, allUpdateArgs.size());
 
-        for (int i = 0; i < allUpdateArgs.size(); i++) {
-            MockPendingTransactionsContentProvider.UpdateArgs updateArgs = allUpdateArgs.get(i);
-            assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L + i), updateArgs.uri);
-            assertEquals(true, (boolean) updateArgs.values.getAsBoolean(TransactionContract.COLUMN_IS_DELETED));
-        }
+        assertEquals(3, repo.savedEntities.size());
+        assertTrue(repo.savedEntities.contains(t1));
+        assertTrue(repo.savedEntities.contains(t2));
+        assertTrue(repo.savedEntities.contains(t3));
+
+        assertTrue(t1.isDeleted);
+        assertTrue(t2.isDeleted);
+        assertTrue(t3.isDeleted);
+
         assertEquals(1, deletedSubscriber.getEvents().size());
-        assertEquals(command.getIds(), deletedSubscriber.getEvent().getIds());
-    }
-
-    public void testPurgeTransactions() {
-        subject.onEventBackgroundThread(new PurgeTransactionsCommand(3321L));
-        assertEquals(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, 3321L), provider.getDeleteArgs().getUri());
+        assertEquals(command.ids, deletedSubscriber.getEvent().getIds());
     }
 }

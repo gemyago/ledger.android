@@ -93,7 +93,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                 .setAccountId(selectedAccount.id)
                 .setLinkData(bic1Data, secret);
         mockBankLinksRepo = new MockDatabaseRepository(BankLink.class);
-        mockBankLinksRepo.entityToGetById = bankLink;
+        mockBankLinksRepo.entitiesToGetById.add(bankLink);
 
         MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-1", null, secret);
         MockBankLinkFragment.registerMockFragment(fragmentsFactory, "bic-2", null, secret);

@@ -78,9 +78,9 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         assertEquals(t3, reported3);
 
         assertEquals(3, publishedSubscriber.getEvents().size());
-        assertEquals(1, publishedSubscriber.getEvents().get(0).getId());
-        assertEquals(2, publishedSubscriber.getEvents().get(1).getId());
-        assertEquals(3, publishedSubscriber.getEvents().get(2).getId());
+        assertEquals(1, publishedSubscriber.getEvents().get(0).id);
+        assertEquals(2, publishedSubscriber.getEvents().get(1).id);
+        assertEquals(3, publishedSubscriber.getEvents().get(2).id);
     }
 
     public void testSynchronizeRemoveLocallyRemoved() throws SQLException {
@@ -142,9 +142,9 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         subject.synchronize(api, null, syncResult);
 
         assertEquals(1, deleteSubscriber.getEvents().size());
-        assertEquals(3, deleteSubscriber.getEvent().getIds().length);
-        assertEquals(100, deleteSubscriber.getEvent().getIds()[0]);
-        assertEquals(101, deleteSubscriber.getEvent().getIds()[1]);
-        assertEquals(102, deleteSubscriber.getEvent().getIds()[2]);
+        assertEquals(3, deleteSubscriber.getEvent().ids.length);
+        assertEquals(100, deleteSubscriber.getEvent().ids[0]);
+        assertEquals(101, deleteSubscriber.getEvent().ids[1]);
+        assertEquals(102, deleteSubscriber.getEvent().ids[2]);
     }
 }

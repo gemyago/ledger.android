@@ -1,21 +1,18 @@
 package com.infora.ledger.application;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 
-import com.infora.ledger.TransactionContract;
 import com.infora.ledger.application.commands.AdjustTransactionCommand;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
-import com.infora.ledger.application.commands.PurgeTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
-import com.infora.ledger.support.BusUtils;
+import com.infora.ledger.data.DatabaseContext;
+import com.infora.ledger.data.DatabaseRepository;
+import com.infora.ledger.data.PendingTransaction;
+
+import java.sql.SQLException;
 
 import de.greenrobot.event.EventBus;
 
@@ -24,61 +21,45 @@ import de.greenrobot.event.EventBus;
  */
 public class PendingTransactionsService {
     private static final String TAG = PendingTransactionsService.class.getName();
-    private ContentResolver resolver;
+    private final DatabaseRepository<PendingTransaction> repo;
     private EventBus bus;
 
-    public PendingTransactionsService(Context context, EventBus bus) {
-        this.resolver = context.getContentResolver();
+    public PendingTransactionsService(DatabaseContext db, EventBus bus) {
+        repo = db.createRepository(PendingTransaction.class);
         this.bus = bus;
     }
 
-    public void onEventBackgroundThread(ReportTransactionCommand command) {
+    public void onEventBackgroundThread(ReportTransactionCommand command) throws SQLException {
         Log.d(TAG, "Reporting new transaction");
-        ContentValues values = new ContentValues();
-        values.put(TransactionContract.COLUMN_ACCOUNT_ID, command.accountId);
-        values.put(TransactionContract.COLUMN_AMOUNT, command.getAmount());
-        values.put(TransactionContract.COLUMN_COMMENT, command.getComment());
-
-        Uri uri = resolver.insert(TransactionContract.CONTENT_URI, values);
-        bus.post(new TransactionReportedEvent(ContentUris.parseId(uri)));
+        PendingTransaction transaction = repo.save(new PendingTransaction()
+                .setAccountId(command.accountId)
+                .setAmount(command.amount)
+                .setComment(command.comment));
+        bus.post(new TransactionReportedEvent(transaction.id));
     }
 
-    public void onEventBackgroundThread(DeleteTransactionsCommand command) {
-        Log.d(TAG, "Marking transactions as deleted. Count: " + command.getIds().length);
-        for (long id : command.getIds()) {
-            ContentValues values = new ContentValues();
-            values.put(TransactionContract.COLUMN_IS_DELETED, true);
-            resolver.update(
-                    ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id),
-                    values, null, null);
-
+    public void onEventBackgroundThread(DeleteTransactionsCommand command) throws SQLException {
+        Log.d(TAG, "Marking transactions as deleted. Count: " + command.ids.length);
+        for (long id : command.ids) {
+            PendingTransaction transaction = repo.getById(id);
+            transaction.isDeleted = true;
+            repo.save(transaction);
         }
-        bus.post(new TransactionsDeletedEvent(command.getIds()));
+        bus.post(new TransactionsDeletedEvent(command.ids));
     }
 
-    public void onEventBackgroundThread(AdjustTransactionCommand command) {
+    public void onEventBackgroundThread(AdjustTransactionCommand command) throws SQLException {
         Log.d(TAG, "Adjusting transaction.");
-        ContentValues values = new ContentValues();
-        values.put(TransactionContract.COLUMN_AMOUNT, command.amount);
-        values.put(TransactionContract.COLUMN_COMMENT, command.comment);
-        resolver.update(
-                ContentUris.withAppendedId(TransactionContract.CONTENT_URI, command.id),
-                values, null, null);
+        PendingTransaction transaction = repo.getById(command.id);
+        transaction.amount = command.amount;
+        transaction.comment = command.comment;
+        repo.save(transaction);
     }
 
-    public void onEventBackgroundThread(PurgeTransactionsCommand command) {
-        Log.d(TAG, "Purging transactions. Count: " + command.getIds().length);
-        for (long id : command.getIds()) {
-            resolver.delete(ContentUris.withAppendedId(TransactionContract.CONTENT_URI, id), null, null);
-        }
-    }
-
-    public void onEvent(MarkTransactionAsPublishedCommand command) {
+    public void onEvent(MarkTransactionAsPublishedCommand command) throws SQLException {
         Log.d(TAG, "Processing mark as published command.");
-        ContentValues values = new ContentValues();
-        values.put(TransactionContract.COLUMN_IS_PUBLISHED, true);
-        resolver.update(
-                ContentUris.withAppendedId(TransactionContract.CONTENT_URI, command.getId()),
-                values, null, null);
+        PendingTransaction transaction = repo.getById(command.id);
+        transaction.isPublished = true;
+        repo.save(transaction);
     }
 }

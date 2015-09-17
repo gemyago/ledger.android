@@ -226,7 +226,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         bus.register(deleteHandler);
         getActivity().findViewById(R.id.menu_delete).callOnClick();
         assertNotNull(deleteHandler.getEvent());
-        long[] deletedIds = deleteHandler.getEvent().getIds();
+        long[] deletedIds = deleteHandler.getEvent().ids;
         assertEquals(2, deletedIds.length);
         assertEquals(1, deletedIds[0]);
         assertEquals(3, deletedIds[1]);

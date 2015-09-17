@@ -5,8 +5,8 @@ package com.infora.ledger.application.commands;
  */
 public class ReportTransactionCommand {
     public String accountId;
-    private String amount;
-    private String comment;
+    public String amount;
+    public String comment;
 
     public ReportTransactionCommand(String accountId, String amount, String comment) {
         this.accountId = accountId;

@@ -3,6 +3,7 @@ package com.infora.ledger.mocks;
 import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.Entity;
 
+import java.lang.reflect.Array;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,11 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
 
     public final ArrayList<TEntity> savedEntities;
     public long[] deletedIds;
+    private final Class<TEntity> classOfEntity;
 
     public MockDatabaseRepository(Class<TEntity> classOfEntity) {
         super(classOfEntity, null);
+        this.classOfEntity = classOfEntity;
         savedEntities = new ArrayList<>();
     }
 
@@ -33,16 +36,18 @@ public class MockDatabaseRepository<TEntity extends Entity> extends DatabaseRepo
         return entity;
     }
 
-    public TEntity entityToGetById;
+    public final ArrayList<TEntity> entitiesToGetById = new ArrayList<>();
 
     @Override
     public TEntity getById(long id) throws SQLException {
-        if (entityToGetById == null)
-            throw new AssertionError("BankLink was not assigned.");
+        if (entitiesToGetById.size() == 0)
+            throw new AssertionError("Entities were not assigned.");
 
-        if (entityToGetById.getId() != id)
-            throw new AssertionError("Wrong BankLink id provided. Expected '" + entityToGetById.getId() + "', was '" + id + "'.");
-        return entityToGetById;
+        for (TEntity e : entitiesToGetById) {
+            if(e.getId() == id) return e;
+        }
+
+        throw new AssertionError("Unknown entity " + classOfEntity + " ' id=" + id + "'.");
     }
 
     @Override

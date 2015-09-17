@@ -117,7 +117,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
                 .setBic("bank-100").setLinkData(linkData, secret).setLastSyncDate(initialLastSyncDate);
         MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>(BankLinkUpdated.class);
         bus.register(updatedHandler);
-        repository.entityToGetById = bankLink;
+        repository.entitiesToGetById.add(bankLink);
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
                 new MockBankLinkData("login-100", "password-100")));
         assertEquals(1, repository.savedEntities.size());
@@ -141,7 +141,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
                 .setBic("bank-100").setLinkData(linkData, secret).setLastSyncDate(initialLastSyncDate);
         MockSubscriber<BankLinkUpdated> updatedHandler = new MockSubscriber<>(BankLinkUpdated.class);
         bus.register(updatedHandler);
-        repository.entityToGetById = bankLink;
+        repository.entitiesToGetById.add(bankLink);
         fetchFromDate = TestHelper.randomDate();
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, bankLink.accountId, bankLink.accountName, linkData)
                 .setFetchFromDate(fetchFromDate));
@@ -158,7 +158,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         MockSubscriber<UpdateBankLinkFailed> updateFailedHandler = new MockSubscriber<>(UpdateBankLinkFailed.class);
         bus.register(updateFailedHandler);
         repository.saveException = new SQLException("sql exception");
-        repository.entityToGetById = bankLink;
+        repository.entitiesToGetById.add(bankLink);
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
                 new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
         assertEquals(0, repository.savedEntities.size());
@@ -187,7 +187,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
     public void testFetchBankTransactionsCommand() {
         final BankLink bankLink = new BankLink().setId(100);
-        repository.entityToGetById = bankLink;
+        repository.entitiesToGetById.add(bankLink);
         final boolean[] fetchPerformed = {false};
         subject = new BankLinksService(bus, db, new MockDeviceSecretProvider(secret)) {
             @Override
@@ -206,7 +206,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
 
     public void testFetchBankTransactionsCommandFailed() {
         final BankLink bankLink = new BankLink().setId(100);
-        repository.entityToGetById = bankLink;
+        repository.entitiesToGetById.add(bankLink);
         final FetchException fetchFailed = new FetchException(new Exception("fetch failed"));
         subject = new BankLinksService(bus, db, new MockDeviceSecretProvider(secret)) {
             @Override

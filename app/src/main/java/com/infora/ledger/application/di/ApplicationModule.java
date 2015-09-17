@@ -35,8 +35,8 @@ public class ApplicationModule {
     }
 
     @Provides @Singleton
-    PendingTransactionsService providePendingTransactionsService(Context context, EventBus bus) {
-        return new PendingTransactionsService(context, bus);
+    PendingTransactionsService providePendingTransactionsService(DatabaseContext db, EventBus bus) {
+        return new PendingTransactionsService(db, bus);
     }
 
     @Provides @Singleton
