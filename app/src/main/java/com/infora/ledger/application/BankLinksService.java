@@ -22,6 +22,7 @@ import com.infora.ledger.data.DatabaseRepository;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -117,6 +118,19 @@ public class BankLinksService {
         } catch (Exception e) {
             Log.e(TAG, "Failed to fetch bank transactions. Posting failure event.", e);
             bus.post(new FetchBankTransactionsFailed(command.bankLinkId, e));
+        }
+    }
+
+    public void fetchAllBankLinks() throws FetchException {
+        Log.i(TAG, "Fetching all bank links...");
+        List<BankLink> allLinks;
+        try {
+            allLinks = repository.getAll();
+        } catch (SQLException e) {
+            throw new FetchException("Failed to get all bank links from the database.", e);
+        }
+        for (BankLink link : allLinks) {
+            fetchBankTransactions(link);
         }
     }
 

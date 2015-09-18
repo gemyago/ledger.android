@@ -4,9 +4,6 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.api.DeviceSecret;
-import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
-import com.infora.ledger.banks.AddBankLinkStrategy;
-import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.application.commands.AddBankLinkCommand;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
@@ -17,6 +14,9 @@ import com.infora.ledger.application.events.BankLinksDeleted;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
+import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
+import com.infora.ledger.banks.AddBankLinkStrategy;
+import com.infora.ledger.banks.FetchException;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
@@ -27,6 +27,7 @@ import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import de.greenrobot.event.EventBus;
@@ -71,17 +72,17 @@ public class BankLinksServiceTest extends AndroidTestCase {
         subject.setAddStrategies(new AddBankLinkStrategiesFactory() {
             @Override
             public AddBankLinkStrategy getStrategy(String bic) {
-                if(bic == command.bic) return new AddBankLinkStrategy() {
+                if (bic == command.bic) return new AddBankLinkStrategy() {
                     @Override
                     public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
                         assertEquals(new BankLink()
-                                        .setAccountId("account-100")
-                                        .setAccountName("Account 100")
-                                        .setBic("bank-100")
-                                        .setLastSyncDate(command.initialFetchDate)
-                                        .setInitialSyncDate(command.initialFetchDate)
-                                        .setLinkData(command.linkData, secret)
-                        , bankLink);
+                                .setAccountId("account-100")
+                                .setAccountName("Account 100")
+                                .setBic("bank-100")
+                                .setLastSyncDate(command.initialFetchDate)
+                                .setInitialSyncDate(command.initialFetchDate)
+                                .setLinkData(command.linkData, secret)
+                                , bankLink);
                         strategyUsed[0] = true;
                     }
                 };
@@ -200,6 +201,27 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertTrue(fetchPerformed[0]);
         assertEquals(1, fetchedSubscriber.getEvents().size());
         assertEquals(bankLink, fetchedSubscriber.getEvent().bankLink);
+    }
+
+    public void testFetchAllBankLinks() throws FetchException {
+        final BankLink link1 = new BankLink().setId(101);
+        final BankLink link2 = new BankLink().setId(102);
+        final BankLink link3 = new BankLink().setId(103);
+        repository.all.add(link1);
+        repository.all.add(link2);
+        repository.all.add(link3);
+        final ArrayList<BankLink> fetchedLinks = new ArrayList<>();
+        subject = new BankLinksService(bus, db, new MockDeviceSecretProvider(secret)) {
+            @Override
+            public void fetchBankTransactions(BankLink link) throws FetchException {
+                fetchedLinks.add(link);
+            }
+        };
+        subject.fetchAllBankLinks();
+        assertEquals(3, fetchedLinks.size());
+        assertTrue(fetchedLinks.contains(link1));
+        assertTrue(fetchedLinks.contains(link2));
+        assertTrue(fetchedLinks.contains(link3));
     }
 
     public void testFetchBankTransactionsCommandFailed() {
