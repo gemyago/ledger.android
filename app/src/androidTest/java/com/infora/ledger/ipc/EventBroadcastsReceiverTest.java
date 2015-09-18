@@ -35,7 +35,7 @@ public class EventBroadcastsReceiverTest extends AndroidTestCase {
     }
 
     public void testPostsBroadcastsFromOtherProcesses() throws Exception {
-        broadcaster.onEvent(new DummyEvent("Event 1"));
+        broadcaster.onEventBackgroundThread(new DummyEvent("Event 1"));
         Intent broadcast = broadcaster.getRecentBroadcast();
         int senderPid = broadcast.getExtras().getInt(EVENT_SENDER_PID);
         broadcast.putExtra(EVENT_SENDER_PID, senderPid + 10);
@@ -49,7 +49,7 @@ public class EventBroadcastsReceiverTest extends AndroidTestCase {
     }
 
     public void testSetBroadcastHeader() throws Exception {
-        broadcaster.onEvent(new DummyEvent("Event 1"));
+        broadcaster.onEventBackgroundThread(new DummyEvent("Event 1"));
         Intent broadcast = broadcaster.getRecentBroadcast();
         int senderPid = broadcast.getExtras().getInt(EVENT_SENDER_PID);
         broadcast.putExtra(EVENT_SENDER_PID, senderPid + 10);
@@ -63,7 +63,7 @@ public class EventBroadcastsReceiverTest extends AndroidTestCase {
     }
 
     public void testDoesNotPostBroadcastsFromOwnProcess() throws Exception {
-        broadcaster.onEvent(new DummyEvent("Event 1"));
+        broadcaster.onEventBackgroundThread(new DummyEvent("Event 1"));
         Intent broadcast = broadcaster.getRecentBroadcast();
         MockSubscriber<DummyEvent> subscriber = new MockSubscriber<>(DummyEvent.class);
         bus.register(subscriber);

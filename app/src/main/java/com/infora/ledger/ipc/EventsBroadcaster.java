@@ -23,9 +23,9 @@ public class EventsBroadcaster {
         this.context = context;
     }
 
-    public void onEvent(Event event) {
+    public void onEventBackgroundThread(Event event) {
         if(event.headers.containsKey(Event.HEADER_BROADCAST)) return;
-        Log.d(TAG, "Broadcusting event: " + event);
+        Log.d(TAG, "Broadcasting event: " + event);
         Intent broadcast = new Intent();
         broadcast.setAction(ACTION_BROADCAST_EVENT);
         broadcast.setPackage("com.infora.ledger");

@@ -34,7 +34,7 @@ public class EventsBroadcasterTest extends TestCase {
     }
 
     public void testBroadcastsEvent() throws Exception {
-        subject.onEvent(new DummyEvent("Prop 100"));
+        subject.onEventBackgroundThread(new DummyEvent("Prop 100"));
         assertEquals(1, sentBroadcasts.size());
 
         Intent broadcast = sentBroadcasts.get(0);
@@ -50,7 +50,7 @@ public class EventsBroadcasterTest extends TestCase {
     public void testDoNotBroadcastsIfEventWasBroadcast() throws Exception {
         DummyEvent originalEvent = new DummyEvent("Prop 100");
         originalEvent.headers.put(Event.HEADER_BROADCAST, "true");
-        subject.onEvent(originalEvent);
+        subject.onEventBackgroundThread(originalEvent);
         assertEquals(0, sentBroadcasts.size());
     }
 
