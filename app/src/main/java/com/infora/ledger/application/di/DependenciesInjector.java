@@ -9,6 +9,7 @@ import com.infora.ledger.LoginActivity;
 import com.infora.ledger.Privat24BankLinkFragment;
 import com.infora.ledger.ReportActivity;
 import com.infora.ledger.application.PendingTransactionsSyncAdapter;
+import com.infora.ledger.ipc.EventBroadcastsReceiver;
 
 /**
  * Created by mye on 9/16/2015.
@@ -31,4 +32,6 @@ public interface DependenciesInjector {
     void inject(GlobalActivityLifecycleCallbacks globalActivityLifecycleCallbacks);
 
     void inject(Privat24BankLinkFragment privat24BankLinkFragment);
+
+    void inject(EventBroadcastsReceiver.Dependencies dependencies);
 }

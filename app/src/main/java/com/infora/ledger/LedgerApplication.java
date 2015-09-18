@@ -2,6 +2,7 @@ package com.infora.ledger;
 
 import android.accounts.Account;
 import android.app.Application;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -14,6 +15,8 @@ import com.infora.ledger.application.di.DaggerApplicationComponent;
 import com.infora.ledger.application.di.DependenciesInjector;
 import com.infora.ledger.application.di.InjectorProvider;
 import com.infora.ledger.data.DatabaseContext;
+import com.infora.ledger.ipc.EventBroadcastsReceiver;
+import com.infora.ledger.ipc.EventsBroadcaster;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
@@ -70,6 +73,11 @@ public class LedgerApplication extends Application implements InjectorProvider<D
         bus.register(this);
         bus.register(pendingTransactionsService);
         bus.register(bankLinksService);
+        bus.register(new EventsBroadcaster(this));
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(EventsBroadcaster.ACTION_BROADCAST_EVENT);
+        this.registerReceiver(new EventBroadcastsReceiver(), filter);
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
 
@@ -96,4 +104,5 @@ public class LedgerApplication extends Application implements InjectorProvider<D
         Account account = new Account(cmd.getEmail(), ACCOUNT_TYPE);
         accountManager.addAccountExplicitly(account, null);
     }
+
 }
