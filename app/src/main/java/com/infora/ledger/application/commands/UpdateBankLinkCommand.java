@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Created by jenya on 03.06.15.
  */
-public class UpdateBankLinkCommand<TLinkData> {
+public class UpdateBankLinkCommand<TLinkData> extends Command {
     public int id;
     public String accountId;
     public String accountName;

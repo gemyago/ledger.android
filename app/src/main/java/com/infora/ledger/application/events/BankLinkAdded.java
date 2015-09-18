@@ -3,7 +3,7 @@ package com.infora.ledger.application.events;
 /**
  * Created by jenya on 31.05.15.
  */
-public class BankLinkAdded {
+public class BankLinkAdded extends Event {
     public String accountId;
     public String bic;
 

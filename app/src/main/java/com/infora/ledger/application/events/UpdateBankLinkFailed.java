@@ -3,7 +3,7 @@ package com.infora.ledger.application.events;
 /**
  * Created by jenya on 03.06.15.
  */
-public class UpdateBankLinkFailed {
+public class UpdateBankLinkFailed extends Event {
     public int id;
     public Exception exception;
 

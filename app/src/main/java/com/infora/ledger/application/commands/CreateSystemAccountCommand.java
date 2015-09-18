@@ -3,7 +3,7 @@ package com.infora.ledger.application.commands;
 /**
  * Created by jenya on 21.03.15.
  */
-public class CreateSystemAccountCommand {
+public class CreateSystemAccountCommand extends Command {
     private String email;
 
     public CreateSystemAccountCommand(String email) {

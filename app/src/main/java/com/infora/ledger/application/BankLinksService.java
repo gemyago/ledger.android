@@ -12,14 +12,13 @@ import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.BankLinkUpdated;
-import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankLinksDeleted;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.DatabaseRepository;
-import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -105,7 +104,7 @@ public class BankLinksService {
         Log.d(TAG, "Deleting bank links: " + Arrays.toString(command.ids));
         repository.deleteAll(command.ids);
         Log.d(TAG, "Bank links deleted. Posting deleted event...");
-        bus.post(new BankLinksDeletedEvent(command.ids));
+        bus.post(new BankLinksDeleted(command.ids));
     }
 
     public void onEventBackgroundThread(FetchBankTransactionsCommand command) {

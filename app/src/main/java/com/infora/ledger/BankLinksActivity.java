@@ -23,7 +23,7 @@ import com.infora.ledger.BanksContract.BankLinks;
 import com.infora.ledger.application.commands.DeleteBankLinksCommand;
 import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.di.DiUtils;
-import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankLinksDeleted;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.data.BankLink;
@@ -97,7 +97,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
 
 
     @EventHandler
-    public void onEventMainThread(BankLinksDeletedEvent event) {
+    public void onEventMainThread(BankLinksDeleted event) {
         int removedLength = event.ids.length;
         String message = getResources().getQuantityString(R.plurals.bank_links_removed, removedLength, removedLength);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

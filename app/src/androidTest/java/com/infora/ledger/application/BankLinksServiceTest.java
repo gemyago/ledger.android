@@ -13,20 +13,18 @@ import com.infora.ledger.application.commands.FetchBankTransactionsCommand;
 import com.infora.ledger.application.commands.UpdateBankLinkCommand;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.application.events.BankLinkUpdated;
-import com.infora.ledger.application.events.BankLinksDeletedEvent;
+import com.infora.ledger.application.events.BankLinksDeleted;
 import com.infora.ledger.application.events.BankTransactionsFetched;
 import com.infora.ledger.application.events.FetchBankTransactionsFailed;
 import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
-import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.support.Dates;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -168,7 +166,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     }
 
     public void testDeleteBankLinksCommand() throws SQLException {
-        MockSubscriber<BankLinksDeletedEvent> subscriber = new MockSubscriber<>(BankLinksDeletedEvent.class);
+        MockSubscriber<BankLinksDeleted> subscriber = new MockSubscriber<>(BankLinksDeleted.class);
         bus.register(subscriber);
         subject.onEventBackgroundThread(new DeleteBankLinksCommand(new long[]{1, 2, 443}));
         assertEquals(3, repository.deletedIds.length);
@@ -176,7 +174,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
         assertEquals(2, repository.deletedIds[1]);
         assertEquals(443, repository.deletedIds[2]);
 
-        BankLinksDeletedEvent deletedEvent = subscriber.getEvent();
+        BankLinksDeleted deletedEvent = subscriber.getEvent();
         assertNotNull(deletedEvent);
 
         assertEquals(3, deletedEvent.ids.length);

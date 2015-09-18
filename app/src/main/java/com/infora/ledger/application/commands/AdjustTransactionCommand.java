@@ -3,7 +3,7 @@ package com.infora.ledger.application.commands;
 /**
  * Created by jenya on 14.04.15.
  */
-public class AdjustTransactionCommand {
+public class AdjustTransactionCommand extends Command {
     public long id;
     public String amount;
     public String comment;
