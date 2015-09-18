@@ -1,58 +1,67 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#e6e6e6"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".ReportActivity">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff"
-        android:orientation="vertical">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:tools="http://schemas.android.com/tools"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:background="#e6e6e6"
+                  android:orientation="vertical"
+                  android:paddingBottom="@dimen/activity_vertical_margin"
+                  android:paddingLeft="@dimen/activity_horizontal_margin"
+                  android:paddingRight="@dimen/activity_horizontal_margin"
+                  android:paddingTop="@dimen/activity_vertical_margin"
+                  tools:context=".ReportActivity">
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/amount"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="0.00"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberDecimal"
+                    android:singleLine="true"/>
+
+                <EditText
+                    android:id="@+id/comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="New transaction"
+                    android:imeActionId="@integer/ime_action_report"
+                    android:imeActionLabel="@string/action_report"
+                    android:singleLine="true"
+                    />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/report"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="0.00"
-                android:inputType="numberDecimal"
-                android:singleLine="true"
-                android:imeOptions="actionNext"/>
-
-            <EditText
-                android:id="@+id/comment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="New transaction"
-                android:singleLine="true"
-                android:imeActionId="@integer/ime_action_report"
-                android:imeActionLabel="@string/action_report"
-                />
+                android:onClick="reportNewTransaction"
+                android:text="@string/action_report"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/report"
-            android:layout_width="wrap_content"
+        <ListView
+            android:id="@+id/reported_transactions_list"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="reportNewTransaction"
-            android:text="@string/action_report" />
+            android:layout_marginTop="8dp"
+            android:background="#ffffff">
+
+        </ListView>
     </LinearLayout>
-
-    <ListView android:id="@+id/reported_transactions_list"
-        android:layout_marginTop="8dp"
-        android:background="#ffffff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </ListView>
-
-</LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

@@ -3,17 +3,15 @@ package com.infora.ledger;
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -30,15 +28,18 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.infora.ledger.application.commands.Command;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.di.DiUtils;
+import com.infora.ledger.application.events.Event;
+import com.infora.ledger.application.events.SynchronizationCompleted;
+import com.infora.ledger.application.events.SynchronizationFailed;
 import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
-import com.infora.ledger.support.BusUtils;
 import com.infora.ledger.support.EventHandler;
 import com.infora.ledger.support.SharedPreferencesUtil;
 
@@ -59,6 +60,7 @@ public class ReportActivity extends AppCompatActivity {
     @Bind(R.id.comment) EditText comment;
     @Bind(R.id.amount) EditText amount;
     @Bind(R.id.report) Button report;
+    @Bind(R.id.swipe_refresh) SwipeRefreshLayout swipeRefresh;
 
     @Inject EventBus bus;
     @Inject TransactionsReadModel transactionsReadModel;
@@ -118,6 +120,26 @@ public class ReportActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        swipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                onEvent(new RequestSyncCommand().setManual(true));
+            }
+        });
+    }
+
+    public void onEventMainThread(SynchronizationCompleted event) {
+        Log.d(TAG, "The synchronization has been completed. Clearing refreshing flag...");
+        swipeRefresh.setRefreshing(false);
+    }
+
+    public void onEventMainThread(SynchronizationFailed event) {
+        Log.d(TAG, "The synchronization has been failed. Clearing refreshing flag...");
+        swipeRefresh.setRefreshing(false);
     }
 
     @Override
@@ -213,6 +235,7 @@ public class ReportActivity extends AppCompatActivity {
             Log.d(TAG, "Automatic synchronization is disabled.");
             return;
         }
+        if(!swipeRefresh.isRefreshing()) swipeRefresh.setRefreshing(true);
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -240,7 +263,7 @@ public class ReportActivity extends AppCompatActivity {
                     });
                     try {
                         for (PendingTransaction transaction : transactionsReadModel.getTransactions()) {
-                            cursor.addRow(new Object[] { transaction.getId(), transaction.amount, transaction.comment });
+                            cursor.addRow(new Object[]{transaction.getId(), transaction.amount, transaction.comment});
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -309,8 +332,13 @@ public class ReportActivity extends AppCompatActivity {
         }
     }
 
-    public static class RequestSyncCommand {
+    public static class RequestSyncCommand extends Command {
         public boolean isManual = false;
+
+        public RequestSyncCommand setManual(boolean value) {
+            isManual = value;
+            return this;
+        }
     }
 
     public static class TransactionsLoaded {
