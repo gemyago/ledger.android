@@ -6,6 +6,7 @@ import com.infora.ledger.EditBankLinkActivityTest;
 import com.infora.ledger.EditTransactionDialogTest;
 import com.infora.ledger.LoginActivityTest;
 import com.infora.ledger.ReportActivityTest;
+import com.infora.ledger.application.PendingTransactionsSyncAdapterTest;
 import com.infora.ledger.application.di.DependenciesInjector;
 
 /**
@@ -23,4 +24,6 @@ public interface TestDependenciesInjector extends DependenciesInjector {
     void inject(EditTransactionDialogTest editTransactionDialogTest);
 
     void inject(ReportActivityTest reportActivityTest);
+
+    void inject(PendingTransactionsSyncAdapterTest pendingTransactionsSyncAdapterTest);
 }

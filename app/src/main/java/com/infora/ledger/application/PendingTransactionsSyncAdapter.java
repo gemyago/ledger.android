@@ -15,6 +15,9 @@ import android.util.Log;
 import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.application.di.DiUtils;
+import com.infora.ledger.application.events.SynchronizationCompleted;
+import com.infora.ledger.application.events.SynchronizationFailed;
+import com.infora.ledger.application.events.SynchronizationStarted;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.AccountManagerWrapper;
 
@@ -65,12 +68,14 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Performing synchronization...");
+        bus.post(new SynchronizationStarted());
         LedgerApi api = apiAdapter.createApi();
         try {
             apiAdapter.authenticateApi(api, account);
         } catch (RetrofitError error) {
             syncResult.stats.numAuthExceptions++;
             Log.e(TAG, "Authentication failed. Synchronization aborted.");
+            bus.post(new SynchronizationFailed());
             return;
         }
         try {
@@ -78,12 +83,15 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         } catch (RetrofitError e) {
             syncResult.stats.numIoExceptions++;
             Log.e(TAG, "Synchronization aborted due to some network error.", e);
+            bus.post(new SynchronizationFailed());
             return;
         } catch (SQLException e) {
             syncResult.stats.numIoExceptions++;
             Log.e(TAG, "Synchronization aborted due to some unhandled SQL error.", e);
+            bus.post(new SynchronizationFailed());
             return;
         }
+        bus.post(new SynchronizationCompleted());
         Log.i(TAG, "Synchronization completed.");
     }
 
