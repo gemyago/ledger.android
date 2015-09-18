@@ -86,7 +86,7 @@ public class ReportActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, "Editing transaction: " + id);
                 EditTransactionDialog dialog = new EditTransactionDialog();
-                CursorWrapper clickedItem = (CursorWrapper) lvReportedTransactions.getItemAtPosition(position);
+                Cursor clickedItem = (Cursor) lvReportedTransactions.getItemAtPosition(position);
                 dialog.transactionId = id;
                 dialog.amount = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_AMOUNT));
                 dialog.comment = clickedItem.getString(clickedItem.getColumnIndex(TransactionContract.COLUMN_COMMENT));
