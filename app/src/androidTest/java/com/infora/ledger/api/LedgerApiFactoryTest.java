@@ -17,16 +17,16 @@ import retrofit.client.Response;
 /**
  * Created by jenya on 11.04.15.
  */
-public class ApiAdapterTest extends AndroidTestCase {
+public class LedgerApiFactoryTest extends AndroidTestCase {
 
-    private ApiAdapter subject;
+    private LedgerApiFactory subject;
     private MockAccountManagerWrapper accountManager;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         accountManager = new MockAccountManagerWrapper(getContext());
-        subject = new ApiAdapter(getContext(), accountManager, "not-existing");
+        subject = new LedgerApiFactory(getContext(), accountManager, "not-existing");
     }
 
     public void testAuthenticateApi() throws Exception {

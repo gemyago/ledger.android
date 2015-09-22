@@ -5,6 +5,7 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.mocks.MockLedgerApi;
+import com.infora.ledger.mocks.MockLedgerApiFactory;
 
 import java.util.ArrayList;
 
@@ -20,7 +21,7 @@ public class LedgerAccountsLoaderTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         api = new MockLedgerApi();
-        subject = new LedgerAccountsLoader(getContext(), api);
+        subject = new LedgerAccountsLoader(getContext(), new MockLedgerApiFactory(api));
     }
 
     public void testLoadInBackground() throws Exception {

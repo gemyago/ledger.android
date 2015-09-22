@@ -1,15 +1,18 @@
-package com.infora.ledger;
+package com.infora.ledger.api;
 
 import android.accounts.Account;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.os.Build;
 import android.test.AndroidTestCase;
 
-import com.infora.ledger.api.ApiAdapter;
+import com.infora.ledger.TransactionContract;
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerAccountDto;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.support.AccountManagerWrapper;
 
 import java.io.IOException;
@@ -23,13 +26,13 @@ import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_INCOME;
 /**
  * Created by jenya on 12.03.15.
  */
-public class ApiManualTest extends AndroidTestCase {
+public class LedgerApiManualTest extends AndroidTestCase {
     /**
      * Before running tests please specify api endpoint url
      */
     private String endpointUrl = "https://staging.my-ledger.com";
 
-    private ApiAdapter adapter;
+    private LedgerApiFactory adapter;
     private LedgerApi ledgerApi;
     private AccountManagerWrapper accountManager;
     private Account account;
@@ -47,13 +50,12 @@ public class ApiManualTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         accountManager = new AccountManagerWrapper(getContext());
-        adapter = new ApiAdapter(getContext(), accountManager, endpointUrl);
-        ledgerApi = adapter.createApi();
         account = accountManager.getApplicationAccounts()[0];
+        adapter = new LedgerApiFactory(getContext(), accountManager, endpointUrl);
+        ledgerApi = adapter.createApi(account);
     }
 
     public void testReportPendingTransaction() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
-        adapter.authenticateApi(ledgerApi, account);
         List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         LedgerAccountDto accountDto = accounts.get(0);
         String expenseTranId = UUID.randomUUID().toString();
@@ -83,7 +85,6 @@ public class ApiManualTest extends AndroidTestCase {
     }
 
     public void testGetPendingTransactions() throws InterruptedException, AuthenticatorException, OperationCanceledException, IOException {
-        adapter.authenticateApi(ledgerApi, account);
         List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         String t1id = UUID.randomUUID().toString();
         String t2id = UUID.randomUUID().toString();
@@ -107,7 +108,6 @@ public class ApiManualTest extends AndroidTestCase {
     }
     
     public void testAdjustPendingTransaction() {
-        adapter.authenticateApi(ledgerApi, account);
         List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
         List<PendingTransactionDto> transactions = ledgerApi.getPendingTransactions();
         for (PendingTransactionDto transaction : transactions) {
@@ -121,7 +121,6 @@ public class ApiManualTest extends AndroidTestCase {
     }
 
     public void testRejectPendingTransactions() {
-        adapter.authenticateApi(ledgerApi, account);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
         ledgerApi.reportPendingTransaction(UUID.randomUUID().toString(), "100.00", new Date(), "Comment for transaction 100", null, TRANSACTION_TYPE_EXPENSE);
@@ -134,9 +133,8 @@ public class ApiManualTest extends AndroidTestCase {
     }
 
     public void testGetDeviceSecret() {
-        adapter.authenticateApi(ledgerApi, account);
-        DeviceSecret deviceSecret = adapter.getDeviceSecret(ledgerApi);
+        DeviceSecret deviceSecret = ledgerApi.registerDevice(DeviceSecretProvider.getDeviceId(getContext()), Build.MODEL);
         assertNotNull(deviceSecret.secret);
-        assertEquals(deviceSecret.secret, adapter.getDeviceSecret(ledgerApi).secret);
+        assertEquals(deviceSecret.secret, ledgerApi.registerDevice(DeviceSecretProvider.getDeviceId(getContext()), Build.MODEL).secret);
     }
 }

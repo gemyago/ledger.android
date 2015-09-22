@@ -52,7 +52,7 @@
                 android:resource="@xml/api_authenticator" />
         </service>
         <service
-            android:name=".application.PendingTransactionsSyncAdapter$PendingTransactionsSyncService"
+            android:name=".application.synchronization.PendingTransactionsSyncAdapter$PendingTransactionsSyncService"
             android:exported="true"
             android:process=":sync">
             <intent-filter>

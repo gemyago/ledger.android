@@ -1,4 +1,4 @@
-package com.infora.ledger.application;
+package com.infora.ledger.application.synchronization;
 
 import android.accounts.Account;
 import android.app.Service;
@@ -12,14 +12,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.infora.ledger.api.ApiAdapter;
-import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.application.events.SynchronizationCompleted;
 import com.infora.ledger.application.events.SynchronizationFailed;
 import com.infora.ledger.application.events.SynchronizationStarted;
-import com.infora.ledger.data.TransactionsReadModel;
-import com.infora.ledger.support.AccountManagerWrapper;
 
 import java.sql.SQLException;
 
@@ -35,8 +31,7 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
     private static final String TAG = PendingTransactionsSyncAdapter.class.getName();
 
     private ContentResolver resolver;
-    private SynchronizationStrategy syncStrategy;
-    private ApiAdapter apiAdapter;
+    @Inject SynchronizationStrategiesFactory strategiesFactory;
     @Inject EventBus bus;
 
     public PendingTransactionsSyncAdapter(Context context, boolean autoInitialize) {
@@ -49,37 +44,19 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         onInit(context);
     }
 
-    public void setSyncStrategy(SynchronizationStrategy syncStrategy) {
-        this.syncStrategy = syncStrategy;
-    }
-
-    public void setApiAdapter(ApiAdapter apiAdapter) {
-        this.apiAdapter = apiAdapter;
-    }
-
     private void onInit(Context context) {
         Log.d(TAG, "Initializing sync adapter...");
         resolver = context.getContentResolver();
         DiUtils.injector(context).inject(this);
-        syncStrategy = new FullSyncSynchronizationStrategy(bus, new TransactionsReadModel(context));
-        apiAdapter = ApiAdapter.createAdapter(context, new AccountManagerWrapper(context));
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Performing synchronization...");
         bus.post(new SynchronizationStarted());
-        LedgerApi api = apiAdapter.createApi();
+        SynchronizationStrategy syncStrategy = strategiesFactory.createStrategy(getContext(), extras);
         try {
-            apiAdapter.authenticateApi(api, account);
-        } catch (RetrofitError error) {
-            syncResult.stats.numAuthExceptions++;
-            Log.e(TAG, "Authentication failed. Synchronization aborted.");
-            bus.post(new SynchronizationFailed());
-            return;
-        }
-        try {
-            syncStrategy.synchronize(api, extras, syncResult);
+            syncStrategy.synchronize(account, extras, syncResult);
         } catch (RetrofitError e) {
             syncResult.stats.numIoExceptions++;
             Log.e(TAG, "Synchronization aborted due to some network error.", e);

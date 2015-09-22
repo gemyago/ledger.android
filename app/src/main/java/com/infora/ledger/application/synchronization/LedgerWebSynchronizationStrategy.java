@@ -1,10 +1,12 @@
-package com.infora.ledger.application;
+package com.infora.ledger.application.synchronization;
 
+import android.accounts.Account;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
@@ -17,23 +19,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import de.greenrobot.event.EventBus;
+import retrofit.RetrofitError;
 
 /**
  * Created by jenya on 25.03.15.
  */
-public class FullSyncSynchronizationStrategy implements SynchronizationStrategy {
-    private static final String TAG = FullSyncSynchronizationStrategy.class.getName();
+public class LedgerWebSynchronizationStrategy implements SynchronizationStrategy {
+    private static final String TAG = LedgerWebSynchronizationStrategy.class.getName();
     private final EventBus bus;
     private TransactionsReadModel readModel;
+    private LedgerApiFactory apiFactory;
 
-    public FullSyncSynchronizationStrategy(EventBus bus, TransactionsReadModel readModel) {
+    @Inject
+    public LedgerWebSynchronizationStrategy(EventBus bus, TransactionsReadModel readModel, LedgerApiFactory apiFactory) {
         this.bus = bus;
         this.readModel = readModel;
+        this.apiFactory = apiFactory;
     }
 
-    public void synchronize(LedgerApi api, Bundle options, SyncResult syncResult) throws SQLException {
+    public void synchronize(Account account, Bundle options, SyncResult syncResult) throws SQLException {
         Log.i(TAG, "Starting full synchronization...");
+
+        LedgerApi api;
+        try {
+            api = apiFactory.createApi(account);
+        } catch (RetrofitError error) {
+            syncResult.stats.numAuthExceptions++;
+            throw error;
+        }
 
         Log.d(TAG, "Retrieving pending transactions from the server...");
         List<PendingTransactionDto> remoteTransactions = api.getPendingTransactions();

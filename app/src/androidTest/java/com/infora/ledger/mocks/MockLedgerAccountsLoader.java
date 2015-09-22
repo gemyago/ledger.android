@@ -18,7 +18,7 @@ public class MockLedgerAccountsLoader extends LedgerAccountsLoader {
             public Context getApplicationContext() {
                 return new MockApplication();
             }
-        });
+        }, null);
     }
 
     @Override

@@ -3,16 +3,22 @@ package com.infora.ledger.mocks.di;
 import android.app.Application;
 import android.content.Context;
 
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.DeviceSecret;
+import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
+import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.mocks.MockAccountManagerWrapper;
+import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
+import com.infora.ledger.mocks.MockLedgerApi;
+import com.infora.ledger.mocks.MockSynchronizationStrategiesFactory;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
@@ -38,6 +44,7 @@ public class TestApplicationModule {
     public AccountManagerWrapper accountManagerWrapper;
     public TransactionsReadModel transactionsReadModel;
     public DatabaseContext databaseContext;
+    public SynchronizationStrategiesFactory synchronizationStrategiesFactory;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -94,5 +101,13 @@ public class TestApplicationModule {
 
     @Provides DatabaseContext provideDatabaseContext() {
         return databaseContext == null ? new MockDatabaseContext() : databaseContext;
+    }
+
+    @Provides LedgerApiFactory provideApiAdapter() {
+        return new MockLedgerApiFactory();
+    }
+
+    @Provides SynchronizationStrategiesFactory provideSynchronizationStrategiesFactory() {
+        return synchronizationStrategiesFactory;
     }
 }

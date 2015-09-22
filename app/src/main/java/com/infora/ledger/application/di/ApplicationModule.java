@@ -3,10 +3,12 @@ package com.infora.ledger.application.di;
 import android.app.Application;
 import android.content.Context;
 
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.data.DatabaseContext;
+import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 
 import javax.inject.Singleton;
@@ -46,5 +48,10 @@ public class ApplicationModule {
 
     @Provides BankLinkFragmentsFactory provideBankLinkFragmentsFactory() {
         return BankLinkFragmentsFactory.createDefault();
+    }
+
+    @Provides @Singleton
+    LedgerApiFactory provideApiAdapter(Context context, AccountManagerWrapper accountManager) {
+        return LedgerApiFactory.createAdapter(context, accountManager);
     }
 }

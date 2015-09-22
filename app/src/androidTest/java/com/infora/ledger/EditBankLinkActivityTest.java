@@ -23,9 +23,11 @@ import com.infora.ledger.mocks.MockBankLinkFragment;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockLedgerApi;
+import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.di.TestApplicationModule;
+import com.infora.ledger.mocks.di.TestDependenciesInjector;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.LogUtil;
 import com.infora.ledger.ui.BankLinkFragment;
@@ -50,6 +52,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
     private LedgerAccountDto selectedAccount;
     @Inject BankLinkFragmentsFactory fragmentsFactory;
     private DeviceSecret secret;
+    private TestDependenciesInjector injector;
 
     public EditBankLinkActivityTest() {
         super(EditBankLinkActivity.class);
@@ -85,7 +88,8 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                         module.bankLinkFragmentsFactory = new BankLinkFragmentsFactory();
                     }
                 });
-        app.injector().inject(this);
+        injector = app.injector();
+        injector.inject(this);
         selectedAccount = new LedgerAccountDto("account-1", "Account 1");
         bankLink = new BankLink()
                 .setId(332)
@@ -215,7 +219,7 @@ public class EditBankLinkActivityTest extends android.test.ActivityUnitTestCase<
                         selectedAccount,
                         new LedgerAccountDto("a-200", "A 200")
                 ));
-                return new LedgerAccountsLoader(context, mockApi);
+                return new LedgerAccountsLoader(context, new MockLedgerApiFactory(mockApi));
             }
         };
     }

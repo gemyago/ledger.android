@@ -35,10 +35,10 @@ public class DatesTest extends TestCase {
     }
 
     public void testWeeksBetween() {
-        Date start = Dates.create(2013, 12, 5);
+        Date start = Dates.create(2012, 12, 5);
         assertEquals(1, Dates.weeksBetween(start, Dates.addDays(start, 7)));
         assertEquals(2, Dates.weeksBetween(start, Dates.addDays(start, 7 * 2)));
-        assertEquals(10, Dates.weeksBetween(start, Dates.addDays(start, 7 * 10)));
+        assertEquals(9, Dates.weeksBetween(start, Dates.addDays(start, 7 * 9)));
         assertEquals(100, Dates.weeksBetween(start, Dates.addDays(start, 7 * 100)));
     }
 }

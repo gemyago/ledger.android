@@ -1,14 +1,17 @@
-package com.infora.ledger.application;
+package com.infora.ledger.application.synchronization;
 
+import android.accounts.Account;
 import android.content.SyncResult;
+import android.os.Bundle;
 import android.test.AndroidTestCase;
 
-import com.infora.ledger.TransactionContract;
+import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.MockLedgerApi;
+import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 
@@ -17,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.greenrobot.event.EventBus;
+import retrofit.RetrofitError;
+import retrofit.client.Header;
+import retrofit.client.Response;
 
 import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_EXPENSE;
 import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_INCOME;
@@ -24,22 +30,53 @@ import static com.infora.ledger.TransactionContract.TRANSACTION_TYPE_INCOME;
 /**
  * Created by jenya on 25.03.15.
  */
-public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
+public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
 
     private MockTransactionsReadModel readModel;
-    private FullSyncSynchronizationStrategy subject;
+    private LedgerWebSynchronizationStrategy subject;
     private MockLedgerApi api;
     private EventBus bus;
     private SyncResult syncResult;
+    private Account account;
+    private MockLedgerApiFactory apiFactory;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         bus = new EventBus();
         readModel = new MockTransactionsReadModel();
-        subject = new FullSyncSynchronizationStrategy(bus, readModel);
+        account = new Account("test-332", "test");
         api = new MockLedgerApi();
+        apiFactory = new MockLedgerApiFactory();
+        apiFactory.onCreatingApi = new MockLedgerApiFactory.OnCreatingApi() {
+            @Override public LedgerApi call(Account actualAccount) {
+                assertSame(account, actualAccount);
+                return api;
+            }
+        };
+        subject = new LedgerWebSynchronizationStrategy(bus, readModel, apiFactory);
         syncResult = new SyncResult();
+    }
+
+    public void testSynchronizeAuthError() throws Exception {
+        final SyncResult testSyncResult = new SyncResult();
+        final Bundle extras = new Bundle();
+        apiFactory.onCreatingApi = new MockLedgerApiFactory.OnCreatingApi() {
+            @Override
+            public LedgerApi call(Account account) {
+                Response response = new Response("localhost", 401, "Unauthorized", new ArrayList<Header>(), null);
+                throw RetrofitError.httpError("test", response, null, null);
+            }
+        };
+
+        boolean thrown = false;
+        try {
+            subject.synchronize(account, extras, testSyncResult);
+        } catch (RetrofitError error) {
+            thrown = true;
+        }
+        assertTrue(thrown);
+        assertEquals(1, testSyncResult.stats.numAuthExceptions);
     }
 
     public void testSynchronizeIgnoreExisting() throws Exception {
@@ -51,7 +88,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         for (PendingTransactionDto dto : remoteTransactions) {
             readModel.inject(dto.toTransaction());
         }
-        subject.synchronize(api, null, syncResult);
+        subject.synchronize(account, null, syncResult);
         assertEquals(0, api.getReportedTransactions().size());
     }
 
@@ -64,7 +101,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         MockSubscriber<MarkTransactionAsPublishedCommand> publishedSubscriber = new MockSubscriber<>(MarkTransactionAsPublishedCommand.class);
         bus.register(publishedSubscriber);
 
-        subject.synchronize(api, null, syncResult);
+        subject.synchronize(account, null, syncResult);
 
         assertEquals(3, api.getReportedTransactions().size());
 
@@ -90,7 +127,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
 
-        subject.synchronize(api, null, syncResult);
+        subject.synchronize(account, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
 
@@ -111,7 +148,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
                 .injectAnd(new PendingTransaction("t-2", "101", "t 101", true, false, null, null).setId(1))
                 .inject(new PendingTransaction("t-3", "103.03", "t 103.03", true, false, null, null).setId(1).setAccountId("account-3"));
 
-        subject.synchronize(api, null, syncResult);
+        subject.synchronize(account, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
         assertEquals(2, api.getAdjustTransactions().size());
@@ -139,7 +176,7 @@ public class FullSyncSynchronizationStrategyTest extends AndroidTestCase {
         MockSubscriber<DeleteTransactionsCommand> deleteSubscriber = new MockSubscriber<>(DeleteTransactionsCommand.class);
         bus.register(deleteSubscriber);
 
-        subject.synchronize(api, null, syncResult);
+        subject.synchronize(account, null, syncResult);
 
         assertEquals(1, deleteSubscriber.getEvents().size());
         assertEquals(3, deleteSubscriber.getEvent().ids.length);

@@ -6,7 +6,7 @@ import com.infora.ledger.EditBankLinkActivityTest;
 import com.infora.ledger.EditTransactionDialogTest;
 import com.infora.ledger.LoginActivityTest;
 import com.infora.ledger.ReportActivityTest;
-import com.infora.ledger.application.PendingTransactionsSyncAdapterTest;
+import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapterTest;
 import com.infora.ledger.application.di.DependenciesInjector;
 import com.infora.ledger.ipc.EventBroadcastsReceiverTest;
 

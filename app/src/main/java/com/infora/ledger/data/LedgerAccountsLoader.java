@@ -1,20 +1,14 @@
 package com.infora.ledger.data;
 
-import android.accounts.Account;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.util.Log;
 
-import com.infora.ledger.SettingsFragment;
-import com.infora.ledger.api.ApiAdapter;
 import com.infora.ledger.api.LedgerAccountDto;
-import com.infora.ledger.api.LedgerApi;
-import com.infora.ledger.support.AccountManagerWrapper;
-import com.infora.ledger.support.LogUtil;
-import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.api.LedgerApiFactory;
+import com.infora.ledger.application.di.DiUtils;
 
 import java.util.List;
 
@@ -30,16 +24,18 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
     public static final String COLUMN_ACCOUNT_ID = "account_id";
     public static final String COLUMN_NAME = "name";
 
-    private LedgerApi ledgerApi;
+    @Inject LedgerApiFactory ledgerApiFactory;
+
     private boolean addSelectionPrompt;
 
     public LedgerAccountsLoader(Context context) {
         super(context);
+        DiUtils.injector(context).inject(this);
     }
 
-    public LedgerAccountsLoader(Context context, LedgerApi ledgerApi) {
+    public LedgerAccountsLoader(Context context, LedgerApiFactory ledgerApiFactory) {
         super(context);
-        this.ledgerApi = ledgerApi;
+        this.ledgerApiFactory = ledgerApiFactory;
     }
 
     public LedgerAccountsLoader withSelectionPrompt() {
@@ -49,38 +45,21 @@ public class LedgerAccountsLoader extends AsyncTaskLoader<Cursor> {
 
     @Override
     protected void onStartLoading() {
-        LogUtil.d(this, "Forcing loading ledger accounts");
+        Log.d(TAG, "Forcing loading ledger accounts");
         forceLoad();
     }
 
     @Override
     public Cursor loadInBackground() {
-        if (ledgerApi == null) ledgerApi = createApi(getContext());
-        LogUtil.d(this, "Loading ledger accounts...");
+        Log.d(TAG, "Loading ledger accounts...");
         final MatrixCursor cursor = new MatrixCursor(new String[]{COLUMN_ID, COLUMN_ACCOUNT_ID, COLUMN_NAME});
         if (addSelectionPrompt) cursor.addRow(new Object[]{0, null, "Please select account..."});
-        List<LedgerAccountDto> accounts = ledgerApi.getAccounts();
+        List<LedgerAccountDto> accounts = ledgerApiFactory.createApi().getAccounts();
         int serialId = 0;
         for (LedgerAccountDto account : accounts) {
             cursor.addRow(new Object[]{++serialId, account.id, account.name});
         }
         return cursor;
-
-    }
-
-    private LedgerApi createApi(Context context) {
-        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
-        String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
-        Log.d(TAG, "Using ledger host: " + ledgerHost);
-        AccountManagerWrapper accountManager = new AccountManagerWrapper(context);
-        ApiAdapter apiAdapter = new ApiAdapter(context, accountManager, ledgerHost);
-        LedgerApi api = apiAdapter.createApi();
-        Account[] accounts = accountManager.getApplicationAccounts();
-        if (accounts.length == 0)
-            throw new IllegalStateException("The application has no accounts assigned");
-        Log.d(TAG, "Authenticating api");
-        apiAdapter.authenticateApi(api, accounts[0]);
-        return api;
     }
 
     public static class Factory {

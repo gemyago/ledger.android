@@ -5,9 +5,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.infora.ledger.SettingsFragment;
@@ -27,15 +25,15 @@ import retrofit.client.OkClient;
 /**
  * Created by jenya on 12.03.15.
  */
-public class ApiAdapter {
-    private static final String TAG = ApiAdapter.class.getName();
+public class LedgerApiFactory {
+    private static final String TAG = LedgerApiFactory.class.getName();
 
     private RestAdapter restAdapter;
     private String authenticityToken;
     private final Context context;
     private final AccountManagerWrapper accountManager;
 
-    public ApiAdapter(Context context, AccountManagerWrapper accountManager, String endpoint) {
+    public LedgerApiFactory(Context context, AccountManagerWrapper accountManager, String endpoint) {
         this.context = context;
         this.accountManager = accountManager;
         OkHttpClient client = new OkHttpClient();
@@ -80,10 +78,18 @@ public class ApiAdapter {
     }
 
     public LedgerApi createApi() {
-        return restAdapter.create(LedgerApi.class);
+        Account[] accounts = accountManager.getApplicationAccounts();
+        if (accounts.length == 0) throw new IllegalStateException("The application has no accounts assigned");
+        return createApi(accounts[0]);
     }
 
-    public void authenticateApi(LedgerApi api, Account account) {
+    public LedgerApi createApi(Account account) {
+        LedgerApi api = restAdapter.create(LedgerApi.class);
+        authenticateApi(api, account);
+        return api;
+    }
+
+    protected void authenticateApi(LedgerApi api, Account account) {
         String idToken = tryGettingToken(account, false);
         AuthenticityToken authenticityToken;
         Log.d(TAG, "Authenticating using google id_token.");
@@ -101,11 +107,6 @@ public class ApiAdapter {
             }
         }
         setAuthenticityToken(authenticityToken.getValue());
-    }
-
-    public DeviceSecret getDeviceSecret(LedgerApi api) {
-        final String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        return api.registerDevice(androidId, Build.MODEL);
     }
 
     private String tryGettingToken(Account account, boolean invalidate) {
@@ -129,10 +130,10 @@ public class ApiAdapter {
         return googleIdToken;
     }
 
-    public static ApiAdapter createAdapter(Context context, AccountManagerWrapper accountManager) {
+    public static LedgerApiFactory createAdapter(Context context, AccountManagerWrapper accountManager) {
         SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
         String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         Log.d(TAG, "Using ledger host: " + ledgerHost);
-        return new ApiAdapter(context, accountManager, ledgerHost);
+        return new LedgerApiFactory(context, accountManager, ledgerHost);
     }
 }

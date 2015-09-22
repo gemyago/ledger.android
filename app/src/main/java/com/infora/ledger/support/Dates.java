@@ -61,7 +61,7 @@ public class Dates {
 
     public static Date addDays(Date original, int count) {
         Calendar cal = getCalendar(original);
-        cal.add(Calendar.DAY_OF_MONTH, count);
+        cal.add(Calendar.DATE, count);
         return cal.getTime();
     }
 

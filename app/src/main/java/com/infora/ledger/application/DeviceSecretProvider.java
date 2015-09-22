@@ -2,9 +2,11 @@ package com.infora.ledger.application;
 
 import android.accounts.Account;
 import android.content.Context;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
-import com.infora.ledger.api.ApiAdapter;
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.support.AccountManagerWrapper;
@@ -19,12 +21,14 @@ public class DeviceSecretProvider {
     private static final String TAG = DeviceSecretProvider.class.getName();
     private final Context context;
     private final AccountManagerWrapper accountManager;
+    private LedgerApiFactory ledgerApiFactory;
     private DeviceSecret deviceSecret;
 
     @Inject @Singleton
-    public DeviceSecretProvider(Context context, AccountManagerWrapper accountManager) {
+    public DeviceSecretProvider(Context context, AccountManagerWrapper accountManager, LedgerApiFactory ledgerApiFactory) {
         this.context = context;
         this.accountManager = accountManager;
+        this.ledgerApiFactory = ledgerApiFactory;
     }
 
     public boolean hasBeenRegistered() {
@@ -39,15 +43,16 @@ public class DeviceSecretProvider {
             Log.w(TAG, "There are no accounts yet. Device registration skipped.");
             return;
         }
-        ApiAdapter adapter = ApiAdapter.createAdapter(context, accountManager);
-        LedgerApi api = adapter.createApi();
-
-        adapter.authenticateApi(api, accounts[0]);
-        deviceSecret = adapter.getDeviceSecret(api);
+        LedgerApi api = ledgerApiFactory.createApi(accounts[0]);
+        deviceSecret = api.registerDevice(getDeviceId(context), Build.MODEL);
     }
 
     public DeviceSecret secret() {
         if (hasBeenRegistered()) return deviceSecret;
         throw new RuntimeException("The secret has not been loaded yet.");
+    }
+
+    public static String getDeviceId(Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 }

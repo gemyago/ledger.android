@@ -11,7 +11,7 @@ public class MockDeviceSecretProvider extends DeviceSecretProvider {
     private DeviceSecret pendingSecret;
 
     public MockDeviceSecretProvider(DeviceSecret secret) {
-        super(null, null);
+        super(null, null, null);
         this.pendingSecret = secret;
     }
 
