@@ -1,6 +1,5 @@
 package com.infora.ledger.application;
 
-import android.content.ContentResolver;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,7 +57,7 @@ public class FullSyncSynchronizationStrategy implements SynchronizationStrategy 
                 } else {
                     Log.d(TAG, "Transaction id='" + localTran.id + "' has not be changed. Skipping.");
                 }
-            } else if(localTran.isPublished) {
+            } else if (localTran.isPublished) {
                 Log.d(TAG, "Local transaction id='" + localTran.id + "' was approved or rejected. Marking for deletion.");
                 toDeleteIds.add(localTran.id);
             } else {
