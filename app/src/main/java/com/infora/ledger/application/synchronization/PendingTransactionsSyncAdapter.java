@@ -49,9 +49,9 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.i(TAG, "Performing synchronization...");
-        bus.post(new SynchronizationStarted());
         SynchronizationStrategy syncStrategy = strategiesFactory.createStrategy(getContext(), extras);
+        Log.i(TAG, "Performing synchronization. Sync strategy type: " + syncStrategy.getClass().getSimpleName());
+        bus.post(new SynchronizationStarted());
         try {
             syncStrategy.synchronize(account, extras, syncResult);
         } catch (SynchronizationException e) {

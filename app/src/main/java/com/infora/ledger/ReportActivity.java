@@ -32,12 +32,12 @@ import com.infora.ledger.application.commands.Command;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.di.DiUtils;
-import com.infora.ledger.application.events.Event;
 import com.infora.ledger.application.events.SynchronizationCompleted;
 import com.infora.ledger.application.events.SynchronizationFailed;
 import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.EventHandler;
@@ -155,7 +155,7 @@ public class ReportActivity extends AppCompatActivity {
         bus.register(this);
 
         Log.d(TAG, "Requesting sync on start...");
-        bus.post(new RequestSyncCommand());
+        bus.post(new RequestSyncCommand().setLedgerWebOnly(true));
     }
 
     @Override
@@ -241,6 +241,10 @@ public class ReportActivity extends AppCompatActivity {
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+        if(cmd.isLedgerWebOnly) {
+            Log.d(TAG, "Requesting synchronization with ledger web only.");
+            settingsBundle.putBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB, true);
+        }
         if (doNotCallRequestSync) {
             Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
         } else {
@@ -334,9 +338,15 @@ public class ReportActivity extends AppCompatActivity {
 
     public static class RequestSyncCommand extends Command {
         public boolean isManual = false;
+        public boolean isLedgerWebOnly = false;
 
         public RequestSyncCommand setManual(boolean value) {
             isManual = value;
+            return this;
+        }
+
+        public RequestSyncCommand setLedgerWebOnly(boolean ledgerWebOnly) {
+            this.isLedgerWebOnly = ledgerWebOnly;
             return this;
         }
     }

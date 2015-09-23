@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.test.mock.MockContentResolver;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -21,7 +20,6 @@ import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
-import com.infora.ledger.mocks.MockPendingTransactionsContentProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 import com.infora.ledger.mocks.di.TestApplicationModule;
@@ -105,6 +103,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getInstrumentation().callActivityOnStart(getActivity());
         assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
         assertFalse("Is manual flag was mistakenly set", mockSubscriber.getEvent().isManual);
+        assertTrue("Is ledger web flag wasn't set", mockSubscriber.getEvent().isLedgerWebOnly);
     }
 
     public void testRequestSyncOnSynchronizeAction() {
@@ -113,6 +112,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getActivity().onOptionsItemSelected(new MockMenuItem(R.id.action_synchronize));
         assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
         assertTrue("Is manual flag wasn't set", mockSubscriber.getEvent().isManual);
+        assertFalse("Is ledger web was mistakenly set", mockSubscriber.getEvent().isLedgerWebOnly);
     }
 
     public void testReportNewTransactionOnReportButtonClick() {
