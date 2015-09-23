@@ -87,16 +87,14 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         assertEquals(1, completedHandler.getEvents().size());
     }
 
-    public void testOnPerformSyncNetworkError() throws Exception {
+    public void testOnPerformSyncWithError() throws Exception {
         final Account testAccount = new Account("test-332", "test");
-        final MockLedgerApi mockApi = new MockLedgerApi();
         final SyncResult testSyncResult = new SyncResult();
         final Bundle extras = new Bundle();
         syncStrategy.onSynchronize = new MockSynchronizationStrategy.OnSynchronize() {
             @Override
-            public void perform(Account account, Bundle options, SyncResult syncResult) {
-                Response response = new Response("localhost", 500, "Internal server error", new ArrayList<Header>(), null);
-                throw RetrofitError.httpError("test", response, null, null);
+            public void perform(Account account, Bundle options, SyncResult syncResult) throws SynchronizationException {
+                throw new SynchronizationException("Synchronization failed");
             }
         };
         MockSubscriber<SynchronizationStarted> startedHandler = new MockSubscriber<>(SynchronizationStarted.class);
@@ -104,7 +102,6 @@ public class PendingTransactionsSyncAdapterTest extends AndroidTestCase {
         bus.register(startedHandler);
         bus.register(failedHandler);
         subject.onPerformSync(testAccount, extras, null, null, testSyncResult);
-        assertEquals(1, testSyncResult.stats.numIoExceptions);
         assertEquals(1, startedHandler.getEvents().size());
         assertEquals(1, failedHandler.getEvents().size());
     }

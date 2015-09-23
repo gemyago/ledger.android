@@ -17,12 +17,9 @@ import com.infora.ledger.application.events.SynchronizationCompleted;
 import com.infora.ledger.application.events.SynchronizationFailed;
 import com.infora.ledger.application.events.SynchronizationStarted;
 
-import java.sql.SQLException;
-
 import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
-import retrofit.RetrofitError;
 
 /**
  * Created by jenya on 13.03.15.
@@ -57,14 +54,8 @@ public class PendingTransactionsSyncAdapter extends AbstractThreadedSyncAdapter 
         SynchronizationStrategy syncStrategy = strategiesFactory.createStrategy(getContext(), extras);
         try {
             syncStrategy.synchronize(account, extras, syncResult);
-        } catch (RetrofitError e) {
-            syncResult.stats.numIoExceptions++;
-            Log.e(TAG, "Synchronization aborted due to some network error.", e);
-            bus.post(new SynchronizationFailed());
-            return;
-        } catch (SQLException e) {
-            syncResult.stats.numIoExceptions++;
-            Log.e(TAG, "Synchronization aborted due to some unhandled SQL error.", e);
+        } catch (SynchronizationException e) {
+            Log.e(TAG, "Synchronization aborted.", e);
             bus.post(new SynchronizationFailed());
             return;
         }

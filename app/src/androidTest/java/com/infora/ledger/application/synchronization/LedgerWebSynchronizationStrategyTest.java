@@ -15,7 +15,6 @@ import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -92,7 +91,7 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         assertEquals(0, api.getReportedTransactions().size());
     }
 
-    public void testSynchronizeReportNew() throws SQLException {
+    public void testSynchronizeReportNew() throws Exception {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
 
         PendingTransaction t1 = readModel.inject(new PendingTransaction("t-1", "100", "t 100", false, false, new Date(), null).setId(1).setAccountId("account-1").setTypeId(TRANSACTION_TYPE_EXPENSE));
@@ -120,7 +119,7 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         assertEquals(3, publishedSubscriber.getEvents().get(2).id);
     }
 
-    public void testSynchronizeRemoveLocallyRemoved() throws SQLException {
+    public void testSynchronizeRemoveLocallyRemoved() throws Exception {
         ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
         remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));
         remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
@@ -137,7 +136,7 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-3"));
     }
 
-    public void testSynchronizeUpdateChanged() throws SQLException {
+    public void testSynchronizeUpdateChanged() throws Exception {
         ArrayList<PendingTransactionDto> remoteTransactions = new ArrayList<>();
         remoteTransactions.add(new PendingTransactionDto("t-1", "100", "t 100"));
         remoteTransactions.add(new PendingTransactionDto("t-2", "101", "t 101"));
@@ -167,7 +166,7 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         assertEquals("account-3", adjustedT3.accountId);
     }
 
-    public void testSynchronizeDeleteApproved() throws SQLException {
+    public void testSynchronizeDeleteApproved() throws Exception {
         api.setPendingTransactions(new ArrayList<PendingTransactionDto>());
         readModel.inject(new PendingTransaction().setId(100).setTransactionId("t-100").setIsPublished(true));
         readModel.inject(new PendingTransaction().setId(101).setTransactionId("t-101").setIsPublished(true));

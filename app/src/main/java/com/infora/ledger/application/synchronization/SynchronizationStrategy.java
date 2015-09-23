@@ -10,5 +10,5 @@ import java.sql.SQLException;
  * Created by jenya on 25.03.15.
  */
 public interface SynchronizationStrategy {
-    void synchronize(Account account, Bundle options, SyncResult syncResult) throws SQLException;
+    void synchronize(Account account, Bundle options, SyncResult syncResult) throws SynchronizationException;
 }
