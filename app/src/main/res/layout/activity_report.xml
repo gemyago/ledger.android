@@ -56,11 +56,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
 
-        <ListView
-            android:id="@+id/reported_transactions_list"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#e6e6e6">
-        </ListView>
+            android:orientation="horizontal">
+            <ListView
+                android:id="@+id/reported_transactions_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ffffff">
+            </ListView>
+        </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

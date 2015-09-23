@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -128,6 +129,20 @@ public class ReportActivity extends AppCompatActivity {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override public void onRefresh() {
                 onEvent(new RequestSyncCommand().setManual(true));
+            }
+        });
+
+        lvReportedTransactions.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                int topRowVerticalPosition = (lvReportedTransactions == null || lvReportedTransactions.getChildCount() == 0) ?
+                        0 : lvReportedTransactions.getChildAt(0).getTop();
+                swipeRefresh.setEnabled((topRowVerticalPosition >= 0));
             }
         });
     }
