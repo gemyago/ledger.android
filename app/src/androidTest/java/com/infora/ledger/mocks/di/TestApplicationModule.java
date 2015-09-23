@@ -3,9 +3,8 @@ package com.infora.ledger.mocks.di;
 import android.app.Application;
 import android.content.Context;
 
-import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.DeviceSecret;
-import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
@@ -14,11 +13,9 @@ import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.mocks.MockAccountManagerWrapper;
-import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
-import com.infora.ledger.mocks.MockLedgerApi;
-import com.infora.ledger.mocks.MockSynchronizationStrategiesFactory;
+import com.infora.ledger.mocks.MockLedgerApiFactory;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
@@ -108,6 +105,6 @@ public class TestApplicationModule {
     }
 
     @Provides SynchronizationStrategiesFactory provideSynchronizationStrategiesFactory() {
-        return synchronizationStrategiesFactory;
+        return synchronizationStrategiesFactory == null ? new SynchronizationStrategiesFactory() : synchronizationStrategiesFactory;
     }
 }

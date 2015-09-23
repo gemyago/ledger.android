@@ -8,6 +8,8 @@ import android.util.Log;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.banks.FetchException;
 
+import javax.inject.Inject;
+
 /**
  * Created by mye on 9/23/2015.
  */
@@ -15,7 +17,7 @@ public class FetchBankLinksSynchronizationStrategy implements SynchronizationStr
     private static final String TAG = FetchBankLinksSynchronizationStrategy.class.getName();
     private BankLinksService bankLinksService;
 
-    public FetchBankLinksSynchronizationStrategy(BankLinksService bankLinksService) {
+    @Inject public FetchBankLinksSynchronizationStrategy(BankLinksService bankLinksService) {
         this.bankLinksService = bankLinksService;
     }
 

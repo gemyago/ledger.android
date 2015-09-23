@@ -8,6 +8,7 @@ import com.infora.ledger.LoginActivityTest;
 import com.infora.ledger.ReportActivityTest;
 import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapterTest;
 import com.infora.ledger.application.di.DependenciesInjector;
+import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactoryTest;
 import com.infora.ledger.ipc.EventBroadcastsReceiverTest;
 
 /**
@@ -29,4 +30,6 @@ public interface TestDependenciesInjector extends DependenciesInjector {
     void inject(PendingTransactionsSyncAdapterTest pendingTransactionsSyncAdapterTest);
 
     void inject(EventBroadcastsReceiverTest eventBroadcastsReceiverTest);
+
+    void inject(SynchronizationStrategiesFactoryTest synchronizationStrategiesFactoryTest);
 }

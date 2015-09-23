@@ -8,7 +8,7 @@ import android.os.Bundle;
  * Created by mye on 9/23/2015.
  */
 public class CompositeSynchronizationStrategy implements SynchronizationStrategy {
-    private SynchronizationStrategy[] strategies;
+    public final SynchronizationStrategy[] strategies;
 
     public CompositeSynchronizationStrategy(SynchronizationStrategy... strategies) {
         this.strategies = strategies;
