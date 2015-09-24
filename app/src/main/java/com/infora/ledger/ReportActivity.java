@@ -144,11 +144,13 @@ public class ReportActivity extends AppCompatActivity {
     public void onEventMainThread(SynchronizationCompleted event) {
         Log.d(TAG, "The synchronization has been completed. Clearing refreshing flag...");
         swipeRefresh.setRefreshing(false);
+        restartTransactionsLoader();
     }
 
     public void onEventMainThread(SynchronizationFailed event) {
         Log.d(TAG, "The synchronization has been failed. Clearing refreshing flag...");
         swipeRefresh.setRefreshing(false);
+        restartTransactionsLoader();
     }
 
     @Override
