@@ -28,24 +28,31 @@ public class SynchronizationStrategiesFactoryTest extends AndroidTestCase {
 
     public void testCreateStrategyNoSpecialOptions() {
         SynchronizationStrategy strategy = subject.createStrategy(getContext(), new Bundle());
-        assertTrue(strategy instanceof CompositeSynchronizationStrategy);
+        assertEquals(CompositeSynchronizationStrategy.class, strategy.getClass());
         CompositeSynchronizationStrategy compositeStrategy = (CompositeSynchronizationStrategy) strategy;
         assertEquals(2, compositeStrategy.strategies.length);
-        assertTrue(compositeStrategy.strategies[0] instanceof FetchBankLinksSynchronizationStrategy);
-        assertTrue(compositeStrategy.strategies[1] instanceof LedgerWebSynchronizationStrategy);
+        assertEquals(FetchBankLinksSynchronizationStrategy.class, compositeStrategy.strategies[0].getClass());
+        assertEquals(LedgerWebSynchronizationStrategy.class, compositeStrategy.strategies[1].getClass());
     }
 
     public void testCreateLedgerWebStrategy() {
         Bundle options = new Bundle();
         options.putBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB, true);
         SynchronizationStrategy strategy = subject.createStrategy(getContext(), options);
-        assertTrue(strategy instanceof LedgerWebSynchronizationStrategy);
+        assertEquals(LedgerWebSynchronizationStrategy.class, strategy.getClass());
+    }
+
+    public void testCreateLedgerWebPublishReportedStrategy() {
+        Bundle options = new Bundle();
+        options.putInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION, 100);
+        SynchronizationStrategy strategy = subject.createStrategy(getContext(), options);
+        assertEquals(LedgerWebPublishReportedSyncStrategy.class, strategy.getClass());
     }
 
     public void testCreateFetchBankLinksStrategy() {
         Bundle options = new Bundle();
         options.putBoolean(SynchronizationStrategiesFactory.OPTION_FETCH_BANK_LINKS, true);
         SynchronizationStrategy strategy = subject.createStrategy(getContext(), options);
-        assertTrue(strategy instanceof FetchBankLinksSynchronizationStrategy);
+        assertEquals(FetchBankLinksSynchronizationStrategy.class, strategy.getClass());
     }
 }

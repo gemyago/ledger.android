@@ -2,6 +2,7 @@ package com.infora.ledger.mocks;
 
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
+import com.infora.ledger.support.ObjectNotFoundException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,6 +29,13 @@ public class MockTransactionsReadModel extends TransactionsReadModel {
     public MockTransactionsReadModel injectAnd(PendingTransaction transaction) {
         inject(transaction);
         return this;
+    }
+
+    @Override public PendingTransaction getById(int id) {
+        for (PendingTransaction transaction : transactions) {
+            if(transaction.id == id) return transaction;
+        }
+        throw new ObjectNotFoundException("Transaction id='" + id + "' not found");
     }
 
     @Override

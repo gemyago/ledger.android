@@ -28,6 +28,10 @@ public class TransactionsReadModel {
         dbHelper = new LedgerDbHelper(context);
     }
 
+    public PendingTransaction getById(int id) throws SQLException {
+        return null;
+    }
+
     /**
      * Returns actual (not deleted) transactions
      *

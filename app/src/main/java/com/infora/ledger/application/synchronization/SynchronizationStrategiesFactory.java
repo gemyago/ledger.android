@@ -13,6 +13,7 @@ import javax.inject.Inject;
  */
 public class SynchronizationStrategiesFactory {
     public static final String OPTION_SYNCHRONIZE_LEDGER_WEB = "option-synchronize-ledger-web";
+    public static final String OPTION_PUBLISH_REPORTED_TRANSACTION = "option-publish-reported-transaction";
     public static final String OPTION_FETCH_BANK_LINKS = "option-fetch-bank-links";
 
     @Inject public SynchronizationStrategiesFactory() {
@@ -24,6 +25,8 @@ public class SynchronizationStrategiesFactory {
             return injector.provideLedgerWebSyncStrategy();
         if (options.getBoolean(OPTION_FETCH_BANK_LINKS, false))
             return injector.provideFetchBankLinksSynchronizationStrategy();
+        if(options.getInt(OPTION_PUBLISH_REPORTED_TRANSACTION) != 0)
+            return injector.provideLedgerWebPublishReportedSyncStrategy();
         return new CompositeSynchronizationStrategy(
                 injector.provideFetchBankLinksSynchronizationStrategy(),
                 injector.provideLedgerWebSyncStrategy());
