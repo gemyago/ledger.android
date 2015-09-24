@@ -214,6 +214,8 @@ public class ReportActivity extends AppCompatActivity {
         Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
 
         restartTransactionsLoader();
+
+        if(prefsProvider.useManualSync()) return;
         Bundle syncOptions = new Bundle();
         syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) event.getId());
         syncOptions.putString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION, SYNC_ACTION_PUBLISH);
@@ -222,6 +224,8 @@ public class ReportActivity extends AppCompatActivity {
 
     public void onEventMainThread(TransactionAdjusted event) {
         restartTransactionsLoader();
+
+        if(prefsProvider.useManualSync()) return;
         Bundle syncOptions = new Bundle();
         syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) event.id);
         syncOptions.putString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION, SYNC_ACTION_ADJUST);
@@ -235,6 +239,7 @@ public class ReportActivity extends AppCompatActivity {
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
         restartTransactionsLoader();
 
+        if(prefsProvider.useManualSync()) return;
         for (long id: event.getIds()) {
             Bundle syncOptions = new Bundle();
             syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) id);

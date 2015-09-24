@@ -307,6 +307,18 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertTrue("The report button was not enabled", reportButton.isEnabled());
     }
 
+    public void testTransactionReportedEventWithManualSync() {
+        mockSharedPrefsProvider.useManualSync = true;
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEventMainThread(new TransactionReportedEvent(100));
+        assertFalse(syncRequested[0]);
+    }
+
     public void testTransactionAdjusted() {
         BarrierSubscriber<ReportActivity.TransactionsLoaded> barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
@@ -333,6 +345,19 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getActivity().onEventMainThread(new TransactionAdjusted(100));
         barrier.await();
         assertTrue(syncRequested[0]);
+    }
+
+    public void testTransactionAdjustedWithManualSync() {
+        mockSharedPrefsProvider.useManualSync = true;
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEventMainThread(new TransactionAdjusted(100));
+        assertFalse(syncRequested[0]);
+
     }
 
     public void testDeleteAction() throws BrokenBarrierException, InterruptedException {
@@ -386,5 +411,17 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getActivity().onEventMainThread(new TransactionsDeletedEvent(100));
         barrier.await();
         assertTrue(syncRequested[0]);
+    }
+
+    public void testTransactionDeletedWithManualSync() {
+        mockSharedPrefsProvider.useManualSync = true;
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEventMainThread(new TransactionsDeletedEvent(100));
+        assertFalse(syncRequested[0]);
     }
 }
