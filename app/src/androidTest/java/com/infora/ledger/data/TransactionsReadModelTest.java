@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
 import com.infora.ledger.DbUtils;
+import com.infora.ledger.support.ObjectNotFoundException;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -24,6 +25,29 @@ public class TransactionsReadModelTest extends AndroidTestCase {
         repo = new DatabaseRepository<>(PendingTransaction.class, context);
         subject = new TransactionsReadModel(context);
         super.setUp();
+    }
+
+    public void testGetById() throws SQLException {
+        PendingTransaction t1 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-1").setTimestamp(new Date()).save(repo);
+        PendingTransaction t2 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-2").setTimestamp(new Date()).save(repo);
+
+        assertEquals(t1, subject.getById(t1.id));
+        assertEquals(t2, subject.getById(t2.id));
+    }
+
+    public void testGetByIdNotExisting() throws SQLException {
+        PendingTransaction t1 = new PendingTransaction().setAmount("100")
+                .setBic("bic-1").setTransactionId("t-1").setTimestamp(new Date()).save(repo);
+        repo.deleteAll(new long[] { t1.id });
+        boolean raised = false;
+        try {
+            subject.getById(t1.id);
+        } catch (ObjectNotFoundException ex) {
+            raised = true;
+        }
+        assertTrue(raised);
     }
 
     public void testGetTransactions() throws SQLException {

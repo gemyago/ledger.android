@@ -29,7 +29,12 @@ public class TransactionsReadModel {
     }
 
     public PendingTransaction getById(int id) throws SQLException {
-        return null;
+        ConnectionSource connectionSource = new AndroidConnectionSource(dbHelper);
+        try {
+            return DaoTools.getById(PendingTransaction.class, id, connectionSource);
+        } finally {
+            connectionSource.close();
+        }
     }
 
     /**
