@@ -255,7 +255,7 @@ public class ReportActivity extends AppCompatActivity {
         }
         if(!swipeRefresh.isRefreshing()) swipeRefresh.setRefreshing(true);
         Bundle settingsBundle = new Bundle();
-        if(cmd.isLedgerWebOnly) {
+        if(cmd.isLedgerWebOnly || prefsProvider.manuallyFetchBankLinks()) {
             Log.d(TAG, "Requesting synchronization with ledger web only.");
             settingsBundle.putBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB, true);
         }

@@ -19,10 +19,12 @@ import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
+import com.infora.ledger.mocks.MockSharedPrefsProvider;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockSyncService;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
@@ -49,6 +51,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     @Inject EventBus bus;
     private MockTransactionsReadModel transactionsReadModel;
     private MockSyncService mockSyncService;
+    private MockSharedPrefsProvider mockSharedPrefsProvider;
 
     public ReportActivityTest() {
         super(ReportActivity.class);
@@ -71,6 +74,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
                 .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
                     @Override public void init(TestApplicationModule module) {
                         module.transactionsReadModel = transactionsReadModel = new MockTransactionsReadModel();
+                        module.sharedPrefsProvider = mockSharedPrefsProvider = new MockSharedPrefsProvider();
                         mockSyncService = new MockSyncService();
                         module.syncService = mockSyncService;
                     }
@@ -125,6 +129,72 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         assertEquals("Request sync command hasn't been posted", 1, mockSubscriber.getEvents().size());
         assertTrue("Is manual flag wasn't set", mockSubscriber.getEvent().isManual);
         assertFalse("Is ledger web was mistakenly set", mockSubscriber.getEvent().isLedgerWebOnly);
+    }
+
+    public void testOnRequestSyncCommand() {
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEvent(new ReportActivity.RequestSyncCommand());
+        assertTrue(syncRequested[0]);
+    }
+
+    public void testOnRequestSyncWebOnly() {
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                assertTrue(extras.getBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB));
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEvent(new ReportActivity.RequestSyncCommand().setLedgerWebOnly(true));
+        assertTrue(syncRequested[0]);
+    }
+
+    public void testOnRequestIgnoreIfManualOnly() {
+        final boolean[] syncRequested = {false};
+        mockSharedPrefsProvider.useManualSync = true;
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEvent(new ReportActivity.RequestSyncCommand());
+        assertFalse(syncRequested[0]);
+    }
+
+    public void testOnRequestSyncWebOnlyIfBankLinksFetchedManually() {
+        final boolean[] syncRequested = {false};
+        mockSharedPrefsProvider.manuallyFetchBankLinks = true;
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                assertTrue(extras.getBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB));
+                syncRequested[0] = true;
+            }
+        };
+        getActivity().onEvent(new ReportActivity.RequestSyncCommand());
+        assertTrue(syncRequested[0]);
     }
 
     public void testReportNewTransactionOnReportButtonClick() {
