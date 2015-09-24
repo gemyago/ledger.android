@@ -36,6 +36,10 @@ import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION_ACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_PUBLISH;
+
 /**
  * Created by jenya on 21.03.15.
  */
@@ -215,7 +219,8 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
                 assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
                 assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
                 assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
-                assertEquals(100, extras.getInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION));
+                assertEquals(100, extras.getInt(OPTION_SYNC_SINGLE_TRANSACTION));
+                assertEquals(SYNC_ACTION_PUBLISH, extras.getString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION));
                 syncRequested[0] = true;
             }
         };

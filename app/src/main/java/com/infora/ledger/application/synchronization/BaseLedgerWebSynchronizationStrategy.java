@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.LedgerApiFactory;
+import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.support.LogUtil;
@@ -44,5 +45,25 @@ public abstract class BaseLedgerWebSynchronizationStrategy implements Synchroniz
             throw new SynchronizationException("Failed to report pending transaction.", ex);
         }
         bus.post(new MarkTransactionAsPublishedCommand(localTran.id));
+    }
+
+    protected static void adjustPendingTransaction(LedgerApi api, PendingTransaction localTran, SyncResult syncResult) throws SynchronizationException {
+        Log.d(TAG, "Local transaction id='" + localTran.id + "' has been changed. Adjusting remote.");
+        try {
+            api.adjustPendingTransaction(localTran.transactionId, localTran.amount, localTran.comment, localTran.accountId);
+        } catch (RetrofitError ex) {
+            syncResult.stats.numIoExceptions++;
+            throw new SynchronizationException("Failed to adjust pending transaction.", ex);
+        }
+    }
+
+    protected static void rejectPendingTransaction(LedgerApi api, String transactionId, SyncResult syncResult) throws SynchronizationException {
+        Log.d(TAG, "Local transaction '" + transactionId + "' removed. Rejecting remote.");
+        try {
+            api.rejectPendingTransaction(transactionId);
+        } catch (RetrofitError ex) {
+            syncResult.stats.numIoExceptions++;
+            throw new SynchronizationException("Failed to reject pending transaction." + ex);
+        }
     }
 }

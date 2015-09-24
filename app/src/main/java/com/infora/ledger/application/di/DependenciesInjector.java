@@ -9,7 +9,7 @@ import com.infora.ledger.LoginActivity;
 import com.infora.ledger.Privat24BankLinkFragment;
 import com.infora.ledger.ReportActivity;
 import com.infora.ledger.application.synchronization.FetchBankLinksSynchronizationStrategy;
-import com.infora.ledger.application.synchronization.LedgerWebPublishReportedSyncStrategy;
+import com.infora.ledger.application.synchronization.LedgerWebSingleTransactionSyncStrategy;
 import com.infora.ledger.application.synchronization.LedgerWebSynchronizationStrategy;
 import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapter;
 import com.infora.ledger.data.LedgerAccountsLoader;
@@ -43,7 +43,7 @@ public interface DependenciesInjector {
 
     LedgerWebSynchronizationStrategy provideLedgerWebSyncStrategy();
 
-    LedgerWebPublishReportedSyncStrategy provideLedgerWebPublishReportedSyncStrategy();
+    LedgerWebSingleTransactionSyncStrategy provideLedgerWebPublishReportedSyncStrategy();
 
     FetchBankLinksSynchronizationStrategy provideFetchBankLinksSynchronizationStrategy();
 }

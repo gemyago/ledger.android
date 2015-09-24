@@ -44,9 +44,9 @@ public class SynchronizationStrategiesFactoryTest extends AndroidTestCase {
 
     public void testCreateLedgerWebPublishReportedStrategy() {
         Bundle options = new Bundle();
-        options.putInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION, 100);
+        options.putInt(SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION, 100);
         SynchronizationStrategy strategy = subject.createStrategy(getContext(), options);
-        assertEquals(LedgerWebPublishReportedSyncStrategy.class, strategy.getClass());
+        assertEquals(LedgerWebSingleTransactionSyncStrategy.class, strategy.getClass());
     }
 
     public void testCreateFetchBankLinksStrategy() {

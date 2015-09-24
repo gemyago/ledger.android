@@ -11,7 +11,6 @@ import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
-import com.infora.ledger.support.LogUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
-import retrofit.RetrofitError;
 
 /**
  * Created by jenya on 25.03.15.
@@ -69,7 +67,6 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
                 PendingTransactionDto remoteTran = remoteTransactionsMap.get(localTran.transactionId);
                 if (!Objects.equals(remoteTran.amount, localTran.amount) ||
                         !remoteTran.comment.equals(localTran.comment)) {
-                    Log.d(TAG, "Local transaction id='" + localTran.id + "' has been changed. Adjusting remote.");
                     adjustPendingTransaction(api, localTran, syncResult);
                 } else {
                     Log.d(TAG, "Transaction id='" + localTran.id + "' has not ben changed. Skipping.");
@@ -84,8 +81,7 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
 
         for (PendingTransactionDto remoteTran : remoteTransactionsMap.values()) {
             if (!localTransMap.containsKey(remoteTran.transactionId)) {
-                Log.d(TAG, "Local transaction '" + remoteTran.transactionId + "' removed. Rejecting remote.");
-                rejectPendingTransaction(api, remoteTran, syncResult);
+                rejectPendingTransaction(api, remoteTran.transactionId, syncResult);
             }
         }
 
@@ -99,21 +95,4 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
         }
     }
 
-    private static void rejectPendingTransaction(LedgerApi api, PendingTransactionDto remoteTran, SyncResult syncResult) throws SynchronizationException {
-        try {
-            api.rejectPendingTransaction(remoteTran.transactionId);
-        } catch (RetrofitError ex) {
-            syncResult.stats.numIoExceptions++;
-            throw new SynchronizationException("Failed to reject pending transaction." + ex);
-        }
-    }
-
-    private static void adjustPendingTransaction(LedgerApi api, PendingTransaction localTran, SyncResult syncResult) throws SynchronizationException {
-        try {
-            api.adjustPendingTransaction(localTran.transactionId, localTran.amount, localTran.comment, localTran.accountId);
-        } catch (RetrofitError ex) {
-            syncResult.stats.numIoExceptions++;
-            throw new SynchronizationException("Failed to adjust pending transaction.", ex);
-        }
-    }
 }

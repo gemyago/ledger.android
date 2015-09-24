@@ -51,6 +51,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION_ACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_PUBLISH;
+
 public class ReportActivity extends AppCompatActivity {
     private static final String TAG = ReportActivity.class.getName();
     private static final int REPORTED_TRANSACTIONS_LOADER_ID = 1;
@@ -210,7 +214,8 @@ public class ReportActivity extends AppCompatActivity {
 
         restartTransactionsLoader();
         Bundle syncOptions = new Bundle();
-        syncOptions.putInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION, (int) event.getId());
+        syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) event.getId());
+        syncOptions.putString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION, SYNC_ACTION_PUBLISH);
         doForceSync(syncOptions);
     }
 
