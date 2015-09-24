@@ -1,9 +1,13 @@
 package com.infora.ledger.banks.ua.privatbank;
 
+import android.util.Base64;
+
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -32,10 +36,13 @@ public class Privat24Transaction implements BankTransaction {
             throw new RuntimeException(e);
         }
         String absOriginalAmount = originalAmount.replace("-", "");
+        String transactionId = bankLink.accountId + timestamp.getTime() + absOriginalAmount.replace(".", "P");
+        //Using sha256 and Base64 to have transactionId no longer than 50 chars.
+        transactionId = Base64.encodeToString(DigestUtils.sha256(transactionId), Base64.NO_PADDING + Base64.NO_WRAP + Base64.URL_SAFE);
         return new PendingTransaction()
                 .setTypeId(typeId)
                 .setAccountId(bankLink.accountId)
-                .setTransactionId(bankLink.accountId + timestamp.getTime() + absOriginalAmount.replace(".", "P"))
+                .setTransactionId(transactionId)
                 .setAmount(amount.replace("-", ""))
                 .setComment(description)
                 .setTimestamp(timestamp)
