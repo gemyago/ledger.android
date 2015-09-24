@@ -26,7 +26,7 @@ public class Privat24TransactionTest extends TestCase {
         PendingTransaction pendingTransaction = pbTransaction.toPendingTransaction(bankLink);
         assertEquals(TransactionContract.TRANSACTION_TYPE_EXPENSE, pendingTransaction.typeId);
         assertEquals(bankLink.accountId, pendingTransaction.accountId);
-        assertEquals(date.getTime() + "20P44", pendingTransaction.transactionId);
+        assertEquals("account-100" + date.getTime() + "20P44", pendingTransaction.transactionId);
         assertEquals("100.31", pendingTransaction.amount);
         assertEquals(pbTransaction.description, pendingTransaction.comment);
         assertEquals(date, pendingTransaction.timestamp);

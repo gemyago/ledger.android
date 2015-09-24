@@ -35,7 +35,7 @@ public class Privat24Transaction implements BankTransaction {
         return new PendingTransaction()
                 .setTypeId(typeId)
                 .setAccountId(bankLink.accountId)
-                .setTransactionId(timestamp.getTime() + absOriginalAmount.replace(".", "P"))
+                .setTransactionId(bankLink.accountId + timestamp.getTime() + absOriginalAmount.replace(".", "P"))
                 .setAmount(amount.replace("-", ""))
                 .setComment(description)
                 .setTimestamp(timestamp)
