@@ -58,7 +58,7 @@ public class LedgerWebSingleTransactionSyncStrategy extends BaseLedgerWebSynchro
             syncResult.stats.numIoExceptions++;
             throw new SynchronizationException(e);
         }
-
+        Log.i(TAG, "Performing sync action: " + action);
         if (action.equals(SYNC_ACTION_PUBLISH)) {
             if (transaction.isPublished) {
                 Log.w(TAG, "Transaction id='" + transaction.id + "' has already been published. Publish skipped.");
