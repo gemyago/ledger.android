@@ -18,7 +18,7 @@ import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.ipc.EventBroadcastsReceiver;
 import com.infora.ledger.ipc.EventsBroadcaster;
 import com.infora.ledger.support.AccountManagerWrapper;
-import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.support.SharedPreferencesProvider;
 
 import javax.inject.Inject;
 
@@ -82,7 +82,7 @@ public class LedgerApplication extends Application implements InjectorProvider<D
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
 
         PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
-        SharedPreferences sharedPreferences = SharedPreferencesUtil.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPreferences = SharedPreferencesProvider.getDefaultSharedPreferences(this);
         if (!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
             Log.d(TAG, "Ledger host preference not yet initialized. Assigning default value: " + BuildConfig.DEFAULT_LEDGER_HOST);
             SharedPreferences.Editor edit = sharedPreferences.edit();

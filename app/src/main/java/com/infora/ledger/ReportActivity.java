@@ -40,7 +40,7 @@ import com.infora.ledger.application.synchronization.SynchronizationStrategiesFa
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.EventHandler;
-import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.support.SharedPreferencesProvider;
 import com.infora.ledger.support.SyncService;
 
 import java.sql.SQLException;
@@ -71,6 +71,7 @@ public class ReportActivity extends AppCompatActivity {
     @Inject EventBus bus;
     @Inject TransactionsReadModel transactionsReadModel;
     @Inject SyncService syncService;
+    @Inject SharedPreferencesProvider prefsProvider;
 
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
@@ -181,9 +182,7 @@ public class ReportActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.action_synchronize) {
-            RequestSyncCommand cmd = new RequestSyncCommand();
-            cmd.isManual = true;
-            bus.post(cmd);
+            bus.post(new RequestSyncCommand().setManual(true));
             return true;
         }
         if (id == R.id.action_bank_links) {
@@ -201,7 +200,7 @@ public class ReportActivity extends AppCompatActivity {
         }
         String commentValue = comment.getText().toString();
         findViewById(R.id.report).setEnabled(false);
-        String accountId = SharedPreferencesUtil.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, null);
+        String accountId = SharedPreferencesProvider.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, null);
         bus.post(new ReportTransactionCommand(accountId, amountValue, commentValue));
     }
 
@@ -250,9 +249,7 @@ public class ReportActivity extends AppCompatActivity {
 
     @EventHandler
     public void onEvent(RequestSyncCommand cmd) {
-        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(this);
-        boolean shouldUseManualSync = prefs.getBoolean(SettingsFragment.KEY_USE_MANUAL_SYNC, false);
-        if (shouldUseManualSync && !cmd.isManual) {
+        if (prefsProvider.useManualSync() && !cmd.isManual) {
             Log.d(TAG, "Automatic synchronization is disabled.");
             return;
         }

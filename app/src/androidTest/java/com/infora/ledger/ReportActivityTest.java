@@ -19,7 +19,6 @@ import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
-import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
@@ -28,7 +27,7 @@ import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockSyncService;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 import com.infora.ledger.mocks.di.TestApplicationModule;
-import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.support.SharedPreferencesProvider;
 
 import java.util.concurrent.BrokenBarrierException;
 
@@ -65,7 +64,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     public void setUp() throws Exception {
         super.setUp();
         final Context baseContext = getInstrumentation().getTargetContext();
-        SharedPreferences.Editor edit = SharedPreferencesUtil.getDefaultSharedPreferences(baseContext).edit();
+        SharedPreferences.Editor edit = SharedPreferencesProvider.getDefaultSharedPreferences(baseContext).edit();
         edit.remove(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID).commit();
 
         final MockLedgerApplication app = new MockLedgerApplication(baseContext)
@@ -149,7 +148,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
     }
 
     public void testReportNewTransactionWithDefaultAccount() {
-        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = SharedPreferencesProvider.getDefaultSharedPreferences(getActivity());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(SettingsFragment.KEY_DEFAULT_ACCOUNT_ID, "account-100");
         editor.apply();

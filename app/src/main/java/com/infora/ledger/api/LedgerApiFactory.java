@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.infora.ledger.SettingsFragment;
 import com.infora.ledger.support.AccountManagerWrapper;
-import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.support.SharedPreferencesProvider;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
@@ -131,7 +131,7 @@ public class LedgerApiFactory {
     }
 
     public static LedgerApiFactory createAdapter(Context context, AccountManagerWrapper accountManager) {
-        SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = SharedPreferencesProvider.getDefaultSharedPreferences(context);
         String ledgerHost = prefs.getString(SettingsFragment.KEY_LEDGER_HOST, null);
         Log.d(TAG, "Using ledger host: " + ledgerHost);
         return new LedgerApiFactory(context, accountManager, ledgerHost);
