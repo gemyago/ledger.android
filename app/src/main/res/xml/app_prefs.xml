@@ -13,6 +13,13 @@
         android:defaultValue="false"
         >
     </SwitchPreference>
+    <SwitchPreference
+        android:key="manually_fetch_bank_links"
+        android:title="@string/prefs_manually_fetch_bank_links"
+        android:summary="@string/prefs_manually_fetch_bank_links_summary"
+        android:defaultValue="false"
+        >
+    </SwitchPreference>
     <com.infora.ledger.DefaultTransactionAccountPreference
         android:key="default_transaction_account"
         android:title="Default Transaction Account"

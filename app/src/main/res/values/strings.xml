@@ -27,7 +27,9 @@
     <string name="prefs_ledger_host">Ledger host</string>
     <string name="prefs_ledger_host_summary">Host name of the ledger server. Sample: https://my-ledger.com.</string>
     <string name="prefs_use_manual_sync">Synchronize manually</string>
-    <string name="prefs_use_manual_sync_summary">Local and remote data will be synchronized only on synchronize action.</string>
+    <string name="prefs_use_manual_sync_summary">If set to true then local and remote data will be synchronized only on synchronize action. In other case transaction changes will be published automatically.</string>
+    <string name="prefs_manually_fetch_bank_links">Fetch bank links manually</string>
+    <string name="prefs_manually_fetch_bank_links_summary">If set to true then bank links will only be fetched manually using fetch action. In other case bank links will be fetched when synchronizing.</string>
     <string name="action_report">Report</string>
     <string name="action_bank_links">Bank Links</string>
     <string name="action_add_bank_link">Add link</string>
