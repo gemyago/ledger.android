@@ -97,19 +97,6 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
-        getContentResolver().registerContentObserver(TransactionContract.CONTENT_URI, true, new ContentObserver(null) {
-            @Override
-            public void onChange(boolean selfChange) {
-                super.onChange(selfChange, null);
-            }
-
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                Log.d(TAG, "Content changed. Requesting sync...");
-                bus.post(new RequestSyncCommand());
-            }
-        });
-
         final int imeActionReport = getResources().getInteger(R.integer.ime_action_report);
         comment.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
