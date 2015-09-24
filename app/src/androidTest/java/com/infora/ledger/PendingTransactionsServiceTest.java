@@ -42,28 +42,33 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         subject = new PendingTransactionsService(db, bus);
     }
 
+    public void testOnReportTransactionCommand() throws SQLException {
+        final PendingTransaction transaction = new PendingTransaction().setId(100);
+        final ReportTransactionCommand command = new ReportTransactionCommand("account-100", "100.01", "Comment 100.01");
+        MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>(TransactionReportedEvent.class);
+        bus.register(subscriber);
+        subject = new PendingTransactionsService(new MockDatabaseContext(), bus) {
+            @Override
+            public PendingTransaction reportPendingTransaction(ReportTransactionCommand c) throws SQLException {
+                assertSame(command, c);
+                return transaction;
+            }
+        };
+        subject.onEventBackgroundThread(command);
+        assertEquals(100, subscriber.getEvent().getId());
+    }
+
     public void testReportPendingTransaction() throws SQLException {
-        subject.onEventBackgroundThread(new ReportTransactionCommand("account-100", "100.01", "Comment 100.01"));
+        PendingTransaction reportedT = subject.reportPendingTransaction(new ReportTransactionCommand("account-100", "100.01", "Comment 100.01"));
         assertEquals(1, repo.savedEntities.size());
         PendingTransaction transaction = repo.savedEntities.get(0);
+        assertSame(reportedT, transaction);
         assertNotNull(transaction.transactionId);
         assertNotNull(transaction.timestamp);
         assertEquals(TransactionContract.TRANSACTION_TYPE_EXPENSE, transaction.typeId);
         assertEquals("account-100", transaction.accountId);
         assertEquals("100.01", transaction.amount);
         assertEquals("Comment 100.01", transaction.comment);
-    }
-
-    public void testReportPendingTransactionRaisesReportedEvent() throws SQLException {
-        MockSubscriber<TransactionReportedEvent> subscriber = new MockSubscriber<>(TransactionReportedEvent.class);
-        bus.register(subscriber);
-        repo.onSaving = new MockDatabaseRepository.SaveAction<PendingTransaction>() {
-            @Override public void save(PendingTransaction pendingTransaction) {
-                pendingTransaction.id = 100;
-            }
-        };
-        subject.onEventBackgroundThread(new ReportTransactionCommand(null, "100.01", "Comment 100.01"));
-        assertEquals(100, subscriber.getEvent().getId());
     }
 
     public void testAdjustTransactionCommand() throws SQLException {
@@ -96,11 +101,9 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         repo.entitiesToGetById.add(t1);
         repo.entitiesToGetById.add(t2);
         repo.entitiesToGetById.add(t3);
-        MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>(TransactionsDeletedEvent.class);
-        bus.register(deletedSubscriber);
 
         DeleteTransactionsCommand command = new DeleteTransactionsCommand(3321L, 3322L, 3323L);
-        subject.onEventBackgroundThread(command);
+        subject.deleteTransactions(command);
 
         assertEquals(3, repo.savedEntities.size());
         assertTrue(repo.savedEntities.contains(t1));
@@ -110,7 +113,19 @@ public class PendingTransactionsServiceTest extends ProviderTestCase2<MockPendin
         assertTrue(t1.isDeleted);
         assertTrue(t2.isDeleted);
         assertTrue(t3.isDeleted);
+    }
 
+    public void testOnDeleteTransactions() throws SQLException {
+        MockSubscriber<TransactionsDeletedEvent> deletedSubscriber = new MockSubscriber<>(TransactionsDeletedEvent.class);
+        bus.register(deletedSubscriber);
+        final DeleteTransactionsCommand command = new DeleteTransactionsCommand(3321L, 3322L, 3323L);
+        subject = new PendingTransactionsService(new MockDatabaseContext(), bus) {
+            @Override
+            public void deleteTransactions(DeleteTransactionsCommand c) throws SQLException {
+                assertSame(command, c);
+            }
+        };
+        subject.onEventBackgroundThread(command);
         assertEquals(1, deletedSubscriber.getEvents().size());
         assertEquals(command.ids, deletedSubscriber.getEvent().getIds());
     }

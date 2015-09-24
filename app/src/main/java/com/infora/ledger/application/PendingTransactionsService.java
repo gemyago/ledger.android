@@ -34,6 +34,11 @@ public class PendingTransactionsService {
     }
 
     public void onEventBackgroundThread(ReportTransactionCommand command) throws SQLException {
+        PendingTransaction transaction = reportPendingTransaction(command);
+        bus.post(new TransactionReportedEvent(transaction.id));
+    }
+
+    public PendingTransaction reportPendingTransaction(ReportTransactionCommand command) throws SQLException {
         Log.d(TAG, "Reporting new transaction");
         PendingTransaction transaction = repo.save(new PendingTransaction()
                 .setTransactionId(UUID.randomUUID().toString())
@@ -42,17 +47,21 @@ public class PendingTransactionsService {
                 .setAmount(command.amount)
                 .setComment(command.comment)
                 .setTimestamp(new Date()));
-        bus.post(new TransactionReportedEvent(transaction.id));
+        return transaction;
     }
 
     public void onEventBackgroundThread(DeleteTransactionsCommand command) throws SQLException {
+        deleteTransactions(command);
+        bus.post(new TransactionsDeletedEvent(command.ids));
+    }
+
+    public void deleteTransactions(DeleteTransactionsCommand command) throws SQLException {
         Log.d(TAG, "Marking transactions as deleted. Count: " + command.ids.length);
         for (long id : command.ids) {
             PendingTransaction transaction = repo.getById(id);
             transaction.isDeleted = true;
             repo.save(transaction);
         }
-        bus.post(new TransactionsDeletedEvent(command.ids));
     }
 
     public void onEventBackgroundThread(AdjustTransactionCommand command) throws SQLException {
