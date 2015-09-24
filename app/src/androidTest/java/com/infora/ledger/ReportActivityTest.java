@@ -38,7 +38,9 @@ import de.greenrobot.event.EventBus;
 
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION;
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION_ACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_ADJUST;
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_PUBLISH;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_REJECT;
 
 /**
  * Created by jenya on 21.03.15.
@@ -242,10 +244,26 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();
 
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                assertEquals(100, extras.getInt(OPTION_SYNC_SINGLE_TRANSACTION));
+                assertEquals(SYNC_ACTION_ADJUST, extras.getString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION));
+                syncRequested[0] = true;
+            }
+        };
+
         barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
         getActivity().onEventMainThread(new TransactionAdjusted(100));
         barrier.await();
+        assertTrue(syncRequested[0]);
     }
 
     public void testDeleteAction() throws BrokenBarrierException, InterruptedException {
@@ -279,9 +297,25 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         getInstrumentation().callActivityOnStart(getActivity());
         barrier.await();
 
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                assertEquals(100, extras.getInt(OPTION_SYNC_SINGLE_TRANSACTION));
+                assertEquals(SYNC_ACTION_REJECT, extras.getString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION));
+                syncRequested[0] = true;
+            }
+        };
+
         barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
         getActivity().onEventMainThread(new TransactionsDeletedEvent(100));
         barrier.await();
+        assertTrue(syncRequested[0]);
     }
 }

@@ -53,7 +53,9 @@ import de.greenrobot.event.EventBus;
 
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION;
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.OPTION_SYNC_SINGLE_TRANSACTION_ACTION;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_ADJUST;
 import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_PUBLISH;
+import static com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory.SYNC_ACTION_REJECT;
 
 public class ReportActivity extends AppCompatActivity {
     private static final String TAG = ReportActivity.class.getName();
@@ -221,6 +223,10 @@ public class ReportActivity extends AppCompatActivity {
 
     public void onEventMainThread(TransactionAdjusted event) {
         restartTransactionsLoader();
+        Bundle syncOptions = new Bundle();
+        syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) event.id);
+        syncOptions.putString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION, SYNC_ACTION_ADJUST);
+        doForceSync(syncOptions);
     }
 
     @EventHandler
@@ -229,6 +235,13 @@ public class ReportActivity extends AppCompatActivity {
         String message = getResources().getQuantityString(R.plurals.transactions_removed, removedLength, removedLength);
         Toast.makeText(ReportActivity.this, message, Toast.LENGTH_SHORT).show();
         restartTransactionsLoader();
+
+        for (long id: event.getIds()) {
+            Bundle syncOptions = new Bundle();
+            syncOptions.putInt(OPTION_SYNC_SINGLE_TRANSACTION, (int) id);
+            syncOptions.putString(OPTION_SYNC_SINGLE_TRANSACTION_ACTION, SYNC_ACTION_REJECT);
+            doForceSync(syncOptions);
+        }
     }
 
     private void restartTransactionsLoader() {
