@@ -239,10 +239,6 @@ public class ReportActivity extends AppCompatActivity {
         }
         if(!swipeRefresh.isRefreshing()) swipeRefresh.setRefreshing(true);
         Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
-        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
         if(cmd.isLedgerWebOnly) {
             Log.d(TAG, "Requesting synchronization with ledger web only.");
             settingsBundle.putBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB, true);
@@ -250,6 +246,10 @@ public class ReportActivity extends AppCompatActivity {
         if (doNotCallRequestSync) {
             Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
         } else {
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
             ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
         }
     }
