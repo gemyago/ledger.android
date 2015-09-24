@@ -16,8 +16,10 @@ import com.infora.ledger.mocks.MockAccountManagerWrapper;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockLedgerApiFactory;
+import com.infora.ledger.mocks.MockSyncService;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.GooglePlayServicesUtilWrapper;
+import com.infora.ledger.support.SyncService;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
 
 import java.security.NoSuchAlgorithmException;
@@ -42,6 +44,7 @@ public class TestApplicationModule {
     public TransactionsReadModel transactionsReadModel;
     public DatabaseContext databaseContext;
     public SynchronizationStrategiesFactory synchronizationStrategiesFactory;
+    public SyncService syncService;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -106,5 +109,10 @@ public class TestApplicationModule {
 
     @Provides SynchronizationStrategiesFactory provideSynchronizationStrategiesFactory() {
         return synchronizationStrategiesFactory == null ? new SynchronizationStrategiesFactory() : synchronizationStrategiesFactory;
+    }
+
+    @Provides SyncService provideSyncService() {
+        if(syncService == null) syncService = new MockSyncService();
+        return syncService;
     }
 }

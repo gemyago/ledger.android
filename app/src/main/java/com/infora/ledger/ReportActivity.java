@@ -6,10 +6,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +41,7 @@ import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
 import com.infora.ledger.support.EventHandler;
 import com.infora.ledger.support.SharedPreferencesUtil;
+import com.infora.ledger.support.SyncService;
 
 import java.sql.SQLException;
 
@@ -65,6 +64,7 @@ public class ReportActivity extends AppCompatActivity {
 
     @Inject EventBus bus;
     @Inject TransactionsReadModel transactionsReadModel;
+    @Inject SyncService syncService;
 
     public static final String EDIT_TRANSACTION_DIALOG_TAG = "EditTransactionDialog";
 
@@ -209,6 +209,9 @@ public class ReportActivity extends AppCompatActivity {
         Toast.makeText(ReportActivity.this, getString(R.string.transaction_reported), Toast.LENGTH_SHORT).show();
 
         restartTransactionsLoader();
+        Bundle syncOptions = new Bundle();
+        syncOptions.putInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION, (int) event.getId());
+        doForceSync(syncOptions);
     }
 
     public void onEventMainThread(TransactionAdjusted event) {
@@ -227,8 +230,6 @@ public class ReportActivity extends AppCompatActivity {
         getLoaderManager().restartLoader(REPORTED_TRANSACTIONS_LOADER_ID, null, new LoaderCallbacks());
     }
 
-    protected boolean doNotCallRequestSync = false;
-
     @EventHandler
     public void onEvent(RequestSyncCommand cmd) {
         SharedPreferences prefs = SharedPreferencesUtil.getDefaultSharedPreferences(this);
@@ -243,15 +244,16 @@ public class ReportActivity extends AppCompatActivity {
             Log.d(TAG, "Requesting synchronization with ledger web only.");
             settingsBundle.putBoolean(SynchronizationStrategiesFactory.OPTION_SYNCHRONIZE_LEDGER_WEB, true);
         }
-        if (doNotCallRequestSync) {
-            Log.w(TAG, "The requestSync skipped because special flag st to true. Is it a test mode?");
-        } else {
-            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
-            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
-            ContentResolver.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
-        }
+
+        doForceSync(settingsBundle);
+    }
+
+    private void doForceSync(Bundle settingsBundle) {
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+        syncService.requestSync(null, TransactionContract.AUTHORITY, settingsBundle);
     }
 
     private class LoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {

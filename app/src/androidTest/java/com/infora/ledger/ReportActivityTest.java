@@ -1,10 +1,13 @@
 package com.infora.ledger;
 
+import android.accounts.Account;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -16,11 +19,13 @@ import com.infora.ledger.application.commands.ReportTransactionCommand;
 import com.infora.ledger.application.events.TransactionAdjusted;
 import com.infora.ledger.application.events.TransactionReportedEvent;
 import com.infora.ledger.application.events.TransactionsDeletedEvent;
+import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.mocks.BarrierSubscriber;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockMenuItem;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.MockSyncService;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.SharedPreferencesUtil;
@@ -38,6 +43,7 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
 
     @Inject EventBus bus;
     private MockTransactionsReadModel transactionsReadModel;
+    private MockSyncService mockSyncService;
 
     public ReportActivityTest() {
         super(ReportActivity.class);
@@ -60,12 +66,13 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
                 .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
                     @Override public void init(TestApplicationModule module) {
                         module.transactionsReadModel = transactionsReadModel = new MockTransactionsReadModel();
+                        mockSyncService = new MockSyncService();
+                        module.syncService = mockSyncService;
                     }
                 });
         app.injector().inject(this);
         setActivityContext(app);
         startActivity(new Intent(), null, null);
-        getActivity().doNotCallRequestSync = true;
     }
 
     public void testTransactionsLoaded() {
@@ -199,10 +206,25 @@ public class ReportActivityTest extends android.test.ActivityUnitTestCase<Report
         View reportButton = wnd.findViewById(R.id.report);
         reportButton.setEnabled(false);
 
+        final boolean[] syncRequested = {false};
+        mockSyncService.onRequestSync = new MockSyncService.OnRequestSync() {
+            @Override public void call(Account account, String authority, Bundle extras) {
+                assertNull(account);
+                assertEquals(TransactionContract.AUTHORITY, authority);
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY));
+                assertTrue(extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF));
+                assertEquals(100, extras.getInt(SynchronizationStrategiesFactory.OPTION_PUBLISH_REPORTED_TRANSACTION));
+                syncRequested[0] = true;
+            }
+        };
+
         barrier = new BarrierSubscriber<>(ReportActivity.TransactionsLoaded.class);
         bus.register(barrier);
         getActivity().onEventMainThread(new TransactionReportedEvent(100));
         barrier.await();
+        assertTrue(syncRequested[0]);
 
         assertEquals("", amount.getText().toString());
         assertEquals("", comment.getText().toString());
