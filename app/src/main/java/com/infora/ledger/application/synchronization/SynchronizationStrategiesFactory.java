@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.infora.ledger.application.di.DependenciesInjector;
 import com.infora.ledger.application.di.DiUtils;
+import com.infora.ledger.support.SharedPreferencesProvider;
 
 import javax.inject.Inject;
 
@@ -21,7 +22,10 @@ public class SynchronizationStrategiesFactory {
     public static final String SYNC_ACTION_ADJUST = "sync-action-adjust";
     public static final String SYNC_ACTION_REJECT = "sync-action-reject";
 
-    @Inject public SynchronizationStrategiesFactory() {
+    private SharedPreferencesProvider prefsProvider;
+
+    @Inject public SynchronizationStrategiesFactory(SharedPreferencesProvider prefsProvider) {
+        this.prefsProvider = prefsProvider;
     }
 
     public SynchronizationStrategy createStrategy(Context context, Bundle options) {
@@ -32,6 +36,8 @@ public class SynchronizationStrategiesFactory {
             return injector.provideFetchBankLinksSynchronizationStrategy();
         if(options.getInt(OPTION_SYNC_SINGLE_TRANSACTION) != 0)
             return injector.provideLedgerWebPublishReportedSyncStrategy();
+        if(prefsProvider.manuallyFetchBankLinks())
+            return injector.provideLedgerWebSyncStrategy();
         return new CompositeSynchronizationStrategy(
                 injector.provideFetchBankLinksSynchronizationStrategy(),
                 injector.provideLedgerWebSyncStrategy());

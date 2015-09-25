@@ -113,8 +113,8 @@ public class TestApplicationModule {
         return new MockLedgerApiFactory();
     }
 
-    @Provides SynchronizationStrategiesFactory provideSynchronizationStrategiesFactory() {
-        return synchronizationStrategiesFactory == null ? new SynchronizationStrategiesFactory() : synchronizationStrategiesFactory;
+    @Provides SynchronizationStrategiesFactory provideSynchronizationStrategiesFactory(SharedPreferencesProvider prefsProvider) {
+        return synchronizationStrategiesFactory == null ? new SynchronizationStrategiesFactory(prefsProvider) : synchronizationStrategiesFactory;
     }
 
     @Provides SyncService provideSyncService() {

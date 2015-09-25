@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.MockSharedPrefsProvider;
 import com.infora.ledger.mocks.di.TestApplicationModule;
 
 import javax.inject.Inject;
@@ -13,14 +14,16 @@ import javax.inject.Inject;
  */
 public class SynchronizationStrategiesFactoryTest extends AndroidTestCase {
     @Inject SynchronizationStrategiesFactory subject;
+    private MockSharedPrefsProvider sharedPrefsProvider;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        sharedPrefsProvider = new MockSharedPrefsProvider();
         MockLedgerApplication app = new MockLedgerApplication(getContext())
                 .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
                     @Override public void init(TestApplicationModule module) {
-
+                        module.sharedPrefsProvider = sharedPrefsProvider;
                     }
                 });
         app.injector().inject(this);
@@ -33,6 +36,13 @@ public class SynchronizationStrategiesFactoryTest extends AndroidTestCase {
         assertEquals(2, compositeStrategy.strategies.length);
         assertEquals(FetchBankLinksSynchronizationStrategy.class, compositeStrategy.strategies[0].getClass());
         assertEquals(LedgerWebSynchronizationStrategy.class, compositeStrategy.strategies[1].getClass());
+    }
+
+    public void testCreateStrategyNoSpecialOptionsWithManualBankLinksFetch() {
+        sharedPrefsProvider.manuallyFetchBankLinks = true;
+
+        SynchronizationStrategy strategy = subject.createStrategy(getContext(), new Bundle());
+        assertEquals(LedgerWebSynchronizationStrategy.class, strategy.getClass());
     }
 
     public void testCreateLedgerWebStrategy() {
