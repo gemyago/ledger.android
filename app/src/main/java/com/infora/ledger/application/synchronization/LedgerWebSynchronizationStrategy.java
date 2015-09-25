@@ -8,6 +8,7 @@ import android.util.Log;
 import com.infora.ledger.api.LedgerApi;
 import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.PendingTransactionDto;
+import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.data.TransactionsReadModel;
@@ -28,12 +29,14 @@ import de.greenrobot.event.EventBus;
 public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizationStrategy {
     private static final String TAG = LedgerWebSynchronizationStrategy.class.getName();
     private final EventBus bus;
-    private TransactionsReadModel readModel;
+    private final PendingTransactionsService pendingTransactionsService;
+    private final TransactionsReadModel readModel;
 
     @Inject
-    public LedgerWebSynchronizationStrategy(EventBus bus, TransactionsReadModel readModel, LedgerApiFactory apiFactory) {
+    public LedgerWebSynchronizationStrategy(EventBus bus, PendingTransactionsService pendingTransactionsService, TransactionsReadModel readModel, LedgerApiFactory apiFactory) {
         super(apiFactory);
         this.bus = bus;
+        this.pendingTransactionsService = pendingTransactionsService;
         this.readModel = readModel;
     }
 
@@ -59,7 +62,6 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
         }
         HashMap<String, PendingTransaction> localTransMap = new HashMap<>();
         Log.d(TAG, "Loaded " + localTransactions.size() + " locally reported transactions.");
-
 
         for (PendingTransaction localTran : localTransactions) {
             localTransMap.put(localTran.transactionId, localTran);
@@ -91,7 +93,12 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
                 ids[i] = toDeleteIds.get(i);
             }
             Log.d(TAG, "Posting command to delete '" + toDeleteIds.size() + "' transactions marked for deletion...");
-            bus.post(new DeleteTransactionsCommand(ids));
+            try {
+                pendingTransactionsService.deleteTransactions(new DeleteTransactionsCommand(ids));
+            } catch (SQLException e) {
+                syncResult.stats.numIoExceptions++;
+                throw new SynchronizationException("Failed to delete approved transactions.", e);
+            }
         }
     }
 

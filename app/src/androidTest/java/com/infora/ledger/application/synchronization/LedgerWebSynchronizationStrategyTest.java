@@ -10,8 +10,10 @@ import com.infora.ledger.api.PendingTransactionDto;
 import com.infora.ledger.application.commands.DeleteTransactionsCommand;
 import com.infora.ledger.application.commands.MarkTransactionAsPublishedCommand;
 import com.infora.ledger.data.PendingTransaction;
+import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockLedgerApi;
 import com.infora.ledger.mocks.MockLedgerApiFactory;
+import com.infora.ledger.mocks.MockPendingTransactionsService;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockTransactionsReadModel;
 
@@ -38,6 +40,7 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
     private SyncResult syncResult;
     private Account account;
     private MockLedgerApiFactory apiFactory;
+    private MockPendingTransactionsService pendingTransactionsService;
 
     @Override
     protected void setUp() throws Exception {
@@ -53,7 +56,8 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
                 return api;
             }
         };
-        subject = new LedgerWebSynchronizationStrategy(bus, readModel, apiFactory);
+        pendingTransactionsService = new MockPendingTransactionsService();
+        subject = new LedgerWebSynchronizationStrategy(bus, pendingTransactionsService, readModel, apiFactory);
         syncResult = new SyncResult();
     }
 
@@ -172,15 +176,14 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         readModel.inject(new PendingTransaction().setId(101).setTransactionId("t-101").setIsPublished(true));
         readModel.inject(new PendingTransaction().setId(102).setTransactionId("t-102").setIsPublished(true));
 
-        MockSubscriber<DeleteTransactionsCommand> deleteSubscriber = new MockSubscriber<>(DeleteTransactionsCommand.class);
-        bus.register(deleteSubscriber);
-
         subject.synchronize(account, null, syncResult);
 
-        assertEquals(1, deleteSubscriber.getEvents().size());
-        assertEquals(3, deleteSubscriber.getEvent().ids.length);
-        assertEquals(100, deleteSubscriber.getEvent().ids[0]);
-        assertEquals(101, deleteSubscriber.getEvent().ids[1]);
-        assertEquals(102, deleteSubscriber.getEvent().ids[2]);
+        assertEquals(1, pendingTransactionsService.deleteCommands.size());
+        DeleteTransactionsCommand deleteCommand = pendingTransactionsService.deleteCommands.get(0);
+
+        assertEquals(3, deleteCommand.ids.length);
+        assertEquals(100, deleteCommand.ids[0]);
+        assertEquals(101, deleteCommand.ids[1]);
+        assertEquals(102, deleteCommand.ids[2]);
     }
 }

@@ -16,6 +16,7 @@ import com.infora.ledger.mocks.MockAccountManagerWrapper;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockLedgerApiFactory;
+import com.infora.ledger.mocks.MockPendingTransactionsService;
 import com.infora.ledger.mocks.MockSharedPrefsProvider;
 import com.infora.ledger.mocks.MockSyncService;
 import com.infora.ledger.support.AccountManagerWrapper;
@@ -48,6 +49,7 @@ public class TestApplicationModule {
     public SynchronizationStrategiesFactory synchronizationStrategiesFactory;
     public SyncService syncService;
     public MockSharedPrefsProvider sharedPrefsProvider;
+    public MockPendingTransactionsService pendingTransactionsService;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -59,8 +61,9 @@ public class TestApplicationModule {
     }
 
     @Provides @Singleton
-    PendingTransactionsService providePendingTransactionsService(DatabaseContext db, EventBus bus) {
-        return new PendingTransactionsService(db, bus);
+    PendingTransactionsService providePendingTransactionsService() {
+        if(pendingTransactionsService == null) pendingTransactionsService = new MockPendingTransactionsService();
+        return pendingTransactionsService;
     }
 
     @Provides @Singleton
