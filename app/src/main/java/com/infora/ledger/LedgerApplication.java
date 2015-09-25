@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.app.Application;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -19,6 +20,7 @@ import com.infora.ledger.ipc.EventBroadcastsReceiver;
 import com.infora.ledger.ipc.EventsBroadcaster;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.support.SharedPreferencesProvider;
+import com.infora.ledger.support.SyncService;
 
 import javax.inject.Inject;
 
@@ -40,6 +42,7 @@ public class LedgerApplication extends Application implements InjectorProvider<D
     @Inject AccountManagerWrapper accountManager;
     @Inject PendingTransactionsService pendingTransactionsService;
     @Inject BankLinksService bankLinksService;
+    @Inject SyncService syncService;
 
     //TODO: Remove
     public EventBus getBus() {
@@ -90,6 +93,11 @@ public class LedgerApplication extends Application implements InjectorProvider<D
             edit.apply();
         }
 
+        Account[] accounts = accountManager.getApplicationAccounts();
+        if (accounts.length == 1) {
+            schedulePeriodicSync(accounts[0]);
+        }
+
         super.onCreate();
     }
 
@@ -103,6 +111,12 @@ public class LedgerApplication extends Application implements InjectorProvider<D
         Log.i(TAG, "Adding new account: " + cmd.getEmail());
         Account account = new Account(cmd.getEmail(), ACCOUNT_TYPE);
         accountManager.addAccountExplicitly(account, null);
+        schedulePeriodicSync(account);
+        syncService.setSyncAutomatically(account, TransactionContract.AUTHORITY, true);
+    }
+
+    private void schedulePeriodicSync(Account account) {
+        syncService.addPeriodicSync(account, TransactionContract.AUTHORITY, Bundle.EMPTY, 60 * 60 * 8 /*Each 8 hours*/);
     }
 
 }
