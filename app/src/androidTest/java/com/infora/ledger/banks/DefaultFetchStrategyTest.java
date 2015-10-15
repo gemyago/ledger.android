@@ -4,18 +4,17 @@ import android.test.AndroidTestCase;
 
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.api.DeviceSecret;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.Entity;
+import com.infora.ledger.mocks.MockBankApi;
+import com.infora.ledger.mocks.MockBankLinkData;
+import com.infora.ledger.mocks.MockBankTransaction;
 import com.infora.ledger.mocks.MockDatabaseContext;
-import com.infora.ledger.mocks.MockPrivatBankApi;
 import com.infora.ledger.mocks.MockUnitOfWork;
 import com.infora.ledger.support.Dates;
 import com.infora.ledger.support.SystemDate;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -26,20 +25,20 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
     private DefaultFetchStrategy subject;
     private MockDatabaseContext mockDb;
     private BankLink bankLink;
-    private PrivatBankLinkData linkData;
-    private MockPrivatBankApi mockApi;
+    private MockBankLinkData linkData;
+    private MockBankApi mockApi;
     private Date now;
     private DeviceSecret secret;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mockApi = new MockPrivatBankApi();
+        mockApi = new MockBankApi();
         subject = new DefaultFetchStrategy(mockApi);
         mockDb = new MockDatabaseContext();
         now = SystemDate.setNow(TestHelper.randomDate());
 
-        linkData = new PrivatBankLinkData("card-100", "merchant-100", "password-100");
+        linkData = new MockBankLinkData("login-100", "password-100");
         secret = DeviceSecret.generateNew();
         bankLink = new BankLink()
                 .setAccountId("account-100")
@@ -93,7 +92,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = Dates.monthAgo(now);
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        mockApi.bankTransactions.add(new PrivatBankTransaction()
+        mockApi.bankTransactions.add(new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
@@ -123,7 +122,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = bankLink.initialSyncDate;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        mockApi.bankTransactions.add(new PrivatBankTransaction()
+        mockApi.bankTransactions.add(new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
@@ -152,7 +151,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = bankLink.initialSyncDate;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        mockApi.bankTransactions.add(new PrivatBankTransaction()
+        mockApi.bankTransactions.add(new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
@@ -180,7 +179,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = Dates.monthAgo(now);
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final BankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:23")
@@ -188,7 +187,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final BankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new MockBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-23")
                 .setTrantime("21:56:24")
@@ -221,7 +220,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final BankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
@@ -229,7 +228,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final BankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new MockBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")
@@ -265,7 +264,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
 
         mockApi.expectedGetTransactionsRequest.startDate = dateFrom;
         mockApi.expectedGetTransactionsRequest.endDate = now;
-        final BankTransaction t1 = new PrivatBankTransaction()
+        final BankTransaction t1 = new MockBankTransaction()
                 .setCard("card-100")
                 .setTrandate("2015-05-20")
                 .setTrantime("21:56:23")
@@ -273,7 +272,7 @@ public class DefaultFetchStrategyTest extends AndroidTestCase {
                 .setCardamount("-100.31 UAH")
                 .setTerminal("terminal-1")
                 .setDescription("description-1");
-        final BankTransaction t2 = new PrivatBankTransaction()
+        final BankTransaction t2 = new MockBankTransaction()
                 .setCard("card-101")
                 .setTrandate("2015-05-24")
                 .setTrantime("21:56:23")

@@ -2,7 +2,7 @@ package com.infora.ledger.ui;
 
 import com.infora.ledger.Privat24BankLinkFragment;
 import com.infora.ledger.UkrsibBankLinkFragment;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
 
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class BankLinkFragmentsFactory {
 
     public static BankLinkFragmentsFactory createDefault() {
         return new BankLinkFragmentsFactory()
-                .register(PrivatBankTransaction.PRIVATBANK_BIC, new Callable<BankLinkFragment>() {
+                .register(Privat24Transaction.PRIVATBANK_BIC, new Callable<BankLinkFragment>() {
                     @Override
                     public BankLinkFragment call() throws Exception {
                         return new Privat24BankLinkFragment();

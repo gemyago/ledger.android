@@ -6,7 +6,6 @@ import android.widget.EditText;
 
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
 import com.infora.ledger.mocks.MockLedgerApplication;

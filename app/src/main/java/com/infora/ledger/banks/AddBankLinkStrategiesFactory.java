@@ -1,7 +1,7 @@
 package com.infora.ledger.banks;
 
 import com.infora.ledger.banks.ua.privatbank.Privat24AddBankLinkStrategy;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
+import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -29,7 +29,7 @@ public class AddBankLinkStrategiesFactory {
 
     public static AddBankLinkStrategiesFactory createDefault() {
         AddBankLinkStrategiesFactory factory = new AddBankLinkStrategiesFactory();
-        factory.strategies.put(PrivatBankTransaction.PRIVATBANK_BIC, new Callable<AddBankLinkStrategy>() {
+        factory.strategies.put(Privat24Transaction.PRIVATBANK_BIC, new Callable<AddBankLinkStrategy>() {
             @Override
             public AddBankLinkStrategy call() throws Exception {
                 return new Privat24AddBankLinkStrategy();

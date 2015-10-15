@@ -17,7 +17,6 @@ import com.infora.ledger.application.events.UpdateBankLinkFailed;
 import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
 import com.infora.ledger.banks.AddBankLinkStrategy;
 import com.infora.ledger.banks.FetchException;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.mocks.MockBankLinkData;
@@ -108,7 +107,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     }
 
     public void testUpdateBankLinkCommand() {
-        PrivatBankLinkData linkData = new PrivatBankLinkData("card-1", "merchant-1", "password-1");
+        MockBankLinkData linkData = new MockBankLinkData("login-1", "password-1");
         Date initialLastSyncDate = TestHelper.randomDate();
         BankLink bankLink = new BankLink()
                 .setId(100)
@@ -132,7 +131,7 @@ public class BankLinksServiceTest extends AndroidTestCase {
     }
 
     public void testUpdateBankLinkCommandWithFetchFromDate() {
-        PrivatBankLinkData linkData = new PrivatBankLinkData("card-1", "merchant-1", "password-1");
+        MockBankLinkData linkData = new MockBankLinkData("login-1", "password-1");
         Date initialLastSyncDate = TestHelper.randomDate();
         BankLink bankLink = new BankLink()
                 .setId(100)
@@ -153,13 +152,13 @@ public class BankLinksServiceTest extends AndroidTestCase {
         BankLink bankLink = new BankLink()
                 .setId(100)
                 .setAccountId("account-100")
-                .setBic("bank-100").setLinkData(new PrivatBankLinkData("card-1", "merchant-1", "password-1"), secret);
+                .setBic("bank-100").setLinkData(new MockBankLinkData("login-1", "password-1"), secret);
         MockSubscriber<UpdateBankLinkFailed> updateFailedHandler = new MockSubscriber<>(UpdateBankLinkFailed.class);
         bus.register(updateFailedHandler);
         repository.saveException = new SQLException("sql exception");
         repository.entitiesToGetById.add(bankLink);
         subject.onEventBackgroundThread(new UpdateBankLinkCommand(bankLink.id, "new-account-100", "New Account 100",
-                new PrivatBankLinkData("new-card-1", "new-merchant-1", "new-password-1")));
+                new MockBankLinkData("new-login-1", "new-password-1")));
         assertEquals(0, repository.savedEntities.size());
         assertEquals(1, updateFailedHandler.getEvents().size());
         assertEquals(bankLink.id, updateFailedHandler.getEvents().get(0).id);

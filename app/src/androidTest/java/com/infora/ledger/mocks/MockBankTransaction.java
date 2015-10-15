@@ -1,7 +1,8 @@
-package com.infora.ledger.banks.ua.privatbank;
+package com.infora.ledger.mocks;
 
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.banks.BankTransaction;
+import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.support.ObfuscatedString;
@@ -16,8 +17,7 @@ import java.util.regex.Pattern;
 /**
  * Created by jenya on 23.05.15.
  */
-public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransaction {
-    public static final String PRIVATBANK_BIC = "PBANUA2X";
+public class MockBankTransaction implements BankTransaction {
 
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("-?(\\d+\\.?\\d*) \\w{2,3}");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -31,30 +31,30 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
     public String terminal;
     public String description;
 
-    public PrivatBankTransaction() {
+    public MockBankTransaction() {
     }
 
-    public PrivatBankTransaction setCard(String card) {
+    public MockBankTransaction setCard(String card) {
         this.card = card;
         return this;
     }
 
-    public PrivatBankTransaction setTrandate(String trandate) {
+    public MockBankTransaction setTrandate(String trandate) {
         this.trandate = trandate;
         return this;
     }
 
-    public PrivatBankTransaction setTrantime(String trantime) {
+    public MockBankTransaction setTrantime(String trantime) {
         this.trantime = trantime;
         return this;
     }
 
-    public PrivatBankTransaction setAmount(String amount) {
+    public MockBankTransaction setAmount(String amount) {
         this.amount = amount;
         return this;
     }
 
-    public PrivatBankTransaction setCardamount(String cardamount) {
+    public MockBankTransaction setCardamount(String cardamount) {
         this.cardamount = cardamount;
         return this;
     }
@@ -64,7 +64,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
         return this;
     }
 
-    public PrivatBankTransaction setTerminal(String terminal) {
+    public MockBankTransaction setTerminal(String terminal) {
         this.terminal = terminal;
         return this;
     }
@@ -96,7 +96,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
         String lastDigitsOfCard = card.substring(card.length() - 4, card.length());
         Matcher amountMatcher = AMOUNT_PATTERN.matcher(amount);
         amountMatcher.find();
-        return PRIVATBANK_BIC + lastDigitsOfCard + trandate.replace("-", "") + trantime.replace(":", "") + amountMatcher.group(1).replace(".", "P");
+        return Privat24Transaction.PRIVATBANK_BIC + lastDigitsOfCard + trandate.replace("-", "") + trantime.replace(":", "") + amountMatcher.group(1).replace(".", "P");
     }
 
     @Override
@@ -113,7 +113,7 @@ public class PrivatBankTransaction implements com.infora.ledger.banks.BankTransa
 
     @Override
     public String toString() {
-        return "PrivatBankTransaction{" +
+        return "MockBankTransaction{" +
                 "card='" + ObfuscatedString.value(card) + '\'' +
                 ", trandate='" + trandate + '\'' +
                 ", trantime='" + trantime + '\'' +

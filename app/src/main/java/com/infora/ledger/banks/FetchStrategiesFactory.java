@@ -1,7 +1,7 @@
 package com.infora.ledger.banks;
 
+import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24ApiAdapterForDefaultFetchStrategy;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankTransaction;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankApi;
 import com.infora.ledger.banks.ua.urksibbank.UkrsibBankTransaction;
 
@@ -32,7 +32,7 @@ public class FetchStrategiesFactory {
 
     public static FetchStrategiesFactory createDefault() {
         FetchStrategiesFactory factory = new FetchStrategiesFactory();
-        factory.fetchStrategies.put(PrivatBankTransaction.PRIVATBANK_BIC, new Callable<FetchStrategy>() {
+        factory.fetchStrategies.put(Privat24Transaction.PRIVATBANK_BIC, new Callable<FetchStrategy>() {
             @Override
             public FetchStrategy call() throws Exception {
                 return new DefaultFetchStrategy(new Privat24ApiAdapterForDefaultFetchStrategy());

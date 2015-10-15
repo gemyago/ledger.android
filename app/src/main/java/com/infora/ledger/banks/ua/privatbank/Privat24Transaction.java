@@ -19,6 +19,7 @@ import java.util.Date;
  */
 public class Privat24Transaction implements BankTransaction {
     public static final DateFormat DateFormat = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss");
+    public static final String PRIVATBANK_BIC = "PBANUA2X";
 
     public String date;
     public String amount;
