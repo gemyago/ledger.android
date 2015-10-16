@@ -14,7 +14,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -101,6 +103,7 @@ public class UkrsibBankResponseParser {
         Elements externalTables = document.getElementsByClass("externalTable");
         RegularCardTransactionTableRowParser regularParser = new RegularCardTransactionTableRowParser();
         CardLocksTransactionTableRowParser cardLocksParser = new CardLocksTransactionTableRowParser();
+        HashMap<String, List<UkrsibBankTransaction>> sameAmountOnSameDateMap = new HashMap<>();
         for (Element externalTable : externalTables) {
             Elements opersTables = externalTable.getElementsByClass("opersTable");
             String cardPattern = cardNumber.substring(0, 6) + "****" + cardNumber.substring(12, 16);
@@ -113,9 +116,9 @@ public class UkrsibBankResponseParser {
                     if (rows.size() > 0) {
                         Elements firstRowCells = rows.get(0).getElementsByTag("td");
                         if (firstRowCells.size() == 7) {
-                            appendTransactions(transactions, opersTable, regularParser);
+                            appendTransactions(transactions, sameAmountOnSameDateMap, opersTable, regularParser);
                         } else if (firstRowCells.size() == 6) {
-                            appendTransactions(transactions, opersTable, cardLocksParser);
+                            appendTransactions(transactions, sameAmountOnSameDateMap, opersTable, cardLocksParser);
                         } else {
                             throw new ParseException("Unexpected cells count: " + firstRowCells.size(), 0);
                         }
@@ -138,16 +141,33 @@ public class UkrsibBankResponseParser {
         Elements opersTables = document.select("form#cardAccountInfoForm > table.opersTable");
         if (opersTables.size() != 1)
             throw new ParseException("Unexpected number of opersTables. Expected 1, got " + opersTables.size(), 0);
-        appendTransactions(transactions, opersTables.get(0), new AccountTransactionTableRowParser());
+        appendTransactions(transactions, new HashMap<String, List<UkrsibBankTransaction>>(), opersTables.get(0), new AccountTransactionTableRowParser());
         return transactions;
     }
 
 
-    private void appendTransactions(ArrayList<UkrsibBankTransaction> transactions, Element opersTable, TransactionTableRowParser parser) throws ParseException {
+    private void appendTransactions(ArrayList<UkrsibBankTransaction> transactions, HashMap<String, List<UkrsibBankTransaction>> sameAmountOnSameDateMap, Element opersTable, TransactionTableRowParser parser) throws ParseException {
+
+        //The sameAmountOnSameDateMap is used to detect transactions with same amount on the same date and then set sequence for such transactions.
+        //This is required to make their ids unique since the ID is generated based the date and amount. The date is provided without time.
+
         Element tbody = opersTable.getElementsByTag("tbody").get(0);
         Elements rows = tbody.getElementsByTag("tr");
         for (Element row : rows) {
-            transactions.add(parser.parse(row));
+            UkrsibBankTransaction transaction = parser.parse(row);
+            String dateAndAmountKey = transaction.trandate.getTime() + transaction.amount;
+            if(sameAmountOnSameDateMap.containsKey(dateAndAmountKey)) {
+                List<UkrsibBankTransaction> duplicates = sameAmountOnSameDateMap.get(dateAndAmountKey);
+                if(duplicates.size() == 1) duplicates.get(0).setSequence(1);
+                duplicates.add(transaction);
+                transaction.setSequence(duplicates.size());
+            } else {
+                ArrayList<UkrsibBankTransaction> possibleDuplicates = new ArrayList<>();
+                possibleDuplicates.add(transaction);
+                sameAmountOnSameDateMap.put(dateAndAmountKey, possibleDuplicates);
+            }
+
+            transactions.add(transaction);
         }
     }
 

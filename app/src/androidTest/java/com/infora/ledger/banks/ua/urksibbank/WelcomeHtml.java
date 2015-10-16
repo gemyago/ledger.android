@@ -341,6 +341,109 @@ public class WelcomeHtml {
                 "</html>";
     }
 
+    public static String contentsWithSameAmountTransactionsOnTheSameDate() {
+        return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n" +
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+                "<head>\n" +
+                "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">\n" +
+                "    <title>Star24</title>\n" +
+                "</head>\n" +
+                "<body id=\"uk\">\n" +
+                "<div id=\"wrapper\">\n" +
+                "    <table class=\"externalTable\">\n" +
+                "        <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_136:tbody_element\">\n" +
+                "        <tr>\n" +
+                "            <td>\n" +
+                "                <table class=\"opersTable\">\n" +
+                "                    <caption>?????? MasterCard Debit 333333****4444 SURNAME NAME</caption>\n" +
+                "                    <thead>\n" +
+                "                    <tr>\n" +
+                "                        <th>???? ????????</th>\n" +
+                "                        <th>???? ??????????</th>\n" +
+                "                        <th>??? ???????????</th>\n" +
+                "                        <th>???? ????????</th>\n" +
+                "                        <th>??????<br>????????</th>\n" +
+                "                        <th>???? ?<br>?????? ????????</th>\n" +
+                "                        <th>???? ?<br>?????? ???????</th>\n" +
+                "                    </tr>\n" +
+                "                    </thead>\n" +
+                "                    <tbody id=\"cardAccountInfoForm:j_id_jsp_1610737686_136:1:j_id_jsp_1610737686_139:tbody_element\">\n" +
+                "                    <tr class=\"darkRow\">\n" +
+                "                        <td class=\"dateColumn\">04.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">08.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">92963Z</td>\n" +
+                "                        <td>?????? ???????\\??????\\S1HA0HFD\\UA\\DERGACHI\\KHAR\\7YABOYKO</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-200.00</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-200.00</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr class=\"brightRow\">\n" +
+                "                        <td class=\"dateColumn\">04.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">08.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">97033Z</td>\n" +
+                "                        <td>?????? ???????\\??????\\S1HA0MIV\\UA\\KHARKOV\\KHARK\\KLASSKORKA</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-90.04</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-90.04</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr class=\"darkRow\">\n" +
+                "                        <td class=\"dateColumn\">04.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">08.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">669474</td>\n" +
+                "                        <td>????????? ??????? ? ????????? ?????\\A0308854\\UA\\KHARKIV\\UKRSIBBANK</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-90.04</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-5 000.00</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr class=\"brightRow\">\n" +
+                "                        <td class=\"dateColumn\">06.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">09.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">01310Z</td>\n" +
+                "                        <td>?????? ???????\\??????\\S1HA0HFD\\UA\\DERGACHI\\KHAR\\7YABOYKO</td>\n" +
+                "                        <td class=\"currencyColumn\">UAH</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-4 288.00</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-4 288.00</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr class=\"darkRow\">\n" +
+                "                        <td class=\"dateColumn\">06.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">09.06.2015</td>\n" +
+                "                        <td class=\"dateColumn\">02671Z</td>\n" +
+                "                        <td>?????? ???????\\??????\\S1HA0HFD\\UA\\DERGACHI\\KHAR\\7YABOYKO</td>\n" +
+                "                        <td class=\"currencyColumn\">USD</td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-100.00</nobr>\n" +
+                "                        </td>\n" +
+                "                        <td class=\"amountColumn\">\n" +
+                "                            <nobr>-815.23</nobr>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    </tbody>\n" +
+                "                </table>\n" +
+                "            </td>\n" +
+                "        </tr>\n" +
+                "        </tbody>\n" +
+                "    </table>\n" +
+                "</div>\n" +
+                "</body>\n" +
+                "</html>";
+    }
+
     public static String contentsWithLocks() {
         return "<table class=\"externalTable\">\n" +
                 "</table>\n" +

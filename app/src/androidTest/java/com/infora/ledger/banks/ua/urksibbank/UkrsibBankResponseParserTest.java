@@ -142,4 +142,17 @@ public class UkrsibBankResponseParserTest extends TestCase {
                         .setCurrency("USD").setAmount("1000.00").setAccountAmount("22103.01"),
                 transactions.get(1));
     }
+
+    public void testTransactionsWithSameAmountOnTheSameDateHaveIndex() throws FetchException, ParseException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithSameAmountTransactionsOnTheSameDate().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        List<UkrsibBankTransaction> transactions = parser.parseTransactions("3333330000004444");
+        assertEquals(5, transactions.size());
+
+        assertEquals(0, transactions.get(0).sequence);
+        assertEquals(1, transactions.get(1).sequence);
+        assertEquals(2, transactions.get(2).sequence);
+        assertEquals(0, transactions.get(3).sequence);
+        assertEquals(0, transactions.get(4).sequence);
+    }
 }
