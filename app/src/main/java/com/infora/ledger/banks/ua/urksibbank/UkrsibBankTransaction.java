@@ -1,10 +1,14 @@
 package com.infora.ledger.banks.ua.urksibbank;
 
+import android.util.Base64;
+
 import com.infora.ledger.TransactionContract;
 import com.infora.ledger.banks.BankTransaction;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.PendingTransaction;
 import com.infora.ledger.support.Dates;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +22,9 @@ public class UkrsibBankTransaction implements BankTransaction {
     public static final String BIC = "KHABUA2K";
     private static final DateFormat DATE_FORMAT_FOR_TRANSACTION_ID = new SimpleDateFormat("yyyyMMdd");
 
+    //This field is used to indicate unique transactions with the same amount for the same date
+    public int sequence;
+
     public Date trandate;
     public Date commitDate;
     public String authCode;
@@ -25,6 +32,11 @@ public class UkrsibBankTransaction implements BankTransaction {
     public String currency;
     public String amount;
     public String accountAmount;
+
+    public UkrsibBankTransaction setSequence(int sequence) {
+        this.sequence = sequence;
+        return this;
+    }
 
     public UkrsibBankTransaction setTrandate(Date trandate) {
         this.trandate = trandate;
@@ -64,10 +76,17 @@ public class UkrsibBankTransaction implements BankTransaction {
     @Override
     public PendingTransaction toPendingTransaction(BankLink bankLink) {
         int typeId = accountAmount.startsWith("-") ? TransactionContract.TRANSACTION_TYPE_EXPENSE : TransactionContract.TRANSACTION_TYPE_INCOME;
+
+        StringBuilder transactionIdBuilder = new StringBuilder()
+                .append(bankLink.accountId).append(trandate.getTime()).append(amount.replace(" ", "").replace("-", "").replace(".", "P"));
+        if(sequence > 0) transactionIdBuilder.append("S").append(sequence);
+
+        //Using sha256 and Base64 to have transactionId no longer than 50 chars.
+        String transactionId = Base64.encodeToString(DigestUtils.sha256(transactionIdBuilder.toString()), Base64.NO_PADDING + Base64.NO_WRAP + Base64.URL_SAFE);
+
         String actualAmount = accountAmount.replace(" ", "").replace("-", "");
-        String authCodeOrHashCode = this.authCode == null ? String.valueOf(Math.abs(description.hashCode())) : this.authCode;
         return new PendingTransaction(
-                BIC + DATE_FORMAT_FOR_TRANSACTION_ID.format(trandate) + authCodeOrHashCode + amount.replace(" ", "").replace("-", "").replace(".", ""),
+                transactionId,
                 actualAmount,
                 description,
                 false,
