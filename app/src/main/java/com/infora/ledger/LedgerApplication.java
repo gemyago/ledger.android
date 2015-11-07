@@ -70,6 +70,9 @@ public class LedgerApplication extends Application implements InjectorProvider<D
     }
 
     public void onCreate() {
+        //Setting defaults first since other components may depend on them
+        setDefaultPrefs();
+
         Log.d(TAG, "Initializing application...");
         injector().inject(this);
 
@@ -84,14 +87,6 @@ public class LedgerApplication extends Application implements InjectorProvider<D
 
         registerActivityLifecycleCallbacks(new GlobalActivityLifecycleCallbacks(this));
 
-        PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
-        SharedPreferences sharedPreferences = SharedPreferencesProvider.getDefaultSharedPreferences(this);
-        if (!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
-            Log.d(TAG, "Ledger host preference not yet initialized. Assigning default value: " + BuildConfig.DEFAULT_LEDGER_HOST);
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putString(SettingsFragment.KEY_LEDGER_HOST, BuildConfig.DEFAULT_LEDGER_HOST);
-            edit.apply();
-        }
 
         Account[] accounts = accountManager.getApplicationAccounts();
         if (accounts.length == 1) {
@@ -119,4 +114,14 @@ public class LedgerApplication extends Application implements InjectorProvider<D
         syncService.addPeriodicSync(account, TransactionContract.AUTHORITY, Bundle.EMPTY, 60 * 60 * 8 /*Each 8 hours*/);
     }
 
+    private void setDefaultPrefs() {
+        PreferenceManager.setDefaultValues(this, R.xml.app_prefs, false);
+        SharedPreferences sharedPreferences = SharedPreferencesProvider.getDefaultSharedPreferences(this);
+        if (!sharedPreferences.contains(SettingsFragment.KEY_LEDGER_HOST)) {
+            Log.d(TAG, "Ledger host preference not yet initialized. Assigning default value: " + BuildConfig.DEFAULT_LEDGER_HOST);
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putString(SettingsFragment.KEY_LEDGER_HOST, BuildConfig.DEFAULT_LEDGER_HOST);
+            edit.apply();
+        }
+    }
 }
