@@ -23,4 +23,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Card Number (last 4 digits)" />
+
+    <Button
+        android:id="@+id/privat24_refresh_authentication"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Refresh Authentication" />
 </LinearLayout>

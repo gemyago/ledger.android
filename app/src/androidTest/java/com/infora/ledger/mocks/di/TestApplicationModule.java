@@ -9,6 +9,7 @@ import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
+import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.data.TransactionsReadModel;
@@ -50,6 +51,7 @@ public class TestApplicationModule {
     public SyncService syncService;
     public MockSharedPrefsProvider sharedPrefsProvider;
     public MockPendingTransactionsService pendingTransactionsService;
+    public Privat24BankService privat24BankService;
     private Application app;
 
     public TestApplicationModule(Application app) {
@@ -125,5 +127,10 @@ public class TestApplicationModule {
     @Provides SharedPreferencesProvider provideSharedPrefsProvider() {
         if(sharedPrefsProvider == null) sharedPrefsProvider = new MockSharedPrefsProvider();
         return sharedPrefsProvider;
+    }
+
+    @Provides Privat24BankService providePrivat24BankService() {
+        if(privat24BankService == null) privat24BankService = new Privat24BankService();
+        return privat24BankService;
     }
 }

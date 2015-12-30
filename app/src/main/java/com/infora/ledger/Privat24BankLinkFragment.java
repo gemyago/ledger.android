@@ -1,6 +1,7 @@
 package com.infora.ledger;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,16 +11,23 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
+import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
+import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.inject.Inject;
 
@@ -70,6 +78,11 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         return inflater.inflate(R.layout.fragment_privat24_bank_link, container, false);
     }
 
+    @Override public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        modeState.onViewCreated(view);
+    }
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -87,7 +100,7 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
 
     @Override
     public void assignValues(BankLink bankLink, DeviceSecret secret) {
-        modeState.assignValues(getView(), bankLink.getLinkData(Privat24BankLinkData.class, secret));
+        modeState.assignValues(getView(), bankLink, bankLink.getLinkData(Privat24BankLinkData.class, secret));
     }
 
     @Override
@@ -128,7 +141,9 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
     private interface ModeState {
         Privat24BankLinkData getBankLinkData(View view);
 
-        void assignValues(View view, Privat24BankLinkData linkData);
+        void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData);
+
+        void onViewCreated(View view);
     }
 
     private static class AddModeState implements ModeState {
@@ -144,7 +159,7 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         }
 
         @Override
-        public void assignValues(View view, Privat24BankLinkData linkData) {
+        public void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData) {
             EditText login = (EditText) view.findViewById(R.id.privat24_login);
             EditText password = (EditText) view.findViewById(R.id.privat24_password);
             EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
@@ -152,10 +167,17 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             password.setText(linkData.password);
             card.setText(linkData.cardNumber);
         }
+
+        @Override public void onViewCreated(View view) {
+            view.findViewById(R.id.privat24_refresh_authentication).setVisibility(View.GONE);
+        }
     }
 
-    private static class EditModeState implements ModeState {
+    public static class EditModeState implements ModeState {
+        @Inject Privat24BankService bankService;
+
         private Privat24BankLinkData linkData;
+        private BankLink bankLink;
 
         @Override
         public Privat24BankLinkData getBankLinkData(View view) {
@@ -163,7 +185,7 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         }
 
         @Override
-        public void assignValues(View view, Privat24BankLinkData linkData) {
+        public void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData) {
             EditText login = (EditText) view.findViewById(R.id.privat24_login);
             EditText password = (EditText) view.findViewById(R.id.privat24_password);
             EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
@@ -173,7 +195,33 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             password.setEnabled(false);
             card.setText(ObfuscatedString.value(linkData.cardNumber));
             card.setEnabled(false);
+            this.bankLink = bankLink;
             this.linkData = linkData;
+        }
+
+        @Override public void onViewCreated(final View view) {
+            DiUtils.injector(view.getContext()).inject(this);
+            Button button = (Button) view.findViewById(R.id.privat24_refresh_authentication);
+            button.setEnabled(true);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    Log.d(TAG, "Refreshing authentication...");
+                    try {
+                        bankService.refreshAuthentication(bankLink.id);
+                    } catch (SQLException e) {
+                        notifyRefreshError(view.getContext(), e);
+                    } catch (IOException e) {
+                        notifyRefreshError(view.getContext(), e);
+                    } catch (PrivatBankException e) {
+                        notifyRefreshError(view.getContext(), e);
+                    }
+                }
+            });
+        }
+
+        private void notifyRefreshError(Context context, Exception e) {
+            Log.e(TAG, "Failed to refresh authentication.", e);
+            Toast.makeText(context, "Failure adding bank link: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }

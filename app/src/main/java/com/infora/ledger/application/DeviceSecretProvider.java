@@ -6,9 +6,9 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.api.LedgerApi;
+import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.support.AccountManagerWrapper;
 
 import javax.inject.Inject;
@@ -29,6 +29,7 @@ public class DeviceSecretProvider {
         this.context = context;
         this.accountManager = accountManager;
         this.ledgerApiFactory = ledgerApiFactory;
+        Log.d(TAG, "Provider instance created. Hash code: " + hashCode());
     }
 
     public boolean hasBeenRegistered() {
@@ -45,6 +46,7 @@ public class DeviceSecretProvider {
         }
         LedgerApi api = ledgerApiFactory.createApi(accounts[0]);
         deviceSecret = api.registerDevice(getDeviceId(context), Build.MODEL);
+        Log.d(TAG, "Device registered. Secret retrieved.");
     }
 
     public DeviceSecret secret() {

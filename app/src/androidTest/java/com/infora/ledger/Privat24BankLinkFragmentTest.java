@@ -9,6 +9,11 @@ import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
 import com.infora.ledger.mocks.MockLedgerApplication;
+import com.infora.ledger.mocks.MockPrivat24BankService;
+import com.infora.ledger.mocks.MockSharedPrefsProvider;
+import com.infora.ledger.mocks.MockSyncService;
+import com.infora.ledger.mocks.MockTransactionsReadModel;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
 
@@ -19,6 +24,7 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
 
     private Privat24BankLinkFragment fragment;
     private DeviceSecret secret;
+    private MockPrivat24BankService mockPrivat24BankService;
 
     public Privat24BankLinkFragmentTest() {
         super(DummyBankLinkFragmentTestActivity.class);
@@ -27,7 +33,14 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        setActivityContext(new MockLedgerApplication(getInstrumentation().getTargetContext()));
+        final MockLedgerApplication app = new MockLedgerApplication(getInstrumentation().getTargetContext())
+                .withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+                    @Override public void init(TestApplicationModule module) {
+                        mockPrivat24BankService = new MockPrivat24BankService();
+                        module.privat24BankService = mockPrivat24BankService;
+                    }
+                });
+        setActivityContext(app);
         startActivity(new Intent(getInstrumentation().getTargetContext(), DummyBankLinkFragmentTestActivity.class), null, null);
         getActivity().fragment = fragment = new Privat24BankLinkFragment();
         fragment.setMode(BankLinkFragment.Mode.Edit);
@@ -85,5 +98,11 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
         assertEquals("", login.getText().toString());
         assertEquals("", password.getText().toString());
         assertEquals("", card.getText().toString());
+    }
+
+    public void testRefreshAuthentication() {
+        fragment.setBankLinkData(new BankLink().setId(3432234).setLinkData(new Privat24BankLinkData(), secret), secret);
+        fragment.getView().findViewById(R.id.privat24_refresh_authentication).callOnClick();
+        assertEquals(3432234, mockPrivat24BankService.refreshAuthenticationCall.bankLinkId);
     }
 }

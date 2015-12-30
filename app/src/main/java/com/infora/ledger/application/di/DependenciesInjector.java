@@ -49,4 +49,6 @@ public interface DependenciesInjector {
     FetchBankLinksSynchronizationStrategy provideFetchBankLinksSynchronizationStrategy();
 
     void inject(SettingsFragment settingsFragment);
+
+    void inject(Privat24BankLinkFragment.EditModeState editModeState);
 }
