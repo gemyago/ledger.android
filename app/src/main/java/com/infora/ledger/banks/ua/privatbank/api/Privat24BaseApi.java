@@ -54,9 +54,9 @@ public class Privat24BaseApi {
         }
         String st = data.get("st").getAsString();
         if (!st.equals("ok")) {
-            LogUtil.d(this, "Unexpected status: " + st + ". Expected: ok");
+            LogUtil.e(this, "Unexpected status: " + st + ". Expected: ok");
             LogUtil.d(this, "data: " + data);
-            throw new PrivatBankException("Unexpected status.");
+            throw new PrivatBankException("Unexpected status: " + st + ". Expected: ok");
         }
     }
 
