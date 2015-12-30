@@ -47,7 +47,7 @@ public class Privat24BankServiceTest extends TestCase {
                 .setLogin(TestHelper.randomString("login"))
                 .setPassword(TestHelper.randomString("password"));
         bankLink.setLinkData(privat24LinkData, secret);
-        repository.all.add(bankLink);
+        repository.entitiesToGetById.add(bankLink);
 
         authApi = new MockPrivat24AuthApi();
         subject.setAuthApiFactory(new Privat24AuthApi.Factory() {
