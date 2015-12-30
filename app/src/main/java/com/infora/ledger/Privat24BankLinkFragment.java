@@ -43,6 +43,7 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
     private ModeState modeState;
 
     @Inject EventBus bus;
+    @Inject Privat24BankService bankService;
 
     @Override
     public void setMode(Mode mode) {
@@ -78,7 +79,8 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         return inflater.inflate(R.layout.fragment_privat24_bank_link, container, false);
     }
 
-    @Override public void onViewCreated(View view, Bundle savedInstanceState) {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         modeState.onViewCreated(view);
     }
@@ -111,6 +113,31 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         login.setText("");
         password.setText("");
         card.setText("");
+    }
+
+    public void onEventBackgroundThread(RefreshAuthentication cmd) {
+        Log.d(TAG, "Refreshing authentication...");
+        try {
+            bankService.refreshAuthentication(cmd.bankLinkId);
+            bus.post(new AuthenticationRefreshed());
+        } catch (SQLException e) {
+            bus.post(new RefreshAuthenticationFailed(e));
+        } catch (IOException e) {
+            bus.post(new RefreshAuthenticationFailed(e));
+        } catch (PrivatBankException e) {
+            bus.post(new RefreshAuthenticationFailed(e));
+        }
+    }
+
+    private void onEventMainThread(RefreshAuthenticationFailed evt) {
+        Log.e(TAG, "Failed to refresh authentication.", evt.exception);
+        Toast.makeText(getActivity(), "Failure adding bank link: " + evt.exception.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
+    private void onEventMainThread(AuthenticationRefreshed evt) {
+        Log.d(TAG, "Refresh command completed.");
+        final Button button = (Button) getActivity().findViewById(R.id.privat24_refresh_authentication);
+        button.setEnabled(true);
     }
 
     public void onEventMainThread(final AskPrivat24Otp cmd) {
@@ -168,13 +195,15 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             card.setText(linkData.cardNumber);
         }
 
-        @Override public void onViewCreated(View view) {
+        @Override
+        public void onViewCreated(View view) {
             view.findViewById(R.id.privat24_refresh_authentication).setVisibility(View.GONE);
         }
     }
 
     public static class EditModeState implements ModeState {
-        @Inject Privat24BankService bankService;
+        @Inject EventBus bus;
+
 
         private Privat24BankLinkData linkData;
         private BankLink bankLink;
@@ -199,29 +228,39 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
             this.linkData = linkData;
         }
 
-        @Override public void onViewCreated(final View view) {
+        @Override
+        public void onViewCreated(final View view) {
             DiUtils.injector(view.getContext()).inject(this);
-            Button button = (Button) view.findViewById(R.id.privat24_refresh_authentication);
+            final Button button = (Button) view.findViewById(R.id.privat24_refresh_authentication);
             button.setEnabled(true);
             button.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    Log.d(TAG, "Refreshing authentication...");
-                    try {
-                        bankService.refreshAuthentication(bankLink.id);
-                    } catch (SQLException e) {
-                        notifyRefreshError(view.getContext(), e);
-                    } catch (IOException e) {
-                        notifyRefreshError(view.getContext(), e);
-                    } catch (PrivatBankException e) {
-                        notifyRefreshError(view.getContext(), e);
-                    }
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Posting command to refresh authentication...");
+                    bus.post(new RefreshAuthentication(bankLink.id));
+                    button.setEnabled(false);
                 }
             });
         }
+    }
 
-        private void notifyRefreshError(Context context, Exception e) {
-            Log.e(TAG, "Failed to refresh authentication.", e);
-            Toast.makeText(context, "Failure adding bank link: " + e.getMessage(), Toast.LENGTH_LONG).show();
+    public static class RefreshAuthentication {
+        public int bankLinkId;
+
+        public RefreshAuthentication(int bankLinkId) {
+            this.bankLinkId = bankLinkId;
+        }
+    }
+
+    public static class AuthenticationRefreshed {
+
+    }
+
+    public static class RefreshAuthenticationFailed {
+        public Exception exception;
+
+        public RefreshAuthenticationFailed(Exception exception) {
+            this.exception = exception;
         }
     }
 }

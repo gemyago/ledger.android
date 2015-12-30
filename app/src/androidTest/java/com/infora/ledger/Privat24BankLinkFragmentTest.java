@@ -10,17 +10,23 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.DummyBankLinkFragmentTestActivity;
 import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockPrivat24BankService;
-import com.infora.ledger.mocks.MockSharedPrefsProvider;
-import com.infora.ledger.mocks.MockSyncService;
-import com.infora.ledger.mocks.MockTransactionsReadModel;
+import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.di.TestApplicationModule;
 import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
+
+import java.sql.SQLException;
+
+import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by jenya on 01.06.15.
  */
 public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBankLinkFragmentTestActivity> {
+
+    @Inject EventBus bus;
 
     private Privat24BankLinkFragment fragment;
     private DeviceSecret secret;
@@ -40,10 +46,13 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
                         module.privat24BankService = mockPrivat24BankService;
                     }
                 });
+        app.injector().inject(this);
         setActivityContext(app);
         startActivity(new Intent(getInstrumentation().getTargetContext(), DummyBankLinkFragmentTestActivity.class), null, null);
         getActivity().fragment = fragment = new Privat24BankLinkFragment();
         fragment.setMode(BankLinkFragment.Mode.Edit);
+        fragment.bankService = mockPrivat24BankService;
+        fragment.bus = bus;
         getInstrumentation().callActivityOnStart(getActivity());
         getActivity().getSupportFragmentManager().executePendingTransactions();
         secret = DeviceSecret.generateNew();
@@ -100,9 +109,45 @@ public class Privat24BankLinkFragmentTest extends ActivityUnitTestCase<DummyBank
         assertEquals("", card.getText().toString());
     }
 
-    public void testRefreshAuthentication() {
-        fragment.setBankLinkData(new BankLink().setId(3432234).setLinkData(new Privat24BankLinkData(), secret), secret);
+    public void testRefreshAuthenticationButtonClick() {
+        final BankLink bankLink = new BankLink().setId(3432234).setLinkData(new Privat24BankLinkData(), secret);
+        fragment.setBankLinkData(bankLink, secret);
+
+        final MockSubscriber<Privat24BankLinkFragment.RefreshAuthentication> refreshSubscriber =
+                new MockSubscriber<>(Privat24BankLinkFragment.RefreshAuthentication.class);
+        bus.register(refreshSubscriber);
+
         fragment.getView().findViewById(R.id.privat24_refresh_authentication).callOnClick();
-        assertEquals(3432234, mockPrivat24BankService.refreshAuthenticationCall.bankLinkId);
+        assertEquals(3432234, refreshSubscriber.getEvent().bankLinkId);
+    }
+
+    public void testOnEventBackgroundThreadRefreshAuthentication() {
+        final MockSubscriber<Privat24BankLinkFragment.AuthenticationRefreshed> refreshedSubscriber =
+                new MockSubscriber<>(Privat24BankLinkFragment.AuthenticationRefreshed.class);
+        bus.register(refreshedSubscriber);
+
+        int bankLinkId = TestHelper.randomInt();
+        fragment.onEventBackgroundThread(new Privat24BankLinkFragment.RefreshAuthentication(bankLinkId));
+        assertEquals(bankLinkId, mockPrivat24BankService.refreshAuthenticationCall.bankLinkId);
+
+        assertNotNull(refreshedSubscriber.getEvent());
+    }
+
+    public void testOnEventBackgroundThreadRefreshAuthenticationFailed() {
+        final MockSubscriber<Privat24BankLinkFragment.RefreshAuthenticationFailed> refreshedSubscriber =
+                new MockSubscriber<>(Privat24BankLinkFragment.RefreshAuthenticationFailed.class);
+        bus.register(refreshedSubscriber);
+
+        final SQLException exception = new SQLException();
+
+        mockPrivat24BankService.onRefreshAuthentication = new MockPrivat24BankService.OnRefreshAuthentication() {
+            @Override public void call(int bankLinkId) throws SQLException {
+                throw exception;
+            }
+        };
+
+        fragment.onEventBackgroundThread(new Privat24BankLinkFragment.RefreshAuthentication(TestHelper.randomInt()));
+
+        assertSame(exception, refreshedSubscriber.getEvent().exception);
     }
 }
