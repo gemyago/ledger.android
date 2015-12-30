@@ -52,6 +52,9 @@ public class Privat24BankApi extends Privat24BaseApi implements BankApi<Privat24
 
         Log.d(TAG, "Getting transactions for the past " + weeks + " weeks");
 
+        Log.d(TAG, "First loading cards. In other case the api may give occasional error");
+        getCards();
+
         Privat24BankLinkData linkData = request.bankLink.getLinkData(Privat24BankLinkData.class, secret);
         JsonObject response = getJsonWithCookie(createApiUrlBuilder()
                 .addQueryParameter("card", linkData.cardid)
