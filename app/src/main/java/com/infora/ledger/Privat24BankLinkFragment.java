@@ -1,33 +1,22 @@
 package com.infora.ledger;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
-import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
-import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
-import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
-import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
-import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import com.infora.ledger.ui.privat24.AddBankLinkFragmentModeState;
+import com.infora.ledger.ui.privat24.BankLinkFragmentModeState;
+import com.infora.ledger.ui.privat24.EditBankLinkFragmentModeState;
 
 import javax.inject.Inject;
 
@@ -40,36 +29,36 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
 
     private static final String TAG = Privat24BankLinkFragment.class.getName();
 
-    private ModeState modeState;
+    BankLinkFragmentModeState modeState;
 
     @Inject EventBus bus;
-    @Inject Privat24BankService bankService;
 
     @Override
     public void setMode(Mode mode) {
         switch (mode) {
             case Add:
-                modeState = new AddModeState();
+                modeState = new AddBankLinkFragmentModeState();
                 break;
             case Edit:
-                modeState = new EditModeState();
+                modeState = new EditBankLinkFragmentModeState();
                 break;
             default:
                 throw new IllegalArgumentException("The mode '" + mode + "' is not supported.");
         }
+        Log.d(TAG, "Mode state initialized.");
         super.setMode(mode);
     }
 
     @Override
     public void onBeforeAdd(Activity parent) {
         DiUtils.injector(parent).inject(this);
-        bus.register(this);
+        bus.register(modeState);
         Log.d(TAG, "Fragment registered to handle events.");
     }
 
     @Override
     public void onBeforeRemove(Activity parent) {
-        bus.unregister(this);
+        bus.unregister(modeState);
         Log.d(TAG, "Fragment unregistered from events handling.");
     }
 
@@ -82,15 +71,15 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        modeState.onViewCreated(view);
+        Log.d(TAG, "View created. Notifying mode state.");
+        modeState.processViewCreated(view);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-
         if (bus != null) {
-            bus.unregister(this);
+            bus.unregister(modeState);
             Log.d(TAG, "Fragment unregistered from events handling.");
         }
     }
@@ -113,154 +102,5 @@ public class Privat24BankLinkFragment extends BankLinkFragment<Privat24BankLinkD
         login.setText("");
         password.setText("");
         card.setText("");
-    }
-
-    public void onEventBackgroundThread(RefreshAuthentication cmd) {
-        Log.d(TAG, "Refreshing authentication...");
-        try {
-            bankService.refreshAuthentication(cmd.bankLinkId);
-            bus.post(new AuthenticationRefreshed());
-        } catch (SQLException e) {
-            bus.post(new RefreshAuthenticationFailed(e));
-        } catch (IOException e) {
-            bus.post(new RefreshAuthenticationFailed(e));
-        } catch (PrivatBankException e) {
-            bus.post(new RefreshAuthenticationFailed(e));
-        }
-    }
-
-    private void onEventMainThread(RefreshAuthenticationFailed evt) {
-        Log.e(TAG, "Failed to refresh authentication.", evt.exception);
-        Toast.makeText(getActivity(), "Failure adding bank link: " + evt.exception.getMessage(), Toast.LENGTH_LONG).show();
-    }
-
-    private void onEventMainThread(AuthenticationRefreshed evt) {
-        Log.d(TAG, "Refresh command completed.");
-        final Button button = (Button) getActivity().findViewById(R.id.privat24_refresh_authentication);
-        button.setEnabled(true);
-    }
-
-    public void onEventMainThread(final AskPrivat24Otp cmd) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Please provide OTP password");
-
-        final EditText input = new EditText(getActivity());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String otpPassword = input.getText().toString();
-                bus.post(new AuthenticateWithOtp(cmd.operationId, otpPassword));
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-
-        builder.show();
-    }
-
-    private interface ModeState {
-        Privat24BankLinkData getBankLinkData(View view);
-
-        void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData);
-
-        void onViewCreated(View view);
-    }
-
-    private static class AddModeState implements ModeState {
-        @Override
-        public Privat24BankLinkData getBankLinkData(View view) {
-            EditText login = (EditText) view.findViewById(R.id.privat24_login);
-            EditText password = (EditText) view.findViewById(R.id.privat24_password);
-            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
-            return new Privat24BankLinkData()
-                    .setLogin(login.getText().toString())
-                    .setPassword(password.getText().toString())
-                    .setCardNumber(card.getText().toString());
-        }
-
-        @Override
-        public void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData) {
-            EditText login = (EditText) view.findViewById(R.id.privat24_login);
-            EditText password = (EditText) view.findViewById(R.id.privat24_password);
-            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
-            login.setText(linkData.login);
-            password.setText(linkData.password);
-            card.setText(linkData.cardNumber);
-        }
-
-        @Override
-        public void onViewCreated(View view) {
-            view.findViewById(R.id.privat24_refresh_authentication).setVisibility(View.GONE);
-        }
-    }
-
-    public static class EditModeState implements ModeState {
-        @Inject EventBus bus;
-
-
-        private Privat24BankLinkData linkData;
-        private BankLink bankLink;
-
-        @Override
-        public Privat24BankLinkData getBankLinkData(View view) {
-            return linkData;
-        }
-
-        @Override
-        public void assignValues(View view, BankLink bankLink, Privat24BankLinkData linkData) {
-            EditText login = (EditText) view.findViewById(R.id.privat24_login);
-            EditText password = (EditText) view.findViewById(R.id.privat24_password);
-            EditText card = (EditText) view.findViewById(R.id.privat24_card_number);
-            login.setText(linkData.login);
-            login.setEnabled(false);
-            password.setText(ObfuscatedString.value(linkData.password));
-            password.setEnabled(false);
-            card.setText(ObfuscatedString.value(linkData.cardNumber));
-            card.setEnabled(false);
-            this.bankLink = bankLink;
-            this.linkData = linkData;
-        }
-
-        @Override
-        public void onViewCreated(final View view) {
-            DiUtils.injector(view.getContext()).inject(this);
-            final Button button = (Button) view.findViewById(R.id.privat24_refresh_authentication);
-            button.setEnabled(true);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Posting command to refresh authentication...");
-                    bus.post(new RefreshAuthentication(bankLink.id));
-                    button.setEnabled(false);
-                }
-            });
-        }
-    }
-
-    public static class RefreshAuthentication {
-        public int bankLinkId;
-
-        public RefreshAuthentication(int bankLinkId) {
-            this.bankLinkId = bankLinkId;
-        }
-    }
-
-    public static class AuthenticationRefreshed {
-
-    }
-
-    public static class RefreshAuthenticationFailed {
-        public Exception exception;
-
-        public RefreshAuthenticationFailed(Exception exception) {
-            this.exception = exception;
-        }
     }
 }

@@ -15,6 +15,9 @@ import com.infora.ledger.application.synchronization.LedgerWebSynchronizationStr
 import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapter;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.ipc.EventBroadcastsReceiver;
+import com.infora.ledger.ui.privat24.AddBankLinkFragmentModeState;
+import com.infora.ledger.ui.privat24.BankLinkFragmentModeState;
+import com.infora.ledger.ui.privat24.EditBankLinkFragmentModeState;
 
 /**
  * Created by mye on 9/16/2015.
@@ -50,5 +53,7 @@ public interface DependenciesInjector {
 
     void inject(SettingsFragment settingsFragment);
 
-    void inject(Privat24BankLinkFragment.EditModeState editModeState);
+    void inject(EditBankLinkFragmentModeState state);
+
+    void inject(AddBankLinkFragmentModeState state);
 }
