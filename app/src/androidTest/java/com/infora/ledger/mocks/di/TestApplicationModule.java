@@ -9,6 +9,7 @@ import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
 import com.infora.ledger.application.synchronization.SynchronizationStrategiesFactory;
+import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.LedgerAccountsLoader;
@@ -132,5 +133,9 @@ public class TestApplicationModule {
     @Provides Privat24BankService providePrivat24BankService() {
         if(privat24BankService == null) privat24BankService = new Privat24BankService();
         return privat24BankService;
+    }
+
+    @Provides AddBankLinkStrategiesFactory provideAddBankLinkStrategiesFactory(Context context) {
+        return AddBankLinkStrategiesFactory.createDefault(context);
     }
 }

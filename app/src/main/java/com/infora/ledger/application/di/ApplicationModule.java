@@ -7,6 +7,7 @@ import com.infora.ledger.api.LedgerApiFactory;
 import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.application.PendingTransactionsService;
+import com.infora.ledger.banks.AddBankLinkStrategiesFactory;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.support.AccountManagerWrapper;
 import com.infora.ledger.ui.BankLinkFragmentsFactory;
@@ -42,8 +43,8 @@ public class ApplicationModule {
     }
 
     @Provides @Singleton
-    BankLinksService provideBankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
-        return new BankLinksService(bus, db, secretProvider);
+    BankLinksService provideBankLinksService() {
+        return new BankLinksService();
     }
 
     @Provides BankLinkFragmentsFactory provideBankLinkFragmentsFactory() {
@@ -53,5 +54,9 @@ public class ApplicationModule {
     @Provides @Singleton
     LedgerApiFactory provideApiAdapter(Context context, AccountManagerWrapper accountManager) {
         return LedgerApiFactory.createAdapter(context, accountManager);
+    }
+
+    @Provides AddBankLinkStrategiesFactory provideAddBankLinkStrategiesFactory(Context context) {
+        return AddBankLinkStrategiesFactory.createDefault(context);
     }
 }

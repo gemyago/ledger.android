@@ -5,7 +5,7 @@ import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
-import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
@@ -68,7 +68,7 @@ public class Privat24BankServiceTest extends TestCase {
             }
         };
 
-        MockSubscriber<AskPrivat24Otp> askOtpHandler = new MockSubscriber<>(AskPrivat24Otp.class);
+        MockSubscriber<AskPrivat24OtpToCreateNewLink> askOtpHandler = new MockSubscriber<>(AskPrivat24OtpToCreateNewLink.class);
         bus.register(askOtpHandler);
 
         subject.refreshAuthentication(bankLink.id);

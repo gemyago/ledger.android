@@ -1,6 +1,7 @@
 package com.infora.ledger.application;
 
 import android.test.AndroidTestCase;
+import android.test.mock.MockApplication;
 
 import com.infora.ledger.TestHelper;
 import com.infora.ledger.api.DeviceSecret;
@@ -23,11 +24,15 @@ import com.infora.ledger.mocks.MockBankLinkData;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
+import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockSubscriber;
+import com.infora.ledger.mocks.di.TestApplicationModule;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -36,9 +41,9 @@ import de.greenrobot.event.EventBus;
  */
 public class BankLinksServiceTest extends AndroidTestCase {
 
-    private BankLinksService subject;
+    @Inject BankLinksService subject;
     private MockDatabaseRepository<BankLink> repository;
-    private EventBus bus;
+    @Inject EventBus bus;
     private MockDatabaseContext db;
     private Date fetchFromDate;
     private DeviceSecret secret;
@@ -47,13 +52,18 @@ public class BankLinksServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        bus = new EventBus();
         db = new MockDatabaseContext();
         repository = new MockDatabaseRepository(BankLink.class);
         db.addMockRepo(BankLink.class, repository);
         secret = DeviceSecret.generateNew();
         secretProvider = new MockDeviceSecretProvider(secret);
-        subject = new BankLinksService(bus, db, secretProvider);
+        final MockLedgerApplication app = new MockLedgerApplication(getContext()).withInjectorModuleInit(new MockLedgerApplication.InjectorModuleInit() {
+            @Override public void init(TestApplicationModule module) {
+                module.databaseContext = db;
+                module.deviceSecretProvider = secretProvider;
+            }
+        });
+        app.injector().inject(this);
     }
 
     public void testAddBankLinkCommand() {

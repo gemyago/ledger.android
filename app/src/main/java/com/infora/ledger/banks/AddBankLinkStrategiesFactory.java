@@ -1,5 +1,8 @@
 package com.infora.ledger.banks;
 
+import android.content.Context;
+
+import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24AddBankLinkStrategy;
 import com.infora.ledger.banks.ua.privatbank.Privat24Transaction;
 
@@ -27,12 +30,12 @@ public class AddBankLinkStrategiesFactory {
         }
     }
 
-    public static AddBankLinkStrategiesFactory createDefault() {
+    public static AddBankLinkStrategiesFactory createDefault(final Context context) {
         AddBankLinkStrategiesFactory factory = new AddBankLinkStrategiesFactory();
         factory.strategies.put(Privat24Transaction.PRIVATBANK_BIC, new Callable<AddBankLinkStrategy>() {
             @Override
             public AddBankLinkStrategy call() throws Exception {
-                return new Privat24AddBankLinkStrategy();
+                return DiUtils.injector(context).provideAddBankLinkStrategy();
             }
         });
         return factory;

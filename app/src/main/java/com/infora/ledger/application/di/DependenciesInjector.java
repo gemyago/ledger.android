@@ -9,10 +9,12 @@ import com.infora.ledger.LoginActivity;
 import com.infora.ledger.Privat24BankLinkFragment;
 import com.infora.ledger.ReportActivity;
 import com.infora.ledger.SettingsFragment;
+import com.infora.ledger.application.BankLinksService;
 import com.infora.ledger.application.synchronization.FetchBankLinksSynchronizationStrategy;
 import com.infora.ledger.application.synchronization.LedgerWebSingleTransactionSyncStrategy;
 import com.infora.ledger.application.synchronization.LedgerWebSynchronizationStrategy;
 import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapter;
+import com.infora.ledger.banks.ua.privatbank.Privat24AddBankLinkStrategy;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.ipc.EventBroadcastsReceiver;
 import com.infora.ledger.ui.privat24.AddBankLinkFragmentModeState;
@@ -45,15 +47,19 @@ public interface DependenciesInjector {
 
     void inject(LedgerAccountsLoader ledgerAccountsLoader);
 
+    void inject(SettingsFragment settingsFragment);
+
+    void inject(EditBankLinkFragmentModeState state);
+
+    void inject(AddBankLinkFragmentModeState state);
+
+    void inject(BankLinksService bankLinksService);
+
     LedgerWebSynchronizationStrategy provideLedgerWebSyncStrategy();
 
     LedgerWebSingleTransactionSyncStrategy provideLedgerWebPublishReportedSyncStrategy();
 
     FetchBankLinksSynchronizationStrategy provideFetchBankLinksSynchronizationStrategy();
 
-    void inject(SettingsFragment settingsFragment);
-
-    void inject(EditBankLinkFragmentModeState state);
-
-    void inject(AddBankLinkFragmentModeState state);
+    Privat24AddBankLinkStrategy provideAddBankLinkStrategy();
 }

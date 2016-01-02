@@ -9,7 +9,7 @@ import android.widget.EditText;
 import com.infora.ledger.R;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
-import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
 import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
 
@@ -50,7 +50,7 @@ public class AddBankLinkFragmentModeState extends BankLinkFragmentModeState {
         view.findViewById(R.id.privat24_refresh_authentication).setVisibility(View.GONE);
     }
 
-    public void onEventMainThread(final AskPrivat24Otp cmd) {
+    public void onEventMainThread(final AskPrivat24OtpToCreateNewLink cmd) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Please provide OTP password");
 

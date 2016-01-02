@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.infora.ledger.application.DeviceSecretProvider;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
-import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24Otp;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 
@@ -54,6 +54,7 @@ public class Privat24BankService {
         Privat24AuthApi authApi = getAuthApiFactory().createApi(linkData.uniqueId);
         String operationId = authApi.authenticateWithPhoneAndPass(linkData.login, linkData.password);
         Log.d(TAG, "Posting event to ask opt from the user.");
-        bus.post(new AskPrivat24Otp(operationId));
+        throw new RuntimeException("Not implemented");
+//        bus.post(new AskPrivat24OtpToCreateNewLink(operationId));
     }
 }
