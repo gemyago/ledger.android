@@ -3,7 +3,6 @@ package com.infora.ledger;
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 import android.view.View;
-import android.widget.EditText;
 
 import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
@@ -13,14 +12,15 @@ import com.infora.ledger.mocks.MockLedgerApplication;
 import com.infora.ledger.mocks.MockPrivat24BankService;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.di.TestApplicationModule;
-import com.infora.ledger.support.ObfuscatedString;
 import com.infora.ledger.ui.BankLinkFragment;
-import com.infora.ledger.ui.privat24.BankLinkFragmentModeState;
 import com.infora.ledger.ui.privat24.EditBankLinkFragmentModeState;
+import com.infora.ledger.ui.privat24.messages.AuthenticateWithOtpToRefreshAuthentication;
 import com.infora.ledger.ui.privat24.messages.AuthenticationRefreshed;
 import com.infora.ledger.ui.privat24.messages.RefreshAuthentication;
 import com.infora.ledger.ui.privat24.messages.RefreshAuthenticationFailed;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.inject.Inject;
@@ -107,6 +107,46 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
 
         subject.onEventBackgroundThread(new RefreshAuthentication(TestHelper.randomInt()));
 
+        assertSame(exception, refreshedSubscriber.getEvent().exception);
+    }
+
+    public void testOnAuthenticateWithOtpToRefreshAuthentication() {
+        final AuthenticateWithOtpToRefreshAuthentication cmd = new AuthenticateWithOtpToRefreshAuthentication(
+                TestHelper.randomString("operation-id"),
+                TestHelper.randomString("otp"),
+                new BankLink()
+        );
+        final boolean[] serviceCalled = {false};
+        mockPrivat24BankService.onAuthenticateWithOtpToRefreshAuthentication = new MockPrivat24BankService.OnAuthenticateWithOtpToRefreshAuthentication() {
+            @Override public void call(String operationId, String otp, BankLink bankLink) {
+                assertEquals(cmd.operationId, operationId);
+                assertEquals(cmd.otp, otp);
+                assertSame(cmd.bankLink, bankLink);
+                serviceCalled[0] = true;
+            }
+        };
+        subject.onEventBackgroundThread(cmd);
+        assertTrue(serviceCalled[0]);
+    }
+
+    public void testOnAuthenticateWithOtpToRefreshAuthenticationExceptionHandling() {
+        final AuthenticateWithOtpToRefreshAuthentication cmd = new AuthenticateWithOtpToRefreshAuthentication(
+                TestHelper.randomString("operation-id"),
+                TestHelper.randomString("otp"),
+                new BankLink()
+        );
+        final MockSubscriber<RefreshAuthenticationFailed> refreshedSubscriber =
+                new MockSubscriber<>(RefreshAuthenticationFailed.class);
+        bus.register(refreshedSubscriber);
+
+        final IOException exception = new IOException();
+
+        mockPrivat24BankService.onAuthenticateWithOtpToRefreshAuthentication = new MockPrivat24BankService.OnAuthenticateWithOtpToRefreshAuthentication() {
+            @Override public void call(String operationId, String otp, BankLink bankLink) throws IOException {
+                throw exception;
+            }
+        };
+        subject.onEventBackgroundThread(cmd);
         assertSame(exception, refreshedSubscriber.getEvent().exception);
     }
 

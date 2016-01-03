@@ -18,6 +18,7 @@ import com.infora.ledger.mocks.MockPrivat24AuthApi;
 import com.infora.ledger.mocks.MockPrivat24BankApi;
 import com.infora.ledger.mocks.MockSubscriber;
 import com.infora.ledger.mocks.MockUnitOfWork;
+import com.infora.ledger.ui.privat24.messages.AuthenticationRefreshed;
 
 import junit.framework.TestCase;
 
@@ -141,5 +142,27 @@ public class Privat24BankServiceTest extends TestCase {
 
         assertEquals(operationId, askOtpHandler.getEvent().operationId);
         assertSame(bankLink, askOtpHandler.getEvent().bankLink);
+    }
+
+    public void testAuthenticateWithOtpToRefreshAuthentication() throws Exception {
+        final String operationId = TestHelper.randomString("otp-operation-id");
+        final String otp = TestHelper.randomString("otp");
+        final boolean[] apiCalled = {false};
+        authApi.onAuthenticateWithOtp = new MockPrivat24AuthApi.AuthenticateWithOtpCall() {
+            @Override public String call(String id, String anOtp) {
+                assertEquals(operationId, id);
+                assertEquals(otp, anOtp);
+                apiCalled[0] = true;
+                return null;
+            }
+        };
+
+        MockSubscriber<AuthenticationRefreshed> successHandler =
+                new MockSubscriber<>(AuthenticationRefreshed.class);
+        bus.register(successHandler);
+
+        subject.authenticateWithOtpToRefreshAuthentication(operationId, otp, bankLink);
+        assertTrue(apiCalled[0]);
+        assertNotNull(successHandler.getEvent());
     }
 }

@@ -13,6 +13,7 @@ import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.UnitOfWork;
 import com.infora.ledger.support.ObfuscatedString;
+import com.infora.ledger.ui.privat24.messages.AuthenticationRefreshed;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -117,5 +118,14 @@ public class Privat24BankService {
         String operationId = authApi.authenticateWithPhoneAndPass(linkData.login, linkData.password);
         Log.d(TAG, "Posting event to ask opt from the user.");
         bus.post(new AskPrivat24OtpToRefreshAuthentication(operationId, bankLink));
+    }
+
+    public void authenticateWithOtpToRefreshAuthentication(String operationId, String otp, BankLink bankLink) throws IOException, PrivatBankException {
+        Log.i(TAG, "Authenticating with otp to refresh bank link: " + bankLink.id);
+        Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, secretProvider.secret());
+        Privat24AuthApi authApi = getAuthApiFactory().createApi(linkData.uniqueId);
+        authApi.authenticateWithOtp(operationId, otp);
+        Log.i(TAG, "Authenticated with OTP. Authentication refreshed.");
+        bus.post(new AuthenticationRefreshed());
     }
 }

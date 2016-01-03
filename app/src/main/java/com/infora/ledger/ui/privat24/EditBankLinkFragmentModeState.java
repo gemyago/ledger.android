@@ -1,5 +1,8 @@
 package com.infora.ledger.ui.privat24;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,8 +14,10 @@ import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToRefreshAuthentication;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.support.ObfuscatedString;
+import com.infora.ledger.ui.privat24.messages.AuthenticateWithOtpToRefreshAuthentication;
 import com.infora.ledger.ui.privat24.messages.AuthenticationRefreshed;
 import com.infora.ledger.ui.privat24.messages.RefreshAuthentication;
 import com.infora.ledger.ui.privat24.messages.RefreshAuthenticationFailed;
@@ -81,6 +86,42 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
         } catch (IOException e) {
             bus.post(new RefreshAuthenticationFailed(e));
         } catch (PrivatBankException e) {
+            bus.post(new RefreshAuthenticationFailed(e));
+        }
+    }
+
+    public void onEventMainThread(final AskPrivat24OtpToRefreshAuthentication cmd) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Please provide OTP password");
+
+        final EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String otpPassword = input.getText().toString();
+                bus.post(new AuthenticateWithOtpToRefreshAuthentication(cmd.operationId, otpPassword, cmd.bankLink));
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        builder.show();
+
+    }
+
+    public void onEventBackgroundThread(AuthenticateWithOtpToRefreshAuthentication cmd) {
+        try {
+            bankService.authenticateWithOtpToRefreshAuthentication(cmd.operationId, cmd.otp, cmd.bankLink);
+        } catch(IOException e) {
+            bus.post(new RefreshAuthenticationFailed(e));
+        } catch(PrivatBankException e) {
             bus.post(new RefreshAuthenticationFailed(e));
         }
     }

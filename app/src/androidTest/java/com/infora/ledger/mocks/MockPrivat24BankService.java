@@ -13,11 +13,12 @@ import java.sql.SQLException;
 public class MockPrivat24BankService extends Privat24BankService {
     public OnRefreshAuthentication onRefreshAuthentication;
     public OnAuthenticateWithOtpAndCreateNewLink onAuthenticateWithOtpAndCreateNewLink;
+    public OnAuthenticateWithOtpToRefreshAuthentication onAuthenticateWithOtpToRefreshAuthentication;
     public RefreshAuthenticationCall refreshAuthenticationCall;
 
     @Override
     public void refreshAuthentication(int bankLinkId) throws SQLException, IOException, PrivatBankException {
-        if (onRefreshAuthentication != null) onRefreshAuthentication.call(bankLinkId);
+        if(onRefreshAuthentication != null) onRefreshAuthentication.call(bankLinkId);
         refreshAuthenticationCall = new RefreshAuthenticationCall(bankLinkId);
     }
 
@@ -27,8 +28,14 @@ public class MockPrivat24BankService extends Privat24BankService {
             onAuthenticateWithOtpAndCreateNewLink.call(operationId, otp, bankLink);
     }
 
+    @Override
+    public void authenticateWithOtpToRefreshAuthentication(String operationId, String otp, BankLink bankLink) throws IOException {
+        if(onAuthenticateWithOtpToRefreshAuthentication != null)
+            onAuthenticateWithOtpToRefreshAuthentication.call(operationId, otp, bankLink);
+    }
+
     public interface OnRefreshAuthentication {
-        void call(int bankLinkId) throws SQLException, IOException, PrivatBankException ;
+        void call(int bankLinkId) throws SQLException, IOException, PrivatBankException;
     }
 
     public class RefreshAuthenticationCall {
@@ -41,5 +48,9 @@ public class MockPrivat24BankService extends Privat24BankService {
 
     public interface OnAuthenticateWithOtpAndCreateNewLink {
         void call(String operationId, String otp, BankLink bankLink);
+    }
+
+    public interface OnAuthenticateWithOtpToRefreshAuthentication {
+        void call(String operationId, String otp, BankLink bankLink) throws IOException;
     }
 }
