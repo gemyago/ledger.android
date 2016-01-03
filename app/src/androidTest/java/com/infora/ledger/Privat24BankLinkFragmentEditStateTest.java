@@ -81,15 +81,9 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
     }
 
     public void testOnRefreshAuthentication() {
-        final MockSubscriber<AuthenticationRefreshed> refreshedSubscriber =
-                new MockSubscriber<>(AuthenticationRefreshed.class);
-        bus.register(refreshedSubscriber);
-
         int bankLinkId = TestHelper.randomInt();
         subject.onEventBackgroundThread(new RefreshAuthentication(bankLinkId));
         assertEquals(bankLinkId, mockPrivat24BankService.refreshAuthenticationCall.bankLinkId);
-
-        assertNotNull(refreshedSubscriber.getEvent());
     }
 
     public void testOnRefreshAuthenticationExceptionHandling() {

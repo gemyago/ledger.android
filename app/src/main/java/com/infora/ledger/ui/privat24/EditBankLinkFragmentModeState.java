@@ -80,7 +80,6 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
         Log.d(TAG, "Refreshing authentication...");
         try {
             bankService.refreshAuthentication(cmd.bankLinkId);
-            bus.post(new AuthenticationRefreshed());
         } catch (SQLException e) {
             bus.post(new RefreshAuthenticationFailed(e));
         } catch (IOException e) {
@@ -135,5 +134,6 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
     public void onEventMainThread(AuthenticationRefreshed evt) {
         Log.d(TAG, "Refresh authentication sequence completed.");
         getView().findViewById(R.id.privat24_refresh_authentication).setEnabled(true);
+        Toast.makeText(getContext(), "Authentication refreshed.", Toast.LENGTH_LONG).show();
     }
 }
