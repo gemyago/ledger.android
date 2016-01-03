@@ -9,6 +9,7 @@ import com.infora.ledger.banks.ua.privatbank.PrivatBankCard;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToRefreshAuthentication;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDatabaseRepository;
@@ -133,11 +134,12 @@ public class Privat24BankServiceTest extends TestCase {
             }
         };
 
-        MockSubscriber<AskPrivat24OtpToCreateNewLink> askOtpHandler = new MockSubscriber<>(AskPrivat24OtpToCreateNewLink.class);
+        MockSubscriber<AskPrivat24OtpToRefreshAuthentication> askOtpHandler = new MockSubscriber<>(AskPrivat24OtpToRefreshAuthentication.class);
         bus.register(askOtpHandler);
 
         subject.refreshAuthentication(bankLink.id);
 
         assertEquals(operationId, askOtpHandler.getEvent().operationId);
+        assertSame(bankLink, askOtpHandler.getEvent().bankLink);
     }
 }

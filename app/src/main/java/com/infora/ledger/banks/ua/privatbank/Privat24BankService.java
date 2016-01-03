@@ -8,6 +8,7 @@ import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
+import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToRefreshAuthentication;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
 import com.infora.ledger.data.UnitOfWork;
@@ -110,13 +111,11 @@ public class Privat24BankService {
         Log.i(TAG, "Refreshing authentication for bank link: " + bankLinkId);
         BankLink bankLink = db.createRepository(BankLink.class).getById(bankLinkId);
         Log.d(TAG, "Retrieving corresponding bank link.");
-        secretProvider.ensureDeviceRegistered(); //TODO: make sure the provider is singleton. Should be called just once.
         Privat24BankLinkData linkData = bankLink.getLinkData(Privat24BankLinkData.class, secretProvider.secret());
         Log.d(TAG, "Authenticating with phone and pass to get the OTP.");
         Privat24AuthApi authApi = getAuthApiFactory().createApi(linkData.uniqueId);
         String operationId = authApi.authenticateWithPhoneAndPass(linkData.login, linkData.password);
         Log.d(TAG, "Posting event to ask opt from the user.");
-        throw new RuntimeException("Not implemented");
-//        bus.post(new AskPrivat24OtpToCreateNewLink(operationId));
+        bus.post(new AskPrivat24OtpToRefreshAuthentication(operationId, bankLink));
     }
 }
