@@ -78,12 +78,12 @@ public class BankLinksServiceTest extends AndroidTestCase {
         bus.register(subscriber);
 
         final boolean[] strategyUsed = {false};
-        subject.setAddStrategies(new AddBankLinkStrategiesFactory() {
+        subject.setAddStrategies(new AddBankLinkStrategiesFactory(null) {
             @Override
             public AddBankLinkStrategy getStrategy(String bic) {
                 if (bic == command.bic) return new AddBankLinkStrategy() {
                     @Override
-                    public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
+                    public void addBankLink(BankLink bankLink) {
                         assertEquals(new BankLink()
                                 .setAccountId("account-100")
                                 .setAccountName("Account 100")

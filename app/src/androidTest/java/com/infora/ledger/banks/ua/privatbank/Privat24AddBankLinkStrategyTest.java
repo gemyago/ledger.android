@@ -7,9 +7,9 @@ import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
-import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockDatabaseContext;
+import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockPrivat24AuthApi;
 import com.infora.ledger.mocks.MockPrivat24BankApi;
 import com.infora.ledger.mocks.MockSubscriber;
@@ -37,7 +37,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         super.setUp();
         bus = new EventBus();
         db = new MockDatabaseContext();
-        subject = new Privat24AddBankLinkStrategy();
+        deviceSecret = DeviceSecret.generateNew();
+        final MockDeviceSecretProvider secretProvider = new MockDeviceSecretProvider(deviceSecret);
+        secretProvider.ensureDeviceRegistered();
+        subject = new Privat24AddBankLinkStrategy(bus, db, secretProvider);
         authApi = new MockPrivat24AuthApi();
         bankApi = new MockPrivat24BankApi();
         subject.setBankApiFactory(new Privat24BankApi.Factory() {
@@ -52,8 +55,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
                 return authApi;
             }
         });
-        deviceSecret = DeviceSecret.generateNew();
-
         authApi.onAuthenticateWithPhoneAndPass = new MockPrivat24AuthApi.AuthenticateWithPhoneAndPassCall() {
             @Override
             public String call(String phone, String pass) {
@@ -78,11 +79,10 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
             }
         };
 
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        subject.addBankLink(bankLink);
 
         assertEquals("41399320", askOtpHandler.getEvent().operationId);
 
-        assertTrue(bus.isRegistered(subject));
     }
 
     public void testAuthenticateWithOtp() {
@@ -92,7 +92,7 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
                 .setPassword("password-100")
                 .setCardNumber("8867")
                 , deviceSecret);
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        subject.addBankLink(bankLink);
 
         authApi.onAuthenticateWithOtp = new MockPrivat24AuthApi.AuthenticateWithOtpCall() {
             @Override
@@ -131,8 +131,7 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
 
         MockSubscriber<BankLinkAdded> addedHandler = new MockSubscriber<>(BankLinkAdded.class);
         bus.register(addedHandler);
-// TODO Restore and adjust
-//        subject.authenticateWithOtpAndCreateNewLink(new AuthenticateWithOtp("operation-1", "9911"));
+        subject.authenticateWithOtpAndCreateNewLink("operation-1", "9911", bankLink);
         hook.assertCommitted();
 
         BankLinkAdded addedEvt = addedHandler.getEvent();
@@ -146,7 +145,7 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     public void testAuthenticateWithOtpWrongOperationId() {
         final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
         bankLink.setLinkData(new Privat24BankLinkData().setLogin("l-1").setPassword("p-1").setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        subject.addBankLink(bankLink);
 
         boolean raised = false;
         try {

@@ -86,7 +86,7 @@ public class BankLinksService {
                 .setInitialSyncDate(command.initialFetchDate)
                 .setLinkData(command.linkData, secret);
 
-        getAddStrategies().getStrategy(command.bic).addBankLink(bus, db, bankLink, secret);
+        getAddStrategies().getStrategy(command.bic).addBankLink(bankLink);
     }
 
     public void onEventBackgroundThread(UpdateBankLinkCommand command) {

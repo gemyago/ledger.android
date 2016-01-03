@@ -2,15 +2,15 @@ package com.infora.ledger.banks;
 
 import android.util.Log;
 
-import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.data.DatabaseContext;
-import com.infora.ledger.data.DatabaseRepository;
 import com.infora.ledger.data.UnitOfWork;
 
 import java.sql.SQLException;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -20,8 +20,16 @@ import de.greenrobot.event.EventBus;
 public class DefaultAddBankLinkStrategy implements AddBankLinkStrategy {
     private static final String TAG = DefaultAddBankLinkStrategy.class.getName();
 
+    private EventBus bus;
+    private DatabaseContext db;
+
+    @Inject public DefaultAddBankLinkStrategy(EventBus bus, DatabaseContext db) {
+        this.bus = bus;
+        this.db = db;
+    }
+
     @Override
-    public void addBankLink(EventBus bus, DatabaseContext db, BankLink bankLink, DeviceSecret deviceSecret) {
+    public void addBankLink(BankLink bankLink) {
         UnitOfWork unitOfWork = db.newUnitOfWork();
         unitOfWork.addNew(bankLink);
         try {

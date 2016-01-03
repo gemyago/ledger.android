@@ -1,6 +1,5 @@
 package com.infora.ledger.banks;
 
-import com.infora.ledger.api.DeviceSecret;
 import com.infora.ledger.application.events.AddBankLinkFailed;
 import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.data.BankLink;
@@ -21,7 +20,6 @@ public class DefaultAddBankLinkStrategyTest extends TestCase {
 
     private EventBus bus;
     private AddBankLinkStrategy subject;
-    private DeviceSecret deviceSecret;
     private MockDatabaseContext db;
 
     @Override
@@ -29,8 +27,7 @@ public class DefaultAddBankLinkStrategyTest extends TestCase {
         super.setUp();
         bus = new EventBus();
         db = new MockDatabaseContext();
-        subject = new DefaultAddBankLinkStrategy();
-        deviceSecret = DeviceSecret.generateNew();
+        subject = new DefaultAddBankLinkStrategy(bus, db);
     }
 
     public void testAddBankLink() {
@@ -48,7 +45,7 @@ public class DefaultAddBankLinkStrategyTest extends TestCase {
             }
         });
 
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        subject.addBankLink(bankLink);
         hook.assertCommitted();
 
         BankLinkAdded addedEvent = addedHandler.getEvent();
@@ -70,7 +67,7 @@ public class DefaultAddBankLinkStrategyTest extends TestCase {
         MockSubscriber<AddBankLinkFailed> failedHandler = new MockSubscriber<>(AddBankLinkFailed.class);
         bus.register(failedHandler);
 
-        subject.addBankLink(bus, db, bankLink, deviceSecret);
+        subject.addBankLink(bankLink);
 
         AddBankLinkFailed failedEvent = failedHandler.getEvent();
         assertSame(saveException, failedEvent.exception);
