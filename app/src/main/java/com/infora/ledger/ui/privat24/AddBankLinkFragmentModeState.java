@@ -9,6 +9,7 @@ import android.widget.EditText;
 import com.infora.ledger.R;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
+import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
 import com.infora.ledger.ui.privat24.messages.AuthenticateWithOtpAndCreateNewPrivat24Link;
 import com.infora.ledger.data.BankLink;
@@ -22,6 +23,7 @@ import de.greenrobot.event.EventBus;
  */
 public class AddBankLinkFragmentModeState extends BankLinkFragmentModeState {
     @Inject EventBus bus;
+    @Inject Privat24BankService bankService;
 
     @Override
     public Privat24BankLinkData getBankLinkData(View view) {
@@ -73,5 +75,9 @@ public class AddBankLinkFragmentModeState extends BankLinkFragmentModeState {
         });
 
         builder.show();
+    }
+
+    public void onEventBackgroundThread(AuthenticateWithOtpAndCreateNewPrivat24Link cmd) {
+        bankService.authenticateWithOtpAndCreateNewLink(cmd.operationId, cmd.otp, cmd.bankLink);
     }
 }

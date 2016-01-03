@@ -5,6 +5,7 @@ import com.infora.ledger.BankLinksActivityTest;
 import com.infora.ledger.EditBankLinkActivityTest;
 import com.infora.ledger.EditTransactionDialogTest;
 import com.infora.ledger.LoginActivityTest;
+import com.infora.ledger.Privat24BankLinkFragmentAddStateTest;
 import com.infora.ledger.Privat24BankLinkFragmentEditStateTest;
 import com.infora.ledger.Privat24BankLinkFragmentTest;
 import com.infora.ledger.ReportActivityTest;
@@ -41,4 +42,6 @@ public interface TestDependenciesInjector extends DependenciesInjector {
     void inject(Privat24BankLinkFragmentEditStateTest privat24BankLinkFragmentEditStateTest);
 
     void inject(BankLinksServiceTest bankLinksServiceTest);
+
+    void inject(Privat24BankLinkFragmentAddStateTest privat24BankLinkFragmentAddStateTest);
 }

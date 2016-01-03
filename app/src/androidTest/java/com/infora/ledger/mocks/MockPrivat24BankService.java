@@ -2,6 +2,7 @@ package com.infora.ledger.mocks;
 
 import com.infora.ledger.banks.ua.privatbank.Privat24BankService;
 import com.infora.ledger.banks.ua.privatbank.PrivatBankException;
+import com.infora.ledger.data.BankLink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -11,12 +12,19 @@ import java.sql.SQLException;
  */
 public class MockPrivat24BankService extends Privat24BankService {
     public OnRefreshAuthentication onRefreshAuthentication;
+    public OnAuthenticateWithOtpAndCreateNewLink onAuthenticateWithOtpAndCreateNewLink;
     public RefreshAuthenticationCall refreshAuthenticationCall;
 
     @Override
     public void refreshAuthentication(int bankLinkId) throws SQLException, IOException, PrivatBankException {
         if (onRefreshAuthentication != null) onRefreshAuthentication.call(bankLinkId);
         refreshAuthenticationCall = new RefreshAuthenticationCall(bankLinkId);
+    }
+
+    @Override
+    public void authenticateWithOtpAndCreateNewLink(String operationId, String otp, BankLink bankLink) {
+        if(onAuthenticateWithOtpAndCreateNewLink != null)
+            onAuthenticateWithOtpAndCreateNewLink.call(operationId, otp, bankLink);
     }
 
     public interface OnRefreshAuthentication {
@@ -29,5 +37,9 @@ public class MockPrivat24BankService extends Privat24BankService {
         public RefreshAuthenticationCall(int bankLinkId) {
             this.bankLinkId = bankLinkId;
         }
+    }
+
+    public interface OnAuthenticateWithOtpAndCreateNewLink {
+        void call(String operationId, String otp, BankLink bankLink);
     }
 }
