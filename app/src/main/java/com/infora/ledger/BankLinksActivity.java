@@ -101,6 +101,7 @@ public class BankLinksActivity extends AppCompatActivity implements LoaderManage
         int removedLength = event.ids.length;
         String message = getResources().getQuantityString(R.plurals.bank_links_removed, removedLength, removedLength);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        getLoaderManager().restartLoader(BANK_LINKS_LOADER_ID, null, this);
     }
 
     public void onEventMainThread(BankTransactionsFetched event) {
