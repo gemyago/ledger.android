@@ -27,7 +27,8 @@ public class MockDeviceSecretProvider extends DeviceSecretProvider {
     }
 
     @Override
-    public void ensureDeviceRegistered() {
+    public DeviceSecretProvider ensureDeviceRegistered() {
         secret = pendingSecret;
+        return this;
     }
 }

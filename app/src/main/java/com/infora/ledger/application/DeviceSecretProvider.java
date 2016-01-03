@@ -36,17 +36,18 @@ public class DeviceSecretProvider {
         return deviceSecret != null;
     }
 
-    public void ensureDeviceRegistered() {
-        if (hasBeenRegistered()) return;
+    public DeviceSecretProvider ensureDeviceRegistered() {
+        if (hasBeenRegistered()) return null;
         Log.d(TAG, "Registering device...");
         Account[] accounts = accountManager.getApplicationAccounts();
         if (accounts.length == 0) {
             Log.w(TAG, "There are no accounts yet. Device registration skipped.");
-            return;
+            return null;
         }
         LedgerApi api = ledgerApiFactory.createApi(accounts[0]);
         deviceSecret = api.registerDevice(getDeviceId(context), Build.MODEL);
         Log.d(TAG, "Device registered. Secret retrieved.");
+        return this;
     }
 
     public DeviceSecret secret() {

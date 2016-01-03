@@ -29,7 +29,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
     private Privat24AddBankLinkStrategy subject;
     private DeviceSecret deviceSecret;
     private MockPrivat24AuthApi authApi;
-    private MockPrivat24BankApi bankApi;
     private MockDatabaseContext db;
 
     @Override
@@ -42,13 +41,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         secretProvider.ensureDeviceRegistered();
         subject = new Privat24AddBankLinkStrategy(bus, db, secretProvider);
         authApi = new MockPrivat24AuthApi();
-        bankApi = new MockPrivat24BankApi();
-        subject.setBankApiFactory(new Privat24BankApi.Factory() {
-            @Override
-            public Privat24BankApi createApi(String uniqueId, String cookie) {
-                return bankApi;
-            }
-        });
         subject.setAuthApiFactory(new Privat24AuthApi.Factory() {
             @Override
             public Privat24AuthApi createApi(String uniqueId) {
@@ -82,78 +74,6 @@ public class Privat24AddBankLinkStrategyTest extends AndroidTestCase {
         subject.addBankLink(bankLink);
 
         assertEquals("41399320", askOtpHandler.getEvent().operationId);
-
-    }
-
-    public void testAuthenticateWithOtp() {
-        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData()
-                .setLogin("login-100")
-                .setPassword("password-100")
-                .setCardNumber("8867")
-                , deviceSecret);
-        subject.addBankLink(bankLink);
-
-        authApi.onAuthenticateWithOtp = new MockPrivat24AuthApi.AuthenticateWithOtpCall() {
-            @Override
-            public String call(String id, String otp) {
-                assertEquals("operation-1", id);
-                assertEquals("9911", otp);
-                return "cookie-133234";
-            }
-        };
-
-        bankApi.onGetCards = new MockPrivat24BankApi.GetCardsCall() {
-            @Override
-            public List<PrivatBankCard> call() {
-                ArrayList<PrivatBankCard> cards = new ArrayList<>();
-                cards.add(new PrivatBankCard().setNumber("1122").setCardid("card-1122"));
-                cards.add(new PrivatBankCard().setNumber("1133").setCardid("card-1133"));
-                cards.add(new PrivatBankCard().setNumber("8867").setCardid("card-8867"));
-                return cards;
-            }
-        };
-
-        MockUnitOfWork.Hook hook = db.addUnitOfWorkHook(new MockUnitOfWork.Hook() {
-            @Override
-            public void onCommitted(MockUnitOfWork mockUnitOfWork) {
-                assertEquals(1, mockUnitOfWork.commits.size());
-                assertEquals(1, mockUnitOfWork.commits.get(0).addedEntities.size());
-                BankLink addedLink = (BankLink) mockUnitOfWork.commits.get(0).addedEntities.get(0);
-                assertSame(bankLink, addedLink);
-                Privat24BankLinkData savedLinkData = addedLink.getLinkData(Privat24BankLinkData.class, deviceSecret);
-                assertEquals(bankLink.getLinkData(Privat24BankLinkData.class, deviceSecret).uniqueId, savedLinkData.uniqueId);
-                assertEquals("password-100", savedLinkData.password);
-                assertEquals("8867", savedLinkData.cardNumber);
-                assertEquals("card-8867", savedLinkData.cardid);
-            }
-        });
-
-        MockSubscriber<BankLinkAdded> addedHandler = new MockSubscriber<>(BankLinkAdded.class);
-        bus.register(addedHandler);
-        subject.authenticateWithOtpAndCreateNewLink("operation-1", "9911", bankLink);
-        hook.assertCommitted();
-
-        BankLinkAdded addedEvt = addedHandler.getEvent();
-        assertNotNull(addedEvt);
-        assertEquals(bankLink.accountId, addedEvt.accountId);
-        assertEquals(bankLink.bic, addedEvt.bic);
-
-        assertFalse(bus.isRegistered(subject));
-    }
-
-    public void testAuthenticateWithOtpWrongOperationId() {
-        final BankLink bankLink = new BankLink().setAccountId("account-1").setBic("bic-1");
-        bankLink.setLinkData(new Privat24BankLinkData().setLogin("l-1").setPassword("p-1").setCardNumber("8867"), deviceSecret);
-        subject.addBankLink(bankLink);
-
-        boolean raised = false;
-        try {
-// TODO Restore and adjust
-//            subject.authenticateWithOtpAndCreateNewLink(new AuthenticateWithOtp("wrong-operation-100", "9911"));
-        } catch (IllegalArgumentException ex) {
-            raised = true;
-        }
-        assertTrue("The exception has not been raised.", raised);
+        assertEquals(bankLink, askOtpHandler.getEvent().bankLink);
     }
 }
