@@ -85,14 +85,14 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
         }
     }
 
-    private void onEventMainThread(RefreshAuthenticationFailed evt) {
+    public void onEventMainThread(RefreshAuthenticationFailed evt) {
         Log.e(TAG, "Failed to refresh authentication.", evt.exception);
-        Toast.makeText(getContext(), "Failure adding bank link: " + evt.exception.getMessage(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), "Failure refreshing authentication: " + evt.exception.getMessage(), Toast.LENGTH_LONG).show();
+        getView().findViewById(R.id.privat24_refresh_authentication).setEnabled(true);
     }
 
-    private void onEventMainThread(AuthenticationRefreshed evt) {
-        Log.d(TAG, "Refresh command completed.");
-        final Button button = (Button) getView().findViewById(R.id.privat24_refresh_authentication);
-        button.setEnabled(true);
+    public void onEventMainThread(AuthenticationRefreshed evt) {
+        Log.d(TAG, "Refresh authentication sequence completed.");
+        getView().findViewById(R.id.privat24_refresh_authentication).setEnabled(true);
     }
 }

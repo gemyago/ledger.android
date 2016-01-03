@@ -2,6 +2,7 @@ package com.infora.ledger;
 
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
+import android.view.View;
 import android.widget.EditText;
 
 import com.infora.ledger.api.DeviceSecret;
@@ -37,6 +38,7 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
     private DeviceSecret secret;
     private MockPrivat24BankService mockPrivat24BankService;
     private EditBankLinkFragmentModeState subject;
+    private View refreshButton;
 
     public Privat24BankLinkFragmentEditStateTest() {
         super(DummyBankLinkFragmentTestActivity.class);
@@ -62,6 +64,7 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
         getActivity().getSupportFragmentManager().executePendingTransactions();
         subject = (EditBankLinkFragmentModeState) fragment.modeState;
         secret = DeviceSecret.generateNew();
+        refreshButton = fragment.getView().findViewById(R.id.privat24_refresh_authentication);
     }
 
     public void testRefreshAuthenticationButtonClick() {
@@ -72,11 +75,12 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
                 new MockSubscriber<>(RefreshAuthentication.class);
         bus.register(refreshSubscriber);
 
-        fragment.getView().findViewById(R.id.privat24_refresh_authentication).callOnClick();
+        refreshButton.callOnClick();
         assertEquals(3432234, refreshSubscriber.getEvent().bankLinkId);
+        assertFalse(refreshButton.isEnabled());
     }
 
-    public void testOnEventBackgroundThreadRefreshAuthentication() {
+    public void testOnRefreshAuthentication() {
         final MockSubscriber<AuthenticationRefreshed> refreshedSubscriber =
                 new MockSubscriber<>(AuthenticationRefreshed.class);
         bus.register(refreshedSubscriber);
@@ -88,7 +92,7 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
         assertNotNull(refreshedSubscriber.getEvent());
     }
 
-    public void testOnEventBackgroundThreadRefreshAuthenticationFailed() {
+    public void testOnRefreshAuthenticationExceptionHandling() {
         final MockSubscriber<RefreshAuthenticationFailed> refreshedSubscriber =
                 new MockSubscriber<>(RefreshAuthenticationFailed.class);
         bus.register(refreshedSubscriber);
@@ -104,5 +108,17 @@ public class Privat24BankLinkFragmentEditStateTest extends ActivityUnitTestCase<
         subject.onEventBackgroundThread(new RefreshAuthentication(TestHelper.randomInt()));
 
         assertSame(exception, refreshedSubscriber.getEvent().exception);
+    }
+
+    public void testOnRefreshAuthenticationFailed() {
+        refreshButton.setEnabled(false);
+        subject.onEventMainThread(new RefreshAuthenticationFailed(new Exception("Refresh failed")));
+        assertTrue(refreshButton.isEnabled());
+    }
+
+    public void testOnAuthenticationRefreshed() {
+        refreshButton.setEnabled(false);
+        subject.onEventMainThread(new AuthenticationRefreshed());
+        assertTrue(refreshButton.isEnabled());
     }
 }
