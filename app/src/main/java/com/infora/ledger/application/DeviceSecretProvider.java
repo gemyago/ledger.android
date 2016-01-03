@@ -17,14 +17,14 @@ import javax.inject.Singleton;
 /**
  * Created by mye on 7/17/2015.
  */
-public class DeviceSecretProvider {
+@Singleton public class DeviceSecretProvider {
     private static final String TAG = DeviceSecretProvider.class.getName();
     private final Context context;
     private final AccountManagerWrapper accountManager;
     private LedgerApiFactory ledgerApiFactory;
     private DeviceSecret deviceSecret;
 
-    @Inject @Singleton
+    @Inject
     public DeviceSecretProvider(Context context, AccountManagerWrapper accountManager, LedgerApiFactory ledgerApiFactory) {
         this.context = context;
         this.accountManager = accountManager;

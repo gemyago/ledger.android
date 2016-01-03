@@ -32,7 +32,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by jenya on 31.05.15.
  */
-public class BankLinksService {
+@Singleton public class BankLinksService {
     private static final String TAG = BankLinksService.class.getName();
     @Inject EventBus bus;
     @Inject DatabaseContext db;
@@ -42,7 +42,7 @@ public class BankLinksService {
     private FetchStrategiesFactory fetchStrategies;
     private DatabaseRepository<BankLink> repository;
 
-    @Inject @Singleton public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
+    @Inject public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
         this.bus = bus;
         this.db = db;
         this.secretProvider = secretProvider;
