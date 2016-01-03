@@ -10,7 +10,7 @@ import com.infora.ledger.R;
 import com.infora.ledger.application.di.DiUtils;
 import com.infora.ledger.banks.ua.privatbank.Privat24BankLinkData;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
-import com.infora.ledger.banks.ua.privatbank.messages.AuthenticateWithOtp;
+import com.infora.ledger.ui.privat24.messages.AuthenticateWithOtpAndCreateNewPrivat24Link;
 import com.infora.ledger.data.BankLink;
 
 import javax.inject.Inject;
@@ -62,7 +62,7 @@ public class AddBankLinkFragmentModeState extends BankLinkFragmentModeState {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String otpPassword = input.getText().toString();
-                bus.post(new AuthenticateWithOtp(cmd.operationId, otpPassword));
+                bus.post(new AuthenticateWithOtpAndCreateNewPrivat24Link(cmd.operationId, otpPassword, cmd.bankLink));
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
