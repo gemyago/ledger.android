@@ -28,5 +28,5 @@
         android:id="@+id/privat24_refresh_authentication"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Refresh Authentication" />
+        android:text="Refresh Authentication" />
 </LinearLayout>

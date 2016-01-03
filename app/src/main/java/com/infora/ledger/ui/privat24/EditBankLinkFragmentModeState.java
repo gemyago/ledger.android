@@ -27,6 +27,8 @@ import java.sql.SQLException;
 
 import javax.inject.Inject;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -37,6 +39,10 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
 
     @Inject EventBus bus;
     @Inject Privat24BankService bankService;
+
+
+    @Bind(R.id.privat24_refresh_authentication) Button refreshAuthenticationButton;
+
 
     private Privat24BankLinkData linkData;
     private BankLink bankLink;
@@ -64,14 +70,14 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
     @Override
     protected void onViewCreated(final View view) {
         DiUtils.injector(getContext()).inject(this);
-        final Button button = (Button) view.findViewById(R.id.privat24_refresh_authentication);
-        button.setEnabled(true);
-        button.setOnClickListener(new View.OnClickListener() {
+        ButterKnife.bind(this, view);
+        refreshAuthenticationButton.setEnabled(true);
+        refreshAuthenticationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Posting command to refresh authentication...");
                 bus.post(new RefreshAuthentication(bankLink.id));
-                button.setEnabled(false);
+                refreshAuthenticationButton.setEnabled(false);
             }
         });
     }
@@ -107,7 +113,7 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                refreshAuthenticationButton.setEnabled(true);
             }
         });
 
@@ -128,12 +134,12 @@ public class EditBankLinkFragmentModeState extends BankLinkFragmentModeState {
     public void onEventMainThread(RefreshAuthenticationFailed evt) {
         Log.e(TAG, "Failed to refresh authentication.", evt.exception);
         Toast.makeText(getContext(), "Failure refreshing authentication: " + evt.exception.getMessage(), Toast.LENGTH_LONG).show();
-        getView().findViewById(R.id.privat24_refresh_authentication).setEnabled(true);
+        refreshAuthenticationButton.setEnabled(true);
     }
 
     public void onEventMainThread(AuthenticationRefreshed evt) {
         Log.d(TAG, "Refresh authentication sequence completed.");
-        getView().findViewById(R.id.privat24_refresh_authentication).setEnabled(true);
+        refreshAuthenticationButton.setEnabled(true);
         Toast.makeText(getContext(), "Authentication refreshed.", Toast.LENGTH_LONG).show();
     }
 }
