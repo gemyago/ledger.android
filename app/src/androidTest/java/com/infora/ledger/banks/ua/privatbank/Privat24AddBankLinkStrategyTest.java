@@ -3,20 +3,13 @@ package com.infora.ledger.banks.ua.privatbank;
 import android.test.AndroidTestCase;
 
 import com.infora.ledger.api.DeviceSecret;
-import com.infora.ledger.application.events.BankLinkAdded;
 import com.infora.ledger.banks.ua.privatbank.api.Privat24AuthApi;
-import com.infora.ledger.banks.ua.privatbank.api.Privat24BankApi;
 import com.infora.ledger.banks.ua.privatbank.messages.AskPrivat24OtpToCreateNewLink;
 import com.infora.ledger.data.BankLink;
 import com.infora.ledger.mocks.MockDatabaseContext;
 import com.infora.ledger.mocks.MockDeviceSecretProvider;
 import com.infora.ledger.mocks.MockPrivat24AuthApi;
-import com.infora.ledger.mocks.MockPrivat24BankApi;
 import com.infora.ledger.mocks.MockSubscriber;
-import com.infora.ledger.mocks.MockUnitOfWork;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
