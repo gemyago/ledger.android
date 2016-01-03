@@ -42,11 +42,6 @@ public class ApplicationModule {
         return new PendingTransactionsService(db, bus);
     }
 
-    @Provides @Singleton
-    BankLinksService provideBankLinksService() {
-        return new BankLinksService();
-    }
-
     @Provides BankLinkFragmentsFactory provideBankLinkFragmentsFactory() {
         return BankLinkFragmentsFactory.createDefault();
     }

@@ -14,13 +14,11 @@ import com.infora.ledger.application.synchronization.FetchBankLinksSynchronizati
 import com.infora.ledger.application.synchronization.LedgerWebSingleTransactionSyncStrategy;
 import com.infora.ledger.application.synchronization.LedgerWebSynchronizationStrategy;
 import com.infora.ledger.application.synchronization.PendingTransactionsSyncAdapter;
-import com.infora.ledger.banks.AddBankLinkStrategy;
 import com.infora.ledger.banks.DefaultAddBankLinkStrategy;
 import com.infora.ledger.banks.ua.privatbank.Privat24AddBankLinkStrategy;
 import com.infora.ledger.data.LedgerAccountsLoader;
 import com.infora.ledger.ipc.EventBroadcastsReceiver;
 import com.infora.ledger.ui.privat24.AddBankLinkFragmentModeState;
-import com.infora.ledger.ui.privat24.BankLinkFragmentModeState;
 import com.infora.ledger.ui.privat24.EditBankLinkFragmentModeState;
 
 /**

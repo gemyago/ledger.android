@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
 
@@ -41,10 +42,7 @@ public class BankLinksService {
     private FetchStrategiesFactory fetchStrategies;
     private DatabaseRepository<BankLink> repository;
 
-    @Inject public BankLinksService() {
-    }
-
-    public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
+    @Inject @Singleton public BankLinksService(EventBus bus, DatabaseContext db, DeviceSecretProvider secretProvider) {
         this.bus = bus;
         this.db = db;
         this.secretProvider = secretProvider;
