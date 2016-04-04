@@ -37,6 +37,7 @@ public class Privat24AuthApi extends Privat24BaseApi {
         Response httpResponse = client.newCall(httpRequest).execute();
         validateResponseStatus(httpResponse);
         JsonObject response = new JsonParser().parse(httpResponse.body().string()).getAsJsonObject();
+        ensureStatusOk(response);
         failWithUnexpectedNextCmd(response, "show_static_password_form");
         String id = response.get("id").getAsString();
 
@@ -77,6 +78,7 @@ public class Privat24AuthApi extends Privat24BaseApi {
         Response httpResponse = client.newCall(httpRequest).execute();
         validateResponseStatus(httpResponse);
         JsonObject response = new JsonParser().parse(httpResponse.body().string()).getAsJsonObject();
+        ensureStatusOk(response);
         failWithUnexpectedNextCmd(response, "redirect");
         return response.get("cookie").getAsString();
     }

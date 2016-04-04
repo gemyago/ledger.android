@@ -53,11 +53,25 @@ public class Privat24BaseApi {
             throw new PrivatBankException("Unexpected data. The st not found.");
         }
         String st = data.get("st").getAsString();
-        if (!st.equals("ok")) {
-            LogUtil.e(this, "Unexpected status: " + st + ". Expected: ok");
-            LogUtil.d(this, "data: " + data);
-            throw new PrivatBankException("Unexpected status: " + st + ". Expected: ok");
+        if(st.equals("ok")) return;
+
+        LogUtil.e(this, "Unexpected status: " + st + ". Expected: ok");
+        LogUtil.d(this, "data: " + data);
+
+        if (data.has("err")) {
+            final String errMsg = data.get("err").getAsString();
+
+            //Expecting something like:
+            //CODE201: show_login_phone_form&Authorization cancelled.
+            if(errMsg.startsWith("CODE201")) {
+                final String[] parts = errMsg.split("&");
+                if(parts.length == 2) {
+                    throw new PrivatBankException(parts[1]);
+                }
+            }
         }
+
+        throw new PrivatBankException("Unexpected status: " + st + ". Expected: ok");
     }
 
     protected void failWithUnexpectedNextCmd(JsonObject data, String expected_cmd) throws PrivatBankException {
