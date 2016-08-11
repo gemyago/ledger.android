@@ -130,13 +130,16 @@ public class LedgerWebSynchronizationStrategyTest extends AndroidTestCase {
         remoteTransactions.add(new PendingTransactionDto("t-3", "102", "t 102"));
         api.setPendingTransactions(remoteTransactions);
 
+        readModel.injectAnd(new PendingTransaction("t-1", "100.01", "t 100.01", true, true, null, null).setId(1))
+                .inject(new PendingTransaction("t-3", "103.03", "t 103.03", true, true, null, null).setId(3));
+
+
         subject.synchronize(account, null, syncResult);
 
         assertEquals(0, api.getReportedTransactions().size());
 
-        assertEquals(3, api.getRejectedPendingTrasnsactions().size());
+        assertEquals(2, api.getRejectedPendingTrasnsactions().size());
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-1"));
-        assertTrue(api.getRejectedPendingTrasnsactions().contains("t-2"));
         assertTrue(api.getRejectedPendingTrasnsactions().contains("t-3"));
     }
 

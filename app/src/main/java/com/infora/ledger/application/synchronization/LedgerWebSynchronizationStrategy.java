@@ -48,7 +48,7 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
         Log.d(TAG, "Retrieving pending transactions from the server...");
         List<PendingTransactionDto> remoteTransactions = api.getPendingTransactions();
         HashMap<String, PendingTransactionDto> remoteTransactionsMap = new HashMap<>();
-        for (PendingTransactionDto remoteTransaction : remoteTransactions) {
+        for(PendingTransactionDto remoteTransaction : remoteTransactions) {
             remoteTransactionsMap.put(remoteTransaction.transactionId, remoteTransaction);
         }
 
@@ -56,46 +56,62 @@ public class LedgerWebSynchronizationStrategy extends BaseLedgerWebSynchronizati
         List<PendingTransaction> localTransactions;
         try {
             localTransactions = readModel.getTransactions();
-        } catch (SQLException e) {
+        } catch(SQLException e) {
             syncResult.stats.numIoExceptions++;
             throw new SynchronizationException("Failed to get local transactions.", e);
         }
         HashMap<String, PendingTransaction> localTransMap = new HashMap<>();
         Log.d(TAG, "Loaded " + localTransactions.size() + " locally reported transactions.");
 
-        for (PendingTransaction localTran : localTransactions) {
+        for(PendingTransaction localTran : localTransactions) {
             localTransMap.put(localTran.transactionId, localTran);
-            if (remoteTransactionsMap.containsKey(localTran.transactionId)) {
+
+            if(remoteTransactionsMap.containsKey(localTran.transactionId)) {
+                //Updating transactions
                 PendingTransactionDto remoteTran = remoteTransactionsMap.get(localTran.transactionId);
-                if (!Objects.equals(remoteTran.amount, localTran.amount) ||
+                if(!Objects.equals(remoteTran.amount, localTran.amount) ||
                         !remoteTran.comment.equals(localTran.comment)) {
                     adjustPendingTransaction(api, localTran, syncResult);
                 } else {
                     Log.d(TAG, "Transaction id='" + localTran.id + "' has not ben changed. Skipping.");
                 }
-            } else if (localTran.isPublished) {
+            } else if(localTran.isPublished) {
+                //Published transactions that not present locally are approved or rejected so safe to delete locally
                 Log.d(TAG, "Local transaction id='" + localTran.id + "' was approved or rejected. Marking for deletion.");
                 toDeleteIds.add(localTran.id);
             } else {
+                //Transactions not present remotely are new so publishing
                 publishPendingTransaction(localTran, syncResult, api, bus);
             }
         }
 
-        for (PendingTransactionDto remoteTran : remoteTransactionsMap.values()) {
-            if (!localTransMap.containsKey(remoteTran.transactionId)) {
-                rejectPendingTransaction(api, remoteTran.transactionId, syncResult);
+        try {
+            for(PendingTransactionDto remoteTran : remoteTransactionsMap.values()) {
+                if(!localTransMap.containsKey(remoteTran.transactionId)) {
+                    //Do not reject stuff reported by other services/devices.
+                    //localTransMap will not include deleted stuff so have to do this check
+                    if(readModel.isTransactionExists(remoteTran.transactionId)) {
+                        rejectPendingTransaction(api, remoteTran.transactionId, syncResult);
+                    } else {
+                        Log.d(TAG, "Remote transaction id='" + remoteTran.transactionId + "' not found locally so skipped.");
+                    }
+                }
             }
+        } catch(SQLException e) {
+            syncResult.stats.numIoExceptions++;
+            throw new SynchronizationException("Failed to reject remote transactions", e);
         }
 
-        if (!toDeleteIds.isEmpty()) {
+
+        if(!toDeleteIds.isEmpty()) {
             long[] ids = new long[toDeleteIds.size()];
-            for (int i = 0; i < toDeleteIds.size(); i++) {
+            for(int i = 0; i < toDeleteIds.size(); i++) {
                 ids[i] = toDeleteIds.get(i);
             }
             Log.d(TAG, "Posting command to delete '" + toDeleteIds.size() + "' transactions marked for deletion...");
             try {
                 pendingTransactionsService.deleteTransactions(new DeleteTransactionsCommand(ids));
-            } catch (SQLException e) {
+            } catch(SQLException e) {
                 syncResult.stats.numIoExceptions++;
                 throw new SynchronizationException("Failed to delete approved transactions.", e);
             }

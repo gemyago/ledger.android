@@ -40,7 +40,11 @@ public class MockTransactionsReadModel extends TransactionsReadModel {
 
     @Override
     public List<PendingTransaction> getTransactions() throws SQLException {
-        return transactions;
+        final ArrayList<PendingTransaction> result = new ArrayList<>();
+        for(PendingTransaction transaction : transactions) {
+            if(!transaction.isDeleted) result.add(transaction);
+        }
+        return result;
     }
 
     @Override
