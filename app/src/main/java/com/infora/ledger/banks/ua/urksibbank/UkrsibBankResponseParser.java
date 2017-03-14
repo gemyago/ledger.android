@@ -139,9 +139,11 @@ public class UkrsibBankResponseParser {
     public List<UkrsibBankTransaction> parseAccountTransactions() throws ParseException {
         ArrayList<UkrsibBankTransaction> transactions = new ArrayList<>();
         Elements opersTables = document.select("form#cardAccountInfoForm > table.opersTable");
-        if (opersTables.size() != 1)
-            throw new ParseException("Unexpected number of opersTables. Expected 1, got " + opersTables.size(), 0);
-        appendTransactions(transactions, new HashMap<String, List<UkrsibBankTransaction>>(), opersTables.get(0), new AccountTransactionTableRowParser());
+        if (opersTables.size() == 1) {
+            appendTransactions(transactions, new HashMap<String, List<UkrsibBankTransaction>>(), opersTables.get(0), new AccountTransactionTableRowParser());
+        } else if(opersTables.size() > 1) {
+            throw new ParseException("Unexpected number of opersTables. Expected at most 1, got " + opersTables.size(), 0);
+        }
         return transactions;
     }
 

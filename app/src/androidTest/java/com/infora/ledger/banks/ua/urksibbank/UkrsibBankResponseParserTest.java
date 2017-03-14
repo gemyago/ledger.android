@@ -143,6 +143,13 @@ public class UkrsibBankResponseParserTest extends TestCase {
                 transactions.get(1));
     }
 
+    public void testParseAccountTransactionsIfNoData() throws FetchException, ParseException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithTransactions().getBytes());
+        UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
+        List<UkrsibBankTransaction> transactions = parser.parseAccountTransactions();
+        assertEquals(0, transactions.size());
+    }
+
     public void testTransactionsWithSameAmountOnTheSameDateHaveIndex() throws FetchException, ParseException {
         ByteArrayInputStream stream = new ByteArrayInputStream(WelcomeHtml.contentsWithSameAmountTransactionsOnTheSameDate().getBytes());
         UkrsibBankResponseParser parser = new UkrsibBankResponseParser(stream);
