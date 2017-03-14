@@ -10,7 +10,7 @@ def loadSecretProperties = { buildType ->
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.infora.ledger"
